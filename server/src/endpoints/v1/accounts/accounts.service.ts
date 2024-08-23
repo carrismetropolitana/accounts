@@ -131,8 +131,8 @@ class AccountsService {
 		const account1 = await this.moogoseService.findOne(this.accountModel, searchDevice1Query);
 		const account2 = await this.moogoseService.findOne(this.accountModel, searchDevice2Query);
 
-		// If no accounts were found, return null
-		if (account1 && account2) {
+		// If no accounts were found, throw an error
+		if (!account1 && !account2) {
 			throw new HttpException(HttpStatus.NOT_FOUND, 'Accounts not found');
 		}
 
