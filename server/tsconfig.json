@@ -7,7 +7,7 @@
 		"module": "ES2022",
 		"moduleResolution": "Bundler",
 		"paths": {
-			"@/*": ["server/src/*"]
+			"@/*": ["src/*"]
 		},
 		"allowJs": true,
 		"outDir": "dist",
