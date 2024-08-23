@@ -1,0 +1,33 @@
+# # #
+name: tml-accounts-local
+
+volumes:
+    mongo:
+
+networks:
+    common:
+
+# # #
+
+services:
+
+    # # # # # # # # # # # # # # # # # # # # #
+    # # # # # # # # # # # # # # # # # # # # #
+
+    mongo:
+        image: mongo:latest
+        container_name: mongo
+        ports:
+            - 27017:27017
+        volumes:
+            - mongo:/data/db
+        networks:
+            - common
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_PASSWORD: example
+        healthcheck:
+            test: echo 'db.runCommand("ping").ok' | mongosh
+            interval: 10s
+            timeout: 5s
+            retries: 5

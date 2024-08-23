@@ -1,0 +1,36 @@
+{
+  "name": "accounts",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.ts",
+  "scripts": {
+    "build": "tsc && resolve-tspaths",
+    "dev:start": "fastify start --ignore-watch=.ts$ -w -l info -P dist/src/index.js",
+    "dev": "tsx watch src/index.ts",
+    "start": "npm run build && node dist/src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "rm -rf dist && rm -rf node_modules",
+    "watch:ts": "tsc -w"
+  },
+  "dependencies": {
+    "@fastify/mongodb": "^8.0.0",
+    "dotenv": "^16.4.5",
+    "fastify": "^4.28.1",
+    "jsonwebtoken": "^9.0.2",
+    "mergician": "github:jusimen/mergician",
+    "mongoose": "^8.5.3"
+  },
+  "devDependencies": {
+    "@carrismetropolitana/eslint": "20240722.1548.55",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/mongoose": "^5.11.96",
+    "@types/node": "^22.4.1",
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.1.4",
+    "pino-pretty": "^11.2.2",
+    "resolve-tspaths": "^0.8.19",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.17.0",
+    "typescript": "^5.5.4"
+  }
+}
