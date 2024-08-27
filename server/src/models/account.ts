@@ -9,6 +9,7 @@ export interface IAccount extends Document {
 	favorite_stops?: string[]
 	first_name?: string
 	last_name?: string
+	avatar?: string
 }
 
 export const AccountSchema: Schema = new Schema<IAccount>({
@@ -24,4 +25,5 @@ export const AccountSchema: Schema = new Schema<IAccount>({
 	favorite_stops: { default: [], type: [String] },
 	first_name: { type: String },
 	last_name: { type: String },
+	avatar: { type: String },
 });

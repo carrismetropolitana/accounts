@@ -97,8 +97,9 @@ class AccountsController {
 		return await this.service.toggleFavoriteStop(id, stop_id);
 	}
 
-	async updateAccount(request: FastifyRequest, reply: FastifyReply) {
-		throw new HttpException(HttpStatus.NOT_IMPLEMENTED, 'Not implemented');
+	async updateAccount(request: FastifyRequest< { Params: { id: string }, Body: IAccount }>, reply: FastifyReply) {
+		const { id } = request.params;
+		return await this.service.updateAccount(id, request.body as IAccount);
 	}
 }
 
