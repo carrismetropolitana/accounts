@@ -1,12 +1,12 @@
-import HttpException from 'src/common/http-exception';
-import HttpStatus from 'src/common/http-status';
-import { decodeJWT, verifyJWT } from 'src/common/utils';
-import { IAccount } from 'src/models/account';
-import { IDevice } from 'src/models/device';
-import { ILine } from 'src/models/line';
-import { AccountModel } from 'src/models/mongoose';
-import { IStop } from 'src/models/stop';
-import MongooseService from 'src/services/mongoose.service';
+import HttpException from '@/common/http-exception';
+import HttpStatus from '@/common/http-status';
+import { decodeJWT, verifyJWT } from '@/common/utils';
+import { IAccount } from '@/models/account';
+import { IDevice } from '@/models/device';
+import { ILine } from '@/models/line';
+import { AccountModel } from '@/models/mongoose';
+import { IStop } from '@/models/stop';
+import MongooseService from '@/services/mongoose.service';
 import { mergician } from 'mergician';
 import { FilterQuery, Model, QueryOptions, UpdateQuery } from 'mongoose';
 

@@ -1,5 +1,5 @@
-import HttpException from 'src/common/http-exception';
-import HttpStatus from 'src/common/http-status';
+import HttpException from '@/common/http-exception';
+import HttpStatus from '@/common/http-status';
 import mongoose, { ConnectOptions, Document, FilterQuery, Model, QueryOptions, UpdateQuery } from 'mongoose';
 
 class MongooseService {

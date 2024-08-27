@@ -2,7 +2,7 @@
   "name": "accounts",
   "version": "1.0.0",
   "type": "module",
-  "main": "index.ts",
+  "main": "./src/index.js",
   "scripts": {
     "build": "tsc && resolve-tspaths",
     "dev:start": "fastify start --ignore-watch=.ts$ -w -l info -P dist/src/index.js",

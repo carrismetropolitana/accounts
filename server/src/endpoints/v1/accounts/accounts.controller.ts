@@ -1,9 +1,9 @@
-import HttpException from 'src/common/http-exception';
-import HttpStatus from 'src/common/http-status';
-import { bindMethods } from 'src/common/utils';
-import { IAccount } from 'src/models/account';
-import { IDevice } from 'src/models/device';
-import { AccountModel, DeviceModel } from 'src/models/mongoose';
+import HttpException from '@/common/http-exception';
+import HttpStatus from '@/common/http-status';
+import { bindMethods } from '@/common/utils';
+import { IAccount } from '@/models/account';
+import { IDevice } from '@/models/device';
+import { AccountModel, DeviceModel } from '@/models/mongoose';
 import { FastifyReply, FastifyRequest } from 'fastify';
 
 import AccountsService from './accounts.service';
