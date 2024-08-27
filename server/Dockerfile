@@ -1,4 +1,4 @@
-FROM node:22.5.1
+FROM node:alpine
 
 WORKDIR /app
 
@@ -7,10 +7,10 @@ COPY package.json ./
 RUN npm install \
     && npm cache clean --force
 
-COPY . .
+RUN npx @helperkits/bumper bump
 
-EXPOSE 5050
+COPY . .
 
 RUN ["npm", "run", "build"]
 
-CMD ["node", "dist/src/index.js"]
+CMD ["node", "dist/index.js"]
