@@ -1,4 +1,4 @@
-FROM node:alpine
+FROM node:22.5.1
 
 WORKDIR /app
 
@@ -13,4 +13,4 @@ COPY . .
 
 RUN ["npm", "run", "build"]
 
-CMD ["node", "dist/index.js"]
+CMD ["node", "dist/src/index.js"]
