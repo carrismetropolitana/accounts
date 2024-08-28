@@ -1,6 +1,6 @@
 import HttpException from '@/common/http-exception';
 import HttpStatus from '@/common/http-status';
-import { decodeJWT, verifyJWT } from '@/common/utils';
+import { verifyJWT } from '@/common/utils';
 import { IAccount } from '@/models/account';
 import { IDevice } from '@/models/device';
 import { ILine } from '@/models/line';
@@ -9,6 +9,7 @@ import { IStop } from '@/models/stop';
 import MongooseService from '@/services/mongoose.service';
 import { mergician } from 'mergician';
 import { FilterQuery, Model, QueryOptions, UpdateQuery } from 'mongoose';
+import { IJwtSync } from '@/models/jwt';
 
 class AccountsService {
 	private readonly accountModel: Model<IAccount>;
@@ -39,14 +40,12 @@ class AccountsService {
 	*/
 	async addDevice(token: string): Promise<IAccount | null> {
 		// Verify the token
-		if (!verifyJWT(token)) {
+		const decodedToken = await verifyJWT<IJwtSync>(token);
+		if (!decodedToken) {
 			throw new HttpException(HttpStatus.UNAUTHORIZED, 'Invalid authorization token');
 		}
 
-		// Decode the token
-		const decodedToken = await decodeJWT(token);
-
-		return await this.mergeDevice(decodedToken.data.device_id, decodedToken.data.device_id_2);
+		return await this.mergeDevice(decodedToken.device_id, decodedToken.device_id_2);
 	}
 
 	/** Creates a new account.
