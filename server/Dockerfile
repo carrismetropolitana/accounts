@@ -7,9 +7,9 @@ COPY package.json ./
 RUN npm install \
     && npm cache clean --force
 
-COPY . .
+RUN npx @helperkits/bumper bump
 
-EXPOSE 5050
+COPY . .
 
 RUN ["npm", "run", "build"]
 

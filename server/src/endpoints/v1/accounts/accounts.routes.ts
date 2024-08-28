@@ -1,6 +1,6 @@
 /* * */
 
-import FastifyService from 'src/services/fastify.service';
+import FastifyService from '@/services/fastify.service';
 import { FastifyInstance } from 'fastify';
 
 import AccountsController from './accounts.controller';
