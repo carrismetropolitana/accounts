@@ -1,38 +1,22 @@
 # # #
-name: tml-accounts
+
+name: accounts
 
 volumes:
-    mongo:
-
-networks:
-    common:
+  certbotdata:
+  accountsdbdata:
 
 # # #
 
 services:
 
-    # # # # # # # # # # # # # # # # # # # # #
-    # # # # # # # # # # # # # # # # # # # # #
-    
-    accounts:
-        image: ghcr.io/carrismetropolitana/accounts-server:main
-        restart: always
-        ports:
-            - 5050:5050
-        networks:
-            - common
-        env_file:
-            - ./.env.production
-        depends_on:
-            mongo:
-                condition: service_healthy
-                restart: true
+  #
 
     # # # # # # # # # # # # # # # # # # # # #
     # # # # # # # # # # # # # # # # # # # # #
 
-    certbot:
-        image: certbot/certbot
+    watchtower:
+        image: containrrr/watchtower
         deploy:
             restart_policy:
                 condition: on-failure
@@ -45,29 +29,64 @@ services:
                 max-size: '1m'
                 max-file: '1'
         volumes:
-        - ./letsencrypt:/etc/letsencrypt
-        - certbotdata:/var/www/certbot
-        entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+            - /var/run/docker.sock:/var/run/docker.sock
+        environment:
+            - WATCHTOWER_POLL_INTERVAL=10
+            - WATCHTOWER_CLEANUP=TRUE
+            - WATCHTOWER_INCLUDE_STOPPED=TRUE
+            - WATCHTOWER_REVIVE_STOPPED=TRUE
+            - WATCHTOWER_ROLLING_RESTART=TRUE
 
-    # # # # # # # # # # # # # # # # # # # # #
-    # # # # # # # # # # # # # # # # # # # # #
+        # # # # # # # # # # # # # # # # # # # # #
+        # # # # # # # # # # # # # # # # # # # # #
 
-    mongo:
-        image: mongo:latest
-        container_name: mongo
+    server:
+        image: ghcr.io/carrismetropolitana/accounts-server:production
+        restart: always
         ports:
-            - 27017:27017
-        volumes:
-            - mongo:/data/db
-        networks:
-            - common
+            - 5050:5050
         env_file:
             - ./.env.production
-        healthcheck:
-            test: echo 'db.runCommand("ping").ok' | mongosh
-            interval: 10s
-            timeout: 5s
-            retries: 5
+        depends_on:
+            accountsdb:
+                condition: service_healthy
+                restart: true
+
+    # # # # # # # # # # # # # # # # # # # # #
+    # # # # # # # # # # # # # # # # # # # # #
+
+    certbot:
+      image: certbot/certbot
+      deploy:
+          restart_policy:
+              condition: on-failure
+              delay: 30s
+          resources:
+              limits:
+                  memory: 100mb
+      logging:
+          options:
+              max-size: '1m'
+              max-file: '1'
+      volumes:
+        - ./letsencrypt:/etc/letsencrypt
+        - certbotdata:/var/www/certbot
+      entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
+    # # # # # # # # # # # # # # # # # # # # #
+    # # # # # # # # # # # # # # # # # # # # #
+
+    accountsdb:
+      image: mongo:latest
+      volumes:
+        - accountsdbdata:/data/db
+      env_file:
+        - ./.env.production
+      healthcheck:
+        test: echo 'db.runCommand("ping").ok' | mongosh
+        interval: 10s
+        timeout: 5s
+        retries: 5
 
     # # # # # # # # # # # # # # # # # # # # #
     # # # # # # # # # # # # # # # # # # # # #
@@ -86,11 +105,11 @@ services:
                 max-size: '1m'
                 max-file: '1'
         volumes:
-        - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-        - ./nginx/uptime.conf:/etc/nginx/conf.d/uptime.conf:ro
-        - ./letsencrypt:/etc/letsencrypt:ro
-        - certbotdata:/var/www/certbot:ro
+          - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+          - ./nginx/uptime.conf:/etc/nginx/conf.d/uptime.conf:ro
+          - ./letsencrypt:/etc/letsencrypt:ro
+          - certbotdata:/var/www/certbot:ro
         ports:
-        - 80:80
-        - 443:443
+          - 80:80
+          - 443:443
         command: '/bin/sh -c ''while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g "daemon off;"'''

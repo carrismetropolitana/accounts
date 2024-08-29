@@ -1,10 +1,10 @@
-import HttpException from 'src/common/http-exception';
-import HttpStatus from 'src/common/http-status';
-import { verifyJWT } from 'src/common/utils';
-import { IAccount } from 'src/models/account';
-import { IDevice } from 'src/models/device';
-import { AccountModel } from 'src/models/mongoose';
-import MongooseService from 'src/services/mongoose.service';
+import HttpException from '@/common/http-exception';
+import HttpStatus from '@/common/http-status';
+import { verifyJWT } from '@/common/utils';
+import { IAccount } from '@/models/account';
+import { IDevice } from '@/models/device';
+import { AccountModel } from '@/models/mongoose';
+import MongooseService from '@/services/mongoose.service';
 import { mergician } from 'mergician';
 import { FilterQuery, Model, QueryOptions, UpdateQuery } from 'mongoose';
 import { IJwtSync } from '@/models/jwt';
@@ -125,45 +125,47 @@ class AccountsService {
 		const searchDevice1Query: FilterQuery<IAccount> = { devices: { $elemMatch: { device_id: device1Id } } };
 		const searchDevice2Query: FilterQuery<IAccount> = { devices: { $elemMatch: { device_id: device2Id } } };
 
-		const account1 = await this.moogoseService.findOne(this.accountModel, searchDevice1Query);
-		const account2 = await this.moogoseService.findOne(this.accountModel, searchDevice2Query);
+		let account1 = await this.moogoseService.findOne(this.accountModel, searchDevice1Query);
+		let account2 = await this.moogoseService.findOne(this.accountModel, searchDevice2Query);
 
 		// If no accounts were found, throw an error
 		if (!account1 && !account2) {
 			throw new HttpException(HttpStatus.NOT_FOUND, 'Accounts not found');
 		}
 
-		// If either account is not found, Create a new account for the device that wasn't found
-		if (!account1 || !account2) {
-
-			if (!account1 && !device1Id) {
-				throw new HttpException(HttpStatus.BAD_REQUEST, 'Device 1 Id is required');
-			}
-
-			if (!account2 && !device2Id) {
-				throw new HttpException(HttpStatus.BAD_REQUEST, 'Device 2 Id is required');
-			}
-			
-			return await this._newAccountFromDeviceId(!account1 ? device1Id : device2Id);
-		}
-
-		// If the account ids are the same
-		// Then account is already merged
-		if (account1.id === account2.id) {
-			throw new HttpException(HttpStatus.BAD_REQUEST, 'Cannot merge the same account');
-		}
-
-		const mergedAccountData = mergician({
-			appendArrays: true,
-			dedupArrays: true,
-			skipKeys: ['_id', '__v'],
-		})({}, account1.toObject(), account2.toObject());
-
 		/**
 		 * Transaction to merge the and delete the second account
 		 */
 		return this.moogoseService.getConnection.startSession().then((session) => {
 			return session.withTransaction(async () => {
+
+				// If either account is not found, Create a new account for the device that wasn't found
+				if (!account1 || !account2) {
+
+					if (!account1 && !device1Id) {
+						throw new HttpException(HttpStatus.BAD_REQUEST, 'Device 1 Id is required');
+					}
+
+					if (!account2 && !device2Id) {
+						throw new HttpException(HttpStatus.BAD_REQUEST, 'Device 2 Id is required');
+					}
+					
+					const newAccount = await this._newAccountFromDeviceId(!account1 ? device1Id : device2Id);
+					!account1 ? account1 = newAccount : account2 = newAccount;
+				}
+
+				// If the account ids are the same
+				// Then account is already merged
+				if (account1.id === account2.id) {
+					throw new HttpException(HttpStatus.BAD_REQUEST, 'Cannot merge the same account');
+				}
+
+				const mergedAccountData = mergician({
+					appendArrays: true,
+					dedupArrays: true,
+					skipKeys: ['_id', '__v'],
+				})({}, account1.toObject(), account2.toObject());
+		
 				// Delete the accounts
 				await this.deleteAccount(device1Id);
 				await this.deleteAccount(device2Id);
@@ -173,6 +175,9 @@ class AccountsService {
 
 				await session.commitTransaction();
 				return mergedAccount;
+			}).catch((error) => {
+				console.error(error);
+				throw error;
 			});
 		});
 	}
