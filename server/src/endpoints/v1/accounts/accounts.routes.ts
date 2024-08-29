@@ -4,6 +4,7 @@ import FastifyService from '@/services/fastify.service';
 import { FastifyInstance } from 'fastify';
 
 import AccountsController from './accounts.controller';
+import authMiddleware from '@/middleware/auth.middleware';
 
 /* * */
 const controller = new AccountsController();
@@ -12,17 +13,24 @@ const namespace = '/v1/accounts';
 
 /// Routes
 // Accounts
-server.get(namespace, controller.getAccounts);
-server.post(namespace, controller.createAccount);
-server.get(namespace + '/:id', controller.getAccountById);
-server.put(namespace + '/:id', controller.updateAccount);
-server.delete(namespace + '/:id', controller.deleteAccount);
+server.register((instance, opts, next) => {
 
-// Accounts - Sync
-server.post(namespace + '/add-device', controller.addDevice);
-server.post(namespace + '/:id/add-device/:deviceId', controller.mergeDevice);
-server.delete(namespace + '/:id/remove-device/:deviceId', controller.deleteDevice);
+    instance.addHook('onRequest', async (request, reply) => await authMiddleware(request, reply));
+    
+    instance.get('/', controller.getAccounts);
+    instance.post('/', controller.createAccount);
+    instance.get('/:id', controller.getAccountById);
+    instance.put('/:id', controller.updateAccount);
+    instance.delete('/:id', controller.deleteAccount);
+    
+    // Accounts - Sync
+    instance.post('/add-device', controller.addDevice);
+    instance.post('/:id/add-device/:deviceId', controller.mergeDevice);
+    instance.delete('/:id/remove-device/:deviceId', controller.deleteDevice);
+    
+    // Accounts - Favorites
+    instance.post('/:id/favorite-lines/:line_id', controller.toggleFavoriteLine);
+    instance.post('/:id/favorite-stops/:stop_id', controller.toggleFavoriteStop);
 
-// Accounts - Favorites
-server.post(namespace + '/:id/favorite-lines/:line_id', controller.toggleFavoriteLine);
-server.post(namespace + '/:id/favorite-stops/:stop_id', controller.toggleFavoriteStop);
+    next();
+}, { prefix: namespace });
