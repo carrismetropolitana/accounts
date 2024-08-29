@@ -137,6 +137,15 @@ class AccountsService {
 
 		// If either account is not found, Create a new account for the device that wasn't found
 		if (!account1 || !account2) {
+
+			if (!account1 && !device1Id) {
+				throw new HttpException(HttpStatus.BAD_REQUEST, 'Device 1 Id is required');
+			}
+
+			if (!account2 && !device2Id) {
+				throw new HttpException(HttpStatus.BAD_REQUEST, 'Device 2 Id is required');
+			}
+			
 			return await this._newAccountFromDeviceId(!account1 ? device1Id : device2Id);
 		}
 
