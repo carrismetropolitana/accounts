@@ -10,6 +10,7 @@ export interface IAccount extends Document {
 	first_name?: string
 	last_name?: string
 	avatar?: string
+	role?: 'owner' | 'admin' | 'user'
 }
 
 export const AccountSchema: Schema = new Schema<IAccount>({
@@ -26,4 +27,5 @@ export const AccountSchema: Schema = new Schema<IAccount>({
 	first_name: { type: String },
 	last_name: { type: String },
 	avatar: { type: String },
+	role: { type: String, enum: ['owner', 'admin', 'user'], default: 'user' },
 });
