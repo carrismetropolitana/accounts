@@ -17,7 +17,6 @@ export interface IAccount extends Document {
 	activity?: 'student' | 'university' | 'working' | 'retired' | 'other',
 	gender?: 'male' | 'female',
 	phone?: string,
-	notifications?: boolean,
 	notification_preferences?: {
 		network: boolean,
 		events: boolean,
