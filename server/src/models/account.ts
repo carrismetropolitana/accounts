@@ -11,6 +11,20 @@ export interface IAccount extends Document {
 	last_name?: string
 	avatar?: string
 	role?: 'owner' | 'admin' | 'user'
+	date_of_birth?: Date,
+	work_municipality?: string,
+	home_municipality?: string,
+	activity?: 'student' | 'university' | 'working' | 'retired' | 'other',
+	gender?: 'male' | 'female',
+	phone?: string,
+	notifications?: boolean,
+	notification_preferences?: {
+		network: boolean,
+		events: boolean,
+		company: boolean,
+	},
+	work_setting: "hybrid" | "remote" | "office",
+	utilization_type: "frequent" | "occasional",
 }
 
 export const AccountSchema: Schema = new Schema<IAccount>({
@@ -28,4 +42,14 @@ export const AccountSchema: Schema = new Schema<IAccount>({
 	last_name: { type: String },
 	avatar: { type: String },
 	role: { type: String, enum: ['owner', 'admin', 'user'], default: 'user' },
-});
+	date_of_birth: { type: Date },
+	work_municipality: { type: String },
+	home_municipality: { type: String },
+	activity: { type: String },
+	gender: { type: String },
+	phone: { type: String },
+	notifications: { type: Boolean, default: false },
+	notification_preferences: { type: Object, default: {} },
+	work_setting: { type: String },
+	utilization_type: { type: String },
+}, {timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }});
