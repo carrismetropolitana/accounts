@@ -1,6 +1,7 @@
 import { Document, Schema } from 'mongoose';
 
 import { DeviceSchema, IDevice } from './device';
+import { INotification, NotificationSchema } from './notification';
 
 export interface IAccount extends Document {
 	devices: IDevice[]
@@ -22,6 +23,7 @@ export interface IAccount extends Document {
 		events: boolean,
 		company: boolean,
 	},
+	notifications?: INotification[],
 	work_setting: "hybrid" | "remote" | "office",
 	utilization_type: "frequent" | "occasional",
 }
@@ -50,4 +52,5 @@ export const AccountSchema: Schema = new Schema<IAccount>({
 	notification_preferences: { type: Object, default: {} },
 	work_setting: { type: String },
 	utilization_type: { type: String },
+	notifications: { type: [NotificationSchema] },
 }, {timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }});
