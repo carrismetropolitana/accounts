@@ -47,7 +47,6 @@ export const AccountSchema: Schema = new Schema<IAccount>({
 	activity: { type: String },
 	gender: { type: String },
 	phone: { type: String },
-	notifications: { type: Boolean, default: false },
 	notification_preferences: { type: Object, default: {} },
 	work_setting: { type: String },
 	utilization_type: { type: String },
