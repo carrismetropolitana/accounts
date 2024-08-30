@@ -8,6 +8,7 @@ import MongooseService from '@/services/mongoose.service';
 import { mergician } from 'mergician';
 import { FilterQuery, Model, QueryOptions, UpdateQuery } from 'mongoose';
 import { IJwtSync } from '@/models/jwt';
+import { INotification } from '@/models/notification';
 
 class AccountsService {
 	private readonly accountModel: Model<IAccount>;
@@ -250,6 +251,113 @@ class AccountsService {
 		};
 
 		return await this.moogoseService.updateOne(this.accountModel, searchQuery, updateQuery, updateOptions);
+	}
+
+	/**
+	 * Create Smart notification
+	 * 
+	 * @param id The ID of the account to create the notification for
+	 * @param notification The notification to create
+	 * @returns The created notification
+	 */
+	async createNotification(id: string, notification: INotification): Promise<INotification> {
+		const searchQuery: FilterQuery<IAccount> = { devices: { $elemMatch: { device_id: id } } };
+		const updateQuery: UpdateQuery<IAccount> = { $push: { notifications: notification } };
+		const updateOptions: QueryOptions<IAccount> = {
+			new: true,
+		};
+
+		// Create the notification
+		await this.moogoseService.updateOne(this.accountModel, searchQuery, updateQuery, updateOptions);
+
+		// Return the created notification
+		return notification;
+	}
+
+	/**
+	 * Delete Smart notification
+	 * 
+	 * @param id The ID of the account to delete the notification from
+	 * @param notificationId The ID of the notification to delete
+	 * @returns The deleted notification
+	 */
+	async deleteNotification(id: string, notificationId: string): Promise<INotification | null> {
+		const searchQuery: FilterQuery<IAccount> = { devices: { $elemMatch: { device_id: id } } };
+		const updateQuery: UpdateQuery<IAccount> = { $pull: { notifications: { _id: notificationId } } };
+		const updateOptions: QueryOptions<IAccount> = {
+			new: true,
+		};
+
+		// Delete the notification
+		const notification = await this.moogoseService.updateOne(this.accountModel, searchQuery, updateQuery, updateOptions);
+
+		// If the notification doesn't exist, return null
+		if (!notification) {
+			throw new HttpException(HttpStatus.NOT_FOUND, 'Notification not found');
+		}
+
+		return;
+	}
+
+	/**
+	 * Get Smart notifications
+	 * 
+	 * @param id The ID of the account to get the notifications for
+	 * @returns The notifications for the account
+	 */
+	async getNotifications(id: string): Promise<INotification[]> {
+		const searchQuery: FilterQuery<IAccount> = { devices: { $elemMatch: { device_id: id } } };
+		const account = await this.moogoseService.findOne(this.accountModel, searchQuery);
+
+		if (!account) {
+			throw new HttpException(HttpStatus.NOT_FOUND, 'Account not found');
+		}
+
+		return account.notifications;
+	}
+
+	/**
+	 * Update Smart notification
+	 * 
+	 * @param id The ID of the account to update the notification for
+	 * @param notificationId The ID of the notification to update
+	 * @param notification The updated notification
+	 * @returns The updated notification
+	 */
+	async updateNotification(id: string, notificationId: string, notification: INotification): Promise<INotification> {
+		const searchQuery: FilterQuery<IAccount> = { devices: { $elemMatch: { device_id: id } }, notifications: { $elemMatch: { _id: notificationId } } };
+		const updateQuery: UpdateQuery<IAccount> = { $set: { notifications: { $elemMatch: { _id: notificationId } } } };
+		const updateOptions: QueryOptions<IAccount> = {
+			new: true,
+		};
+
+		// Update the notification
+		const updatedAccount = await this.moogoseService.updateOne(this.accountModel, searchQuery, updateQuery, updateOptions);
+
+		// If the notification doesn't exist, return null
+		if (!updatedAccount) {
+			throw new HttpException(HttpStatus.NOT_FOUND, 'Notification not found');
+		}
+
+		return updatedAccount.notifications.find((notification) => notification._id === notificationId);
+	}
+
+	/**
+	 * Get Smart notification by ID
+	 * 
+	 * @param id The ID of the account to get the notification for
+	 * @param notificationId The ID of the notification to get
+	 * @returns The notification with the given ID
+	 */
+	async getNotificationById(id: string, notificationId: string): Promise<INotification> {
+		const searchQuery: FilterQuery<IAccount> = { devices: { $elemMatch: { device_id: id } }, notifications: { $elemMatch: { _id: notificationId } } };
+		const account = await this.moogoseService.findOne(this.accountModel, searchQuery);
+
+		if (!account) {
+			throw new HttpException(HttpStatus.NOT_FOUND, 'Account not found');
+		}
+
+		return account.notifications.find((notification) => notification._id === notificationId);
 	}
 }
 
