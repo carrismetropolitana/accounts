@@ -1,6 +1,6 @@
 import HttpException from '@/common/http-exception';
 import HttpStatus from '@/common/http-status';
-import { verifyJWT } from '@/common/utils';
+import { generateUpdateFields, verifyJWT } from '@/common/utils';
 import { IAccount } from '@/models/account';
 import { IDevice } from '@/models/device';
 import { AccountModel } from '@/models/mongoose';
@@ -9,12 +9,15 @@ import { mergician } from 'mergician';
 import { FilterQuery, Model, QueryOptions, UpdateQuery } from 'mongoose';
 import { IJwtSync } from '@/models/jwt';
 import { INotificationDocument, ISendNotificationDto } from '@/models/notification';
+import SmartNotificationsService from '@/services/smart-notifications.service';
 
 class AccountsService {
 	private readonly accountModel: Model<IAccount>;
 	private readonly moogoseService: MongooseService;
+	private readonly notificationsService: SmartNotificationsService;
 
 	constructor() {
+		this.notificationsService = SmartNotificationsService.getInstance();
 		this.moogoseService = MongooseService.getInstance();
 		this.accountModel = AccountModel;
 	}
@@ -198,7 +201,6 @@ class AccountsService {
 		// If not, create a new account
 		let account = await this.getAccountById(id);
 		if (!account) {
-			console.log('Creating account');
 			account = await this._newAccountFromDeviceId(id);
 		}
 
@@ -225,7 +227,6 @@ class AccountsService {
 		// If not, create a new account
 		let account = await this.getAccountById(id);
 		if (!account) {
-			console.log('Creating account');
 			account = await this._newAccountFromDeviceId(id);
 		}
 
@@ -267,6 +268,15 @@ class AccountsService {
 			new: true,
 		};
 
+		// Create the notification in the Smart Notification Service
+		const notificationDto: ISendNotificationDto = {
+			...notification.toObject(),
+			user_id: id,
+			id: notification.id,
+		};
+
+		await this.notificationsService.upsertNotification(notificationDto);
+
 		// Create the notification
 		await this.moogoseService.updateOne(this.accountModel, searchQuery, updateQuery, updateOptions);
 
@@ -289,12 +299,17 @@ class AccountsService {
 		};
 
 		// Delete the notification
-		const notification = await this.moogoseService.updateOne(this.accountModel, searchQuery, updateQuery, updateOptions);
+		const notification = await this.moogoseService.findOne(this.accountModel, searchQuery);
 
 		// If the notification doesn't exist, return null
 		if (!notification) {
 			throw new HttpException(HttpStatus.NOT_FOUND, 'Notification not found');
 		}
+
+		
+		// Delete the notification in the Smart Notification Service
+		await this.notificationsService.deleteNotification(`${id}:${notificationId}`);
+		await this.moogoseService.updateOne(this.accountModel, searchQuery, updateQuery, updateOptions);
 
 		return;
 	}
@@ -326,18 +341,29 @@ class AccountsService {
 	 */
 	async updateNotification(id: string, notificationId: string, notification: INotificationDocument): Promise<INotificationDocument> {
 		const searchQuery: FilterQuery<IAccount> = { devices: { $elemMatch: { device_id: id } }, notifications: { $elemMatch: { _id: notificationId } } };
-		const updateQuery: UpdateQuery<IAccount> = { $set: { notifications: { $elemMatch: { _id: notificationId } } } };
+		const updateQuery: UpdateQuery<IAccount> = { $set: generateUpdateFields('notifications', notification)};
+
 		const updateOptions: QueryOptions<IAccount> = {
 			new: true,
 		};
 
 		// Update the notification
-		const updatedAccount = await this.moogoseService.updateOne(this.accountModel, searchQuery, updateQuery, updateOptions);
+		const updatedAccount = await this.moogoseService.findOne(this.accountModel, searchQuery);
 
 		// If the notification doesn't exist, return null
 		if (!updatedAccount) {
 			throw new HttpException(HttpStatus.NOT_FOUND, 'Notification not found');
 		}
+
+		// Create the notification in the Smart Notification Service
+		const notificationDto: ISendNotificationDto = {
+			...notification.toObject(),
+			user_id: id,
+			id: notificationId,
+		};
+
+		await this.notificationsService.upsertNotification(notificationDto);
+		await this.moogoseService.updateOne(this.accountModel, searchQuery, updateQuery, updateOptions);
 
 		return updatedAccount.notifications.find((notification) => notification._id === notificationId);
 	}

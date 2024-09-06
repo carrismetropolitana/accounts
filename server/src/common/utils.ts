@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import jwt from 'jsonwebtoken';
+import { Document } from 'mongoose';
 
 /**
  * Binds all methods of a prototype to an instance.
@@ -71,4 +72,20 @@ export async function verifyJWT<T = Record<string, any>>(token: string) : Promis
 		console.error('Error verifying JWT:', error);
 		return null;
 	}
+}
+
+/**
+ * Helper function that generates the fields to update for a MongoDB document
+ * @param collectionName The name of the collection
+ * @param data The data to update the document with
+ * @returns The fields to update
+*/
+export function generateUpdateFields(collectionName: string, data: Document): Record<string, any> {
+
+	return Object.keys(data.toObject())
+		.filter(field => field !== '_id')
+		.reduce((acc, field) => {
+			acc[`${collectionName}.$.${field}`] = data[field];
+			return acc;
+		}, {});
 }

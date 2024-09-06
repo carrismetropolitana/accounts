@@ -160,19 +160,25 @@ class AccountsController {
 
 	async updateNotification(request: FastifyRequest<{ Params: { id: string, notificationId: string } }>, reply: FastifyReply) {
 		const { id, notificationId } = request.params;
+		const notification = new NotificationModel(request.body as INotification);
+
+		const error = notification.validateSync();
+		if (error) {
+			throw new HttpException(HttpStatus.BAD_REQUEST, error.message);
+		}
 
 
-		if(request.fastifyUser.role === 'user' && request.fastifyUser.device_id !== id) {
+		if(request.fastifyUser?.role === 'user' && request.fastifyUser?.device_id !== id) {
 			throw new HttpException(HttpStatus.FORBIDDEN, 'You are not allowed to update this account')
 		}
 
-		return await this.service.updateNotification(id, notificationId, request.body as INotificationDocument);
+		return await this.service.updateNotification(id, notificationId, notification);
 	}
 
 	async deleteNotification(request: FastifyRequest<{ Params: { id: string, notificationId: string } }>, reply: FastifyReply) {
 		const { id, notificationId } = request.params;
 
-		if(request.fastifyUser.role === 'user' && request.fastifyUser.device_id !== id) {
+		if(request.fastifyUser?.role === 'user' && request.fastifyUser?.device_id !== id) {
 			throw new HttpException(HttpStatus.FORBIDDEN, 'You are not allowed to execute this action')
 		}
 

@@ -135,8 +135,14 @@ class MongooseService {
 	async updateOne<T extends Document>(model: Model<T>, filter: FilterQuery<T>, updateData: UpdateQuery<T>, options: QueryOptions<T> = {}): Promise<T | null> {
 		try {
 			options.new = options.new || true;
+			
+			const result = await model.findOneAndUpdate(filter, updateData, options).exec();
+			
+			if(!result) {
+				throw new HttpException(HttpStatus.NOT_FOUND, 'Document not found');
+			}
 
-			return await model.findOneAndUpdate(filter, updateData, options).exec();
+			return result;
 		} catch (error) {
 			console.error('Error updating document:', error);
 			throw error;
