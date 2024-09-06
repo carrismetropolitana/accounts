@@ -2,12 +2,11 @@ import HttpException from '@/common/http-exception';
 import HttpStatus from '@/common/http-status';
 import { bindMethods } from '@/common/utils';
 import { IAccount } from '@/models/account';
-import { IDevice } from '@/models/device';
-import { AccountModel, DeviceModel, NotificationModel } from '@/models/mongoose';
+import { AccountModel, NotificationModel } from '@/models/mongoose';
 import { FastifyReply, FastifyRequest } from 'fastify';
 
 import AccountsService from './accounts.service';
-import { INotification } from '@/models/notification';
+import { INotification, INotificationDocument } from '@/models/notification';
 
 class AccountsController {
 	private readonly service: AccountsService;
@@ -167,7 +166,7 @@ class AccountsController {
 			throw new HttpException(HttpStatus.FORBIDDEN, 'You are not allowed to update this account')
 		}
 
-		return await this.service.updateNotification(id, notificationId, request.body as INotification);
+		return await this.service.updateNotification(id, notificationId, request.body as INotificationDocument);
 	}
 
 	async deleteNotification(request: FastifyRequest<{ Params: { id: string, notificationId: string } }>, reply: FastifyReply) {

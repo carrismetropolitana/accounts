@@ -1,20 +1,26 @@
 import { Document, Schema } from 'mongoose';
 
-export interface INotification extends Document {
-    line_id: string
+export interface INotification {
+    pattern_id: string
     stop_id: string
     distance: number
-    distance_unit: 'km' | 'm' | 'min'
+    distance_unit: 'meters' | 'min'
     start_time: number
     end_time: number
     week_days: string[]
 }
+export interface ISendNotificationDto extends INotification {
+    user_id: string
+    id: string
+}
 
-export const NotificationSchema: Schema = new Schema<INotification>({
-    line_id: { required: true, type: String },
+export interface INotificationDocument extends INotification, Document {}
+
+export const NotificationSchema: Schema = new Schema<INotificationDocument>({
+    pattern_id: { required: true, type: String },
     stop_id: { required: true, type: String },
     distance: { required: true, type: Number },
-    distance_unit: { required: true, type: String, enum: ['km', 'm', 'min'] },
+    distance_unit: { required: true, type: String, enum: ['meters', 'min'] },
     start_time: { required: true, type: Number, validate: (value: number) => {
         if (value < 0 || value > 86400) {
             throw new Error('Start time must be between 0 and 86400');

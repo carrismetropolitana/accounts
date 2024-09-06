@@ -1,7 +1,7 @@
 import { Document, Schema } from 'mongoose';
 
 import { DeviceSchema, IDevice } from './device';
-import { INotification, NotificationSchema } from './notification';
+import { INotificationDocument, NotificationSchema } from './notification';
 
 export interface IAccount extends Document {
 	devices: IDevice[]
@@ -23,7 +23,7 @@ export interface IAccount extends Document {
 		events: boolean,
 		company: boolean,
 	},
-	notifications?: INotification[],
+	notifications?: INotificationDocument[],
 	work_setting: "hybrid" | "remote" | "office",
 	utilization_type: "frequent" | "occasional",
 }

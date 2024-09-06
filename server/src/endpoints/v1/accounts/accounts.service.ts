@@ -8,7 +8,7 @@ import MongooseService from '@/services/mongoose.service';
 import { mergician } from 'mergician';
 import { FilterQuery, Model, QueryOptions, UpdateQuery } from 'mongoose';
 import { IJwtSync } from '@/models/jwt';
-import { INotification } from '@/models/notification';
+import { INotificationDocument, ISendNotificationDto } from '@/models/notification';
 
 class AccountsService {
 	private readonly accountModel: Model<IAccount>;
@@ -260,7 +260,7 @@ class AccountsService {
 	 * @param notification The notification to create
 	 * @returns The created notification
 	 */
-	async createNotification(id: string, notification: INotification): Promise<INotification> {
+	async createNotification(id: string, notification: INotificationDocument): Promise<INotificationDocument> {
 		const searchQuery: FilterQuery<IAccount> = { devices: { $elemMatch: { device_id: id } } };
 		const updateQuery: UpdateQuery<IAccount> = { $push: { notifications: notification } };
 		const updateOptions: QueryOptions<IAccount> = {
@@ -281,7 +281,7 @@ class AccountsService {
 	 * @param notificationId The ID of the notification to delete
 	 * @returns The deleted notification
 	 */
-	async deleteNotification(id: string, notificationId: string): Promise<INotification | null> {
+	async deleteNotification(id: string, notificationId: string): Promise<INotificationDocument | null> {
 		const searchQuery: FilterQuery<IAccount> = { devices: { $elemMatch: { device_id: id } } };
 		const updateQuery: UpdateQuery<IAccount> = { $pull: { notifications: { _id: notificationId } } };
 		const updateOptions: QueryOptions<IAccount> = {
@@ -305,7 +305,7 @@ class AccountsService {
 	 * @param id The ID of the account to get the notifications for
 	 * @returns The notifications for the account
 	 */
-	async getNotifications(id: string): Promise<INotification[]> {
+	async getNotifications(id: string): Promise<INotificationDocument[]> {
 		const searchQuery: FilterQuery<IAccount> = { devices: { $elemMatch: { device_id: id } } };
 		const account = await this.moogoseService.findOne(this.accountModel, searchQuery);
 
@@ -324,7 +324,7 @@ class AccountsService {
 	 * @param notification The updated notification
 	 * @returns The updated notification
 	 */
-	async updateNotification(id: string, notificationId: string, notification: INotification): Promise<INotification> {
+	async updateNotification(id: string, notificationId: string, notification: INotificationDocument): Promise<INotificationDocument> {
 		const searchQuery: FilterQuery<IAccount> = { devices: { $elemMatch: { device_id: id } }, notifications: { $elemMatch: { _id: notificationId } } };
 		const updateQuery: UpdateQuery<IAccount> = { $set: { notifications: { $elemMatch: { _id: notificationId } } } };
 		const updateOptions: QueryOptions<IAccount> = {
@@ -349,7 +349,7 @@ class AccountsService {
 	 * @param notificationId The ID of the notification to get
 	 * @returns The notification with the given ID
 	 */
-	async getNotificationById(id: string, notificationId: string): Promise<INotification> {
+	async getNotificationById(id: string, notificationId: string): Promise<INotificationDocument> {
 		const searchQuery: FilterQuery<IAccount> = { devices: { $elemMatch: { device_id: id } }, notifications: { $elemMatch: { _id: notificationId } } };
 		const account = await this.moogoseService.findOne(this.accountModel, searchQuery);
 
