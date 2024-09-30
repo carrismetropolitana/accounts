@@ -42,7 +42,7 @@ class AccountsController {
 	async deleteAccount(request: FastifyRequest, reply: FastifyReply) {
 		const { id } = request.params as { id: string };
 
-		if(request.fastifyUser.role === 'user' && request.fastifyUser.device_id !== id) {
+		if(request.fastifyUser?.role === 'user' && request.fastifyUser?.device_id !== id) {
 			throw new HttpException(HttpStatus.FORBIDDEN, 'You are not allowed to delete this account')
 		}
 
@@ -59,7 +59,7 @@ class AccountsController {
 	async getAccountById(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
 		const { id } = request.params;
 
-		if(request.fastifyUser.role === 'user' && request.fastifyUser.device_id !== id) {
+		if(request.fastifyUser?.role === 'user' && request.fastifyUser?.device_id !== id) {
 			throw new HttpException(HttpStatus.UNAUTHORIZED, 'You are not authorized to execute this action')
 		}
 
@@ -69,7 +69,7 @@ class AccountsController {
 	async getAccounts(request: FastifyRequest, reply: FastifyReply) {
 
 		const permitedRoles = ['admin', 'owner'];
-		if(!permitedRoles.includes(request.fastifyUser.role)) {
+		if(!permitedRoles.includes(request.fastifyUser?.role)) {
 			throw new HttpException(HttpStatus.FORBIDDEN, 'You are not allowed to execute this action')
 		}
 
@@ -107,14 +107,13 @@ class AccountsController {
 		const { id } = request.params;
 		
 		// If the user is not an owner, it should not be possible to change the role
-		console.log("fastifyUser", request.fastifyUser);
 		if(request.fastifyUser?.role !== 'owner') {
 			request.body.role = undefined;
 		}
 
 		// If the user is not admin/owner cant update the account
 		// If account does not belong to the user, it should not be possible to update the account
-		if(request.body.role === 'user' && request.fastifyUser.device_id !== id) {
+		if(request.body.role === 'user' && request.fastifyUser?.device_id !== id) {
 			throw new HttpException(HttpStatus.FORBIDDEN, 'You are not allowed to update this account')
 
 		}
@@ -135,7 +134,7 @@ class AccountsController {
 	async getNotificationById(request: FastifyRequest<{ Params: { id: string, notificationId: string } }>, reply: FastifyReply) {
 		const { id, notificationId } = request.params;
 
-		if(request.fastifyUser.role === 'user' && request.fastifyUser.device_id !== id) {
+		if(request.fastifyUser?.role === 'user' && request.fastifyUser?.device_id !== id) {
 			throw new HttpException(HttpStatus.FORBIDDEN, 'You are not allowed to execute this action')
 		}
 
