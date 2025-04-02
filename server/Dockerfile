@@ -1,16 +1,50 @@
-FROM node:22.5.1
+# # # # # # # # #
+
+FROM node:alpine AS base
+
+ENV MODULE=accounts
+ENV PROJECT=server
+
+RUN npm install -g turbo@^2
+
+# # # # # # # # #
+
+
+# # #
+# BUILDER STAGE
+
+FROM base AS pruner
 
 WORKDIR /app
 
-COPY package.json ./
-
-RUN npm install \
-    && npm cache clean --force
-
-RUN npx @helperkits/bumper bump
-
 COPY . .
 
-RUN ["npm", "run", "build"]
+RUN turbo prune --scope=@tmlmobilidade/${MODULE}-${PROJECT} --docker
 
-CMD ["node", "dist/src/index.js"]
+
+# # #
+# INSTALLER STAGE
+
+FROM base AS builder
+
+WORKDIR /app
+
+# First install the dependencies (as they change less often)
+COPY --from=pruner /app/out/json/ .
+RUN npm install
+
+# Build the project
+COPY --from=pruner /app/out/full/ .
+RUN turbo run build --filter=@tmlmobilidade/${MODULE}-${PROJECT}
+
+
+# # #
+# RUNNER STAGE
+
+FROM base AS runner
+
+WORKDIR /app
+
+COPY --from=builder /app .
+
+CMD node apps/${PROJECT}/dist/src/index.js

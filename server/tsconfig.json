@@ -1,17 +1,11 @@
 {
+	"extends": "@tmlmobilidade/tsconfig/nodejs.json",
 	"compilerOptions": {
-		"target": "ESNext",
-		"baseUrl": ".",
-		"rootDir": ".",
-		"module": "ES2022",
-		"moduleResolution": "Bundler",
+		"outDir": "./dist",
 		"paths": {
-			"@/*": ["src/*"]
+			"@/*": ["./src/*"]
 		},
-		"allowJs": true,
-		"outDir": "dist",
-		"sourceMap": true,
-		"esModuleInterop": true
+		"rootDir": "."
 	},
-	"exclude": ["**/node_modules", "**/.*/", "**/dist/"]
+	"include": ["src/**/*.ts", "tests/**/*.ts"]
 }

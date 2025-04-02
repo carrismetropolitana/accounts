@@ -1,4 +1,4 @@
-import 'dotenv/config';
+/* * */
 
 import './main';
-import './endpoints/v1';
+import './endpoints';
