@@ -25,7 +25,7 @@ services:
             - common
         environment:
             MONGO_INITDB_ROOT_USERNAME: root
-            MONGO_INITDB_ROOT_PASSWORD: example
+            MONGO_INITDB_ROOT_PASSWORD: root
         healthcheck:
             test: echo 'db.runCommand("ping").ok' | mongosh
             interval: 10s
