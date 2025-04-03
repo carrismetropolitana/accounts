@@ -1,11 +1,15 @@
-import { MongoCollectionClass } from '@/interfaces/mongo-collection.js';
+import { MongoCollectionClass } from '@tmlmobilidade/interfaces';
 import { AsyncSingletonProxy } from '@tmlmobilidade/utils';
 import { Filter, IndexDescription, WithId } from 'mongodb';
-import { Account, UpdateAccountDto } from './account.type.js';
+import { Account, AccountSchema, UpdateAccountDto, UpdateAccountSchema } from './account.type.js';
 import { CreateAccountDto } from './account.type.js';
+import { z } from 'zod';
 
 class AccountsClass extends MongoCollectionClass<Account, CreateAccountDto, UpdateAccountDto> {
 	private static _instance: AccountsClass;
+
+	protected override createSchema: z.ZodSchema = AccountSchema;
+	protected override updateSchema: z.ZodSchema = UpdateAccountSchema;
 
 	private constructor() {
 		super();

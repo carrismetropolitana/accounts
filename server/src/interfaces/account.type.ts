@@ -1,5 +1,4 @@
 import { DocumentSchema, UnixTimestamp, validateUnixTimestamp } from '@tmlmobilidade/types';
-import { getUnixTimestamp } from '@tmlmobilidade/utils';
 import { z } from 'zod';
 
 // ENUMS

@@ -10,7 +10,7 @@
 	"scripts": {
 		"build": "npm run clean && tsc && resolve-tspaths",
 		"clean": "rm -rf dist",
-		"dev": "dotenv-run -- tsx watch src/index.ts",
+		"dev": "dotenv-run --env-file .env.development -- tsx watch src/index.ts",
 		"lint": "eslint . && tsc --noEmit",
 		"lint:fix": "eslint --fix .",
 		"test": "vitest"
@@ -18,9 +18,10 @@
 	"dependencies": {
 		"@fastify/cookie": "11.0.2",
 		"@fastify/cors": "11.0.1",
-		"@tmlmobilidade/connectors": "^20250401.1955.4",
-		"@tmlmobilidade/lib": "20250401.1955.19",
-		"@tmlmobilidade/utils": "20250401.2248.27",
+		"@tmlmobilidade/connectors": "^20250403.1004.29",
+		"@tmlmobilidade/interfaces": "^20250403.1340.14",
+		"@tmlmobilidade/lib": "20250403.1219.51",
+		"@tmlmobilidade/utils": "20250403.1004.32",
 		"fastify": "5.2.2",
 		"pino-pretty": "13.0.0",
 		"resolve-tspaths": "0.8.23",
@@ -33,7 +34,7 @@
 		"@fastify/multipart": "^9.0.3",
 		"@tmlmobilidade/tsconfig": "20250325.1731.13",
 		"@types/jest": "29.5.14",
-		"@types/node": "22.13.13",
+		"@types/node": "22.14.0",
 		"jest": "29.7.0",
 		"typescript": "5.8.2"
 	}
