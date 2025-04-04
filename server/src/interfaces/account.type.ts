@@ -68,6 +68,7 @@ const ProfileSchema = z.object({
     work_setting: WorkSettingSchema.nullish(),
     utilization_type: UtilizationTypeSchema.nullish(),
     activity: ActivitySchema.nullish(),
+    profile_image: z.string().nullish(),
 }).strict();
 
 export const AccountSchema = DocumentSchema.extend({
