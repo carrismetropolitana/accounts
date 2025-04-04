@@ -10,7 +10,7 @@
 	"scripts": {
 		"build": "npm run clean && tsc && resolve-tspaths",
 		"clean": "rm -rf dist",
-		"dev": "dotenv-run --env-file .env.development -- tsx watch src/index.ts",
+		"dev": "dotenv-run --env-file .env -- tsx watch src/index.ts",
 		"lint": "eslint . && tsc --noEmit",
 		"lint:fix": "eslint --fix .",
 		"test": "vitest"

@@ -61,11 +61,11 @@ export class AccountsController {
 	 * @param reply Fastify reply
 	 */
 	static async getByDeviceId(
-		request: FastifyRequest<{ Params: { deviceId: string } }>,
+		request: FastifyRequest<{ Params: { id: string } }>,
 		reply: FastifyReply,
 	) {
 		try {
-			const account = await accounts.findByDeviceId(request.params.deviceId);
+			const account = await accounts.findByDeviceId(request.params.id);
 			return reply.status(HttpStatus.OK).send(account);
 		}
 		catch (error) {

@@ -4,6 +4,7 @@ import { Filter, IndexDescription, WithId } from 'mongodb';
 import { Account, AccountSchema, UpdateAccountDto, UpdateAccountSchema } from './account.type.js';
 import { CreateAccountDto } from './account.type.js';
 import { z } from 'zod';
+import { HttpException } from '@tmlmobilidade/lib';
 
 class AccountsClass extends MongoCollectionClass<Account, CreateAccountDto, UpdateAccountDto> {
 	private static _instance: AccountsClass;
@@ -61,9 +62,11 @@ class AccountsClass extends MongoCollectionClass<Account, CreateAccountDto, Upda
      * @returns A promise that resolves to the matching document or null if not found
      */
 	async findByDeviceId(deviceId: string) {
+		console.log(deviceId);
+
 		const user = await this.mongoCollection.findOne({ devices: { $elemMatch: { device_id: deviceId } } } as unknown as Filter<Account>);
 		if (!user) {
-			return null;
+			throw new HttpException(404, 'Account not found');
 		}
 		return user as WithId<Account>;
 	}
