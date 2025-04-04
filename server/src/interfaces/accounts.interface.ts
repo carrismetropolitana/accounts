@@ -69,7 +69,10 @@ class AccountsClass extends MongoCollectionClass<Account, CreateAccountDto, Upda
 	}
 
 	protected getCollectionIndexes(): IndexDescription[] {
-		return [];
+		return [
+			{ background: true, key: { email: 1 }, unique: true },
+			{ background: true, key: { 'devices.device_id': 1 }, unique: true },
+		];
 	}
 
 	protected getCollectionName(): string {

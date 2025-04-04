@@ -32,7 +32,7 @@ export class AccountsController {
 		reply: FastifyReply,
 	) {
 		try {
-			const account = await accounts.deleteById(request.params.id);
+			const account = await accounts.deleteOne({ devices: { $elemMatch: { device_id: request.params.id } } });
 			return reply.status(HttpStatus.OK).send(account);
 		}
 		catch (error) {
@@ -49,24 +49,6 @@ export class AccountsController {
 		try {
 			const all = await accounts.all();
 			return reply.status(HttpStatus.OK).send(all);
-		}
-		catch (error) {
-			return reply.status(HttpStatus.INTERNAL_SERVER_ERROR).send(error);
-		}
-	}
-
-	/**
-	 * Retrieves a single account by ID
-	 * @param request Fastify request containing account ID in params
-	 * @param reply Fastify reply
-	 */
-	static async getById(
-		request: FastifyRequest<{ Params: { id: string } }>,
-		reply: FastifyReply,
-	) {
-		try {
-			const account = await accounts.findById(request.params.id);
-			return reply.status(HttpStatus.OK).send(account);
 		}
 		catch (error) {
 			return reply.status(HttpStatus.INTERNAL_SERVER_ERROR).send(error);
@@ -101,7 +83,7 @@ export class AccountsController {
 		reply: FastifyReply,
 	) {
 		try {
-			const account = await accounts.updateById(request.params.id, request.body);
+			const account = await accounts.updateOne({ devices: { $elemMatch: { device_id: request.params.id } } }, request.body);
 			return reply.status(HttpStatus.OK).send(account);
 		}
 		catch (error) {

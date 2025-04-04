@@ -30,7 +30,7 @@ server.register(
 			{
 				preHandler: authorizationMiddleware,
 			},
-			AccountsController.getById,
+			AccountsController.getByDeviceId,
 		);
 
 		// POST /accounts
