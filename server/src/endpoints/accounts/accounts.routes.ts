@@ -36,9 +36,6 @@ server.register(
 		// POST /accounts
 		instance.post(
 			'/',
-			{
-				preHandler: authorizationMiddleware,
-			},
 			AccountsController.create,
 		);
 

@@ -2,6 +2,7 @@ import { HttpStatus } from '@tmlmobilidade/lib';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { accounts } from '@/interfaces/accounts.interface.js';
 import { CreateAccountDto } from '@/interfaces/account.type.js';
+import { randomUUID } from 'crypto';
 
 /**
  * This is an example controller that is using the accounts interface.
@@ -14,7 +15,15 @@ export class AccountsController {
 	 */
 	static async create(request: FastifyRequest<{ Body: CreateAccountDto }>, reply: FastifyReply) {
 		try {
+			request.body.devices.forEach(element => {
+				element.device_id = randomUUID();
+			});
 			const account = await accounts.insertOne(request.body);
+			// const session = await sessions.insertOne({
+			// 	_id: account.insertedId,
+			// 	user_id: request.body.devices[0].device_id,
+			// 	token: request.body.profile.email
+			// });
 			return reply.status(HttpStatus.CREATED).send(account);
 		}
 		catch (error) {
