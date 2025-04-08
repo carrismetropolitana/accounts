@@ -129,9 +129,8 @@ export class AccountsController {
 		reply: FastifyReply,
 	) {
 		try {
-			const image = await accounts.findPersonaImageById(request.params.id);
-			console.log(request.params.id);
-			return reply.status(HttpStatus.OK).send(image);
+			const { id } = request.params;
+			return reply.sendFile(`/output/${id}`);
 		}
 		catch (error) {
 			return reply.status(HttpStatus.INTERNAL_SERVER_ERROR).send(error);
