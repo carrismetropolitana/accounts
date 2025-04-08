@@ -32,6 +32,24 @@ server.register(
 			},
 			AccountsController.getByDeviceId,
 		);
+		
+		// GET /persona
+		instance.get(
+			'/persona',
+			{
+				//preHandler: authorizationMiddleware,
+			},
+			AccountsController.getPersona,
+		);
+
+		// GET /persona/:id
+		instance.get(
+			'/persona/:id',
+			{
+				//preHandler: authorizationMiddleware,
+			},
+			AccountsController.getPersonaImageById,
+		);
 
 		// POST /accounts
 		instance.post(

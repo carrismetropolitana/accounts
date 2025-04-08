@@ -128,3 +128,6 @@ results/
 nginx/uptime.conf
 
 build/
+
+composites_map.json
+output

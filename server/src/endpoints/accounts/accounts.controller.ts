@@ -16,24 +16,34 @@ export class AccountsController {
 	 */
 	static async create(request: FastifyRequest<{ Body: CreateAccountDto }>, reply: FastifyReply) {
 		try {
-
-			request.body.devices.forEach(element => {
-				element.device_id = randomUUID();
+			// Create the actual account
+			const device_id = randomUUID();
+			const account = await accounts.insertOne({
+				devices: [
+					{
+						device_id,
+						type: request.body.devices[0].type,
+					}
+				]
 			});
 
-			const account = await accounts.insertOne(request.body);
+			// Insert the token into the session collection
+			const session_token = randomUUID();
+			const session = await sessions.insertOne({
+				user_id: account.insertedId,
+				token: session_token
+			});
 
-			// const session = await sessions.insertOne({
-			// 	_id: account.insertedId,
-			// 	user_id: request.body.devices[0].device_id,
-			// 	token: 'teste@gmail.com'
-			// });
-
-			const generatedDeviceId = request.body.devices[0].device_id;
+			// Check if the session was created successfully
+			if (!session) {
+				return reply.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
+					message: 'Failed to create session',
+				});
+			}
 			
 			return reply.status(HttpStatus.CREATED).send({
-				inserted_id: account.insertedId,
-				device_id: generatedDeviceId
+				session_token,
+				device_id,
 			});
 
 		}
@@ -87,6 +97,41 @@ export class AccountsController {
 		try {
 			const account = await accounts.findByDeviceId(request.params.id);
 			return reply.status(HttpStatus.OK).send(account);
+		}
+		catch (error) {
+			return reply.status(HttpStatus.INTERNAL_SERVER_ERROR).send(error);
+		}
+	}
+
+	/**
+	 * Retrieves a record from composite_map.json
+	  * @param request Fastify request
+	 * @param reply Fastify reply
+	 */
+	static async getPersona(request: FastifyRequest,reply: FastifyReply,) 
+	{
+		try {
+			const persona = await accounts.findPersona();
+			return reply.status(HttpStatus.OK).send(persona);
+		}
+		catch (error) {
+			return reply.status(HttpStatus.INTERNAL_SERVER_ERROR).send(error);
+		}
+	}
+
+	/**
+	 * Retrieves a record from composite_map.json
+	 * @param request Fastify request
+	 * @param reply Fastify reply
+	 */
+	static async getPersonaImageById(
+		request: FastifyRequest<{ Params: { id: string } }>,
+		reply: FastifyReply,
+	) {
+		try {
+			const image = await accounts.findPersonaImageById(request.params.id);
+			console.log(request.params.id);
+			return reply.status(HttpStatus.OK).send(image);
 		}
 		catch (error) {
 			return reply.status(HttpStatus.INTERNAL_SERVER_ERROR).send(error);

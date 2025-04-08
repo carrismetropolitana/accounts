@@ -1,26 +1,38 @@
-import { FastifyRequest, FastifyReply } from "fastify";
+import { accounts } from '@/interfaces/accounts.interface.js';
+import { authProvider, sessions, users } from '@tmlmobilidade/interfaces';
+import { HttpException, HttpStatus } from '@tmlmobilidade/lib';
+import { Permission } from '@tmlmobilidade/types';
+import { FastifyReply, FastifyRequest } from 'fastify';
+import { a } from 'vitest/dist/chunks/suite.d.FvehnV49.js';
 
-// declare module 'fastify' {
-//     export interface FastifyRequest {
-//       fastifyUser?: IFastifyUser;
-//     }
-//   }
+declare module 'fastify' {
+	export interface FastifyRequest {}
+}
 
 export default async function authorizationMiddleware(request: FastifyRequest, reply: FastifyReply) {
-	// const token = request.headers['authorization']?.split(' ')[1] || undefined;
+		const token = request.cookies.session_token;
 
-    // const decodedToken = await verifyJWT<IJwt | IJwtSync>(token);
-    // if (!decodedToken) {
-    //     throw new HttpException(HttpStatus.UNAUTHORIZED, 'Invalid authorization token');
-    // }
+		if (!token) {
+			throw new HttpException(
+				HttpStatus.UNAUTHORIZED,
+				'Invalid authorization token',
+			);
+		}
 
-    // const accountService = new AccountsService();
-    // const account = await accountService.getAccountById(decodedToken.device_id);
-    // if (account) {
-    //     request.fastifyUser = {
-    //         device_id: decodedToken.device_id,
-    //         role: account.role,
-    //     };
-    // }
-    return;
+		try {
+			// TODO: Implement caching with redis
+
+            const session = await sessions.findOne({ token });
+
+            if (!session) {
+                throw new HttpException(HttpStatus.UNAUTHORIZED, 'Session not found');
+            }
+		}
+		catch (error) {
+			reply
+				.status(error.statusCode ?? HttpStatus.INTERNAL_SERVER_ERROR)
+				.send({
+					message: error.message || 'An unexpected error occurred',
+				});
+		}
 }
