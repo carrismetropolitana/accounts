@@ -2,7 +2,7 @@
 
 import authorizationMiddleware from '@/middleware/authorization.middleware.js';
 import FastifyService from '@/services/fastify.service.js';
-import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import { FastifyInstance } from 'fastify';
 
 import { AccountsController } from './accounts.controller.js';
 
