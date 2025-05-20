@@ -128,4 +128,7 @@ results/
 nginx/uptime.conf
 
 build/
-output
+
+# Yalc
+.yalc
+yalc.lock

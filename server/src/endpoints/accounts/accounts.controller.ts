@@ -128,7 +128,7 @@ export class AccountsController {
 	) {
 		try {
 			const { id } = request.params;
-			return reply.sendFile(`/output/${id}`);
+			return reply.sendFile(`/personas/${id}`);
 		}
 		catch (error) {
 			return reply.status(HttpStatus.INTERNAL_SERVER_ERROR).send(error);

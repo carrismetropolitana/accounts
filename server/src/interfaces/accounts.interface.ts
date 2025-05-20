@@ -1,23 +1,17 @@
+import { personas } from '@/lib/personas.js';
 import { MongoCollectionClass } from '@tmlmobilidade/interfaces';
 import { HttpException } from '@tmlmobilidade/lib';
 import { AsyncSingletonProxy } from '@tmlmobilidade/utils';
-import * as fs from 'fs';
 import { Filter, IndexDescription, WithId } from 'mongodb';
-import path, { dirname } from 'path';
-import { fileURLToPath } from 'url';
-import { z } from 'zod';
 
 import { Account, AccountSchema, UpdateAccountDto, UpdateAccountSchema } from './account.type.js';
 import { CreateAccountDto } from './account.type.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
 class AccountsClass extends MongoCollectionClass<Account, CreateAccountDto, UpdateAccountDto> {
 	private static _instance: AccountsClass;
 
-	protected override createSchema: z.ZodSchema = AccountSchema;
-	protected override updateSchema: z.ZodSchema = UpdateAccountSchema;
+	protected override createSchema = AccountSchema;
+	protected override updateSchema = UpdateAccountSchema;
 
 	private constructor() {
 		super();
@@ -84,16 +78,8 @@ class AccountsClass extends MongoCollectionClass<Account, CreateAccountDto, Upda
      * @returns An id that represents the persona
      */
 	async findPersona() {
-		const filePath = path.join(__dirname, '../../composites_map.json');
-		const fileContent = fs.readFileSync(filePath, 'utf-8');
-		const data = JSON.parse(fileContent);
-
-		if (!Array.isArray(data) || data.length === 0) {
-			throw new Error('composites_map.json is empty or invalid');
-		}
-
-		const randomIndex = Math.floor(Math.random() * data.length);
-		return data[randomIndex];
+		const randomIndex = Math.floor(Math.random() * personas.length);
+		return personas[randomIndex];
 	}
 
 	/**
@@ -103,15 +89,7 @@ class AccountsClass extends MongoCollectionClass<Account, CreateAccountDto, Upda
      * @returns A promise that resolves to the matching image or null if not found
      */
 	async findPersonaImageById(imageId: string) {
-		const filePath = path.join(__dirname, '../../composites_map.json');
-		const fileContent = fs.readFileSync(filePath, 'utf-8');
-		const data = JSON.parse(fileContent);
-
-		if (!Array.isArray(data) || data.length === 0) {
-			throw new Error('composites_map.json is empty or invalid');
-		}
-
-		const persona = data.find((item: { url: string }) => item.url === imageId);
+		const persona = personas.find((item: { url: string }) => item.url === imageId);
 
 		if (!persona) {
 			throw new Error(`Persona with image ID "${imageId}" not found`);
