@@ -1,0 +1,12 @@
+{
+	"compilerOptions": {
+		"outDir": "./dist",
+		"paths": {
+			"@/*": ["./src/*"]
+		},
+		"rootDir": "."
+	},
+	"exclude": ["tests/**/*.ts"],
+	"extends": "@tmlmobilidade/tsconfig/nodejs.json",
+	"include": ["src/**/*.ts"]
+}

@@ -18,15 +18,19 @@ COPY . .
 # First install the dependencies (as they change less often)
 RUN npm install
 
-RUN npm run build
+# WAIT 5 minutes
 
-# # #
-# RUNNER STAGE
+CMD sleep 300
 
-FROM base AS runner
+# RUN npm run build
 
-WORKDIR /app
+# # # #
+# # RUNNER STAGE
 
-COPY --from=builder /app /apps/${PROJECT}/dist/ ./apps/${PROJECT}
+# FROM base AS runner
 
-CMD node src/index.js
+# WORKDIR /app
+
+# COPY --from=builder /app /apps/${PROJECT}/dist/ ./apps/${PROJECT}
+
+# CMD node src/index.js
