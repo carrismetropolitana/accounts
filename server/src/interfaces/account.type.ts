@@ -9,6 +9,8 @@ const UTILIZATION_TYPE_VALUES = ['frequent', 'occasional'] as const;
 const ACTIVITY_VALUES = ['student', 'university', 'working', 'retired', 'other'] as const;
 const DEVICE_TYPE_VALUES = ['android', 'ios', 'web'] as const;
 const WIDGET_TYPE_VALUES = ['lines', 'stops', 'smart_notifications'] as const;
+const INTERESTS_VALUES = ['network changes, events and news, carris metropolitana'] as const;
+
 
 // ENUM SCHEMAS
 export const GenderSchema = z.enum(GENDER_VALUES);
@@ -17,6 +19,7 @@ export const WorkSettingSchema = z.enum(WORK_SETTING_VALUES);
 export const UtilizationTypeSchema = z.enum(UTILIZATION_TYPE_VALUES);
 export const ActivitySchema = z.enum(ACTIVITY_VALUES);
 export const DeviceTypeSchema = z.enum(DEVICE_TYPE_VALUES);
+export const InterestsSchema = z.enum(INTERESTS_VALUES);
 export const WidgetTypeSchema = z.enum(WIDGET_TYPE_VALUES);
 
 // SCHEMA
@@ -67,6 +70,7 @@ const ProfileSchema = z.object({
     gender: GenderSchema.nullish(),
     work_setting: WorkSettingSchema.nullish(),
     utilization_type: UtilizationTypeSchema.nullish(),
+    interests: InterestsSchema.nullish(),
     activity: ActivitySchema.nullish(),
     profile_image: z.string().nullish(),
 }).strict();
@@ -98,6 +102,7 @@ export type AccountGender = z.infer<typeof GenderSchema>;
 export type AccountRole = z.infer<typeof RoleSchema>;
 export type AccountWorkSetting = z.infer<typeof WorkSettingSchema>;
 export type AccountUtilizationType = z.infer<typeof UtilizationTypeSchema>;
+export type AccountInterests = z.infer<typeof InterestsSchema>;
 export type AccountActivity = z.infer<typeof ActivitySchema>;
 export type AccountDeviceType = z.infer<typeof DeviceTypeSchema>;
 export type AccountWidgetType = z.infer<typeof WidgetTypeSchema>;
@@ -129,6 +134,8 @@ export type Account = Omit<
     | 'favorites'
     | 'date_of_birth'
     | 'profile'
+    | 'interests'
+
 > & {
     devices: AccountDevice[],
     created_at: UnixTimestamp,
@@ -138,6 +145,7 @@ export type Account = Omit<
     widgets?: AccountWidget[],
     favorites?: AccountFavorites,
     profile?: AccountProfile,
+    interests?: AccountInterests
 };
 
 export type CreateAccountDto = Omit<
