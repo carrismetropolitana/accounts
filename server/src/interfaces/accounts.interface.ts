@@ -1,13 +1,14 @@
 import { MongoCollectionClass } from '@tmlmobilidade/interfaces';
+import { HttpException } from '@tmlmobilidade/lib';
 import { AsyncSingletonProxy } from '@tmlmobilidade/utils';
+import * as fs from 'fs';
 import { Filter, IndexDescription, WithId } from 'mongodb';
+import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { z } from 'zod';
+
 import { Account, AccountSchema, UpdateAccountDto, UpdateAccountSchema } from './account.type.js';
 import { CreateAccountDto } from './account.type.js';
-import { z } from 'zod';
-import { HttpException } from '@tmlmobilidade/lib';
-import * as fs from 'fs';
-import { fileURLToPath } from 'url';
-import path, { dirname } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -29,6 +30,22 @@ class AccountsClass extends MongoCollectionClass<Account, CreateAccountDto, Upda
 			AccountsClass._instance = instance;
 		}
 		return AccountsClass._instance;
+	}
+
+	/**
+     * Finds a document by its device ID.
+     *
+     * @param deviceId - The device ID of the document to find
+     * @returns A promise that resolves to the matching document or null if not found
+     */
+	async findByDeviceId(deviceId: string) {
+		console.log(deviceId);
+
+		const user = await this.mongoCollection.findOne({ devices: { $elemMatch: { device_id: deviceId } } } as unknown as Filter<Account>);
+		if (!user) {
+			throw new HttpException(404, 'Account not found');
+		}
+		return user as WithId<Account>;
 	}
 
 	/**
@@ -61,63 +78,47 @@ class AccountsClass extends MongoCollectionClass<Account, CreateAccountDto, Upda
 		return user as WithId<Account>;
 	}
 
-    /**
-     * Finds a document by its device ID.
-     *
-     * @param deviceId - The device ID of the document to find
-     * @returns A promise that resolves to the matching document or null if not found
-     */
-	async findByDeviceId(deviceId: string) {
-		console.log(deviceId);
-
-		const user = await this.mongoCollection.findOne({ devices: { $elemMatch: { device_id: deviceId } } } as unknown as Filter<Account>);
-		if (!user) {
-			throw new HttpException(404, 'Account not found');
-		}
-		return user as WithId<Account>;
-	}
-
-    /**
+	/**
      * Finds a record from composite_map.json
      *
-     * @returns An id that represents the persona 
+     * @returns An id that represents the persona
      */
 	async findPersona() {
-        const filePath = path.join(__dirname, '../../composites_map.json');
-        const fileContent = fs.readFileSync(filePath, 'utf-8');
-        const data = JSON.parse(fileContent);
+		const filePath = path.join(__dirname, '../../composites_map.json');
+		const fileContent = fs.readFileSync(filePath, 'utf-8');
+		const data = JSON.parse(fileContent);
 
-        if (!Array.isArray(data) || data.length === 0) {
-            throw new Error('composites_map.json is empty or invalid');
-        }
+		if (!Array.isArray(data) || data.length === 0) {
+			throw new Error('composites_map.json is empty or invalid');
+		}
 
-        const randomIndex = Math.floor(Math.random() * data.length);
-        return data[randomIndex];
+		const randomIndex = Math.floor(Math.random() * data.length);
+		return data[randomIndex];
 	}
 
-   /**
+	/**
      * Finds a document by its device ID.
      *
      * @param imageId - The image ID  to find
      * @returns A promise that resolves to the matching image or null if not found
      */
-   async findPersonaImageById(imageId: string) {
-	const filePath = path.join(__dirname, '../../composites_map.json');
-	const fileContent = fs.readFileSync(filePath, 'utf-8');
-	const data = JSON.parse(fileContent);
+	async findPersonaImageById(imageId: string) {
+		const filePath = path.join(__dirname, '../../composites_map.json');
+		const fileContent = fs.readFileSync(filePath, 'utf-8');
+		const data = JSON.parse(fileContent);
 
-	if (!Array.isArray(data) || data.length === 0) {
-		throw new Error('composites_map.json is empty or invalid');
+		if (!Array.isArray(data) || data.length === 0) {
+			throw new Error('composites_map.json is empty or invalid');
+		}
+
+		const persona = data.find((item: { url: string }) => item.url === imageId);
+
+		if (!persona) {
+			throw new Error(`Persona with image ID "${imageId}" not found`);
+		}
+
+		return persona;
 	}
-
-	const persona = data.find((item: { url: string }) => item.url === imageId);
-
-	if (!persona) {
-		throw new Error(`Persona with image ID "${imageId}" not found`);
-	}
-
-	return persona;
-   }
 
 	protected getCollectionIndexes(): IndexDescription[] {
 		return [
@@ -131,7 +132,7 @@ class AccountsClass extends MongoCollectionClass<Account, CreateAccountDto, Upda
 	}
 
 	protected getEnvName(): string {
-        return 'ACCOUNTS_DB_URI';
+		return 'ACCOUNTS_DB_URI';
 	}
 }
 

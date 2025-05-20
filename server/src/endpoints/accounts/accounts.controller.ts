@@ -1,9 +1,9 @@
-import { HttpStatus } from '@tmlmobilidade/lib';
-import { FastifyReply, FastifyRequest } from 'fastify';
-import { accounts } from '@/interfaces/accounts.interface.js';
 import { CreateAccountDto } from '@/interfaces/account.type.js';
-import { randomUUID } from 'crypto';
+import { accounts } from '@/interfaces/accounts.interface.js';
 import { sessions } from '@tmlmobilidade/interfaces';
+import { HttpStatus } from '@tmlmobilidade/lib';
+import { randomUUID } from 'crypto';
+import { FastifyReply, FastifyRequest } from 'fastify';
 
 /**
  * This is an example controller that is using the accounts interface.
@@ -23,15 +23,15 @@ export class AccountsController {
 					{
 						device_id,
 						type: request.body.devices[0].type,
-					}
-				]
+					},
+				],
 			});
 
 			// Insert the token into the session collection
 			const session_token = randomUUID();
 			const session = await sessions.insertOne({
+				token: session_token,
 				user_id: account.insertedId,
-				token: session_token
 			});
 
 			// Check if the session was created successfully
@@ -40,12 +40,11 @@ export class AccountsController {
 					message: 'Failed to create session',
 				});
 			}
-			
-			return reply.status(HttpStatus.CREATED).send({
-				session_token,
-				device_id,
-			});
 
+			return reply.status(HttpStatus.CREATED).send({
+				device_id,
+				session_token,
+			});
 		}
 		catch (error) {
 			return reply.status(HttpStatus.INTERNAL_SERVER_ERROR).send(error);
@@ -108,8 +107,7 @@ export class AccountsController {
 	  * @param request Fastify request
 	 * @param reply Fastify reply
 	 */
-	static async getPersona(request: FastifyRequest,reply: FastifyReply,) 
-	{
+	static async getPersona(request: FastifyRequest, reply: FastifyReply) {
 		try {
 			const persona = await accounts.findPersona();
 			return reply.status(HttpStatus.OK).send(persona);
@@ -151,7 +149,7 @@ export class AccountsController {
 			return reply.status(HttpStatus.OK).send(account);
 		}
 		catch (error) {
-			return reply.status(HttpStatus.INTERNAL_SERVER_ERROR).send(error);	
+			return reply.status(HttpStatus.INTERNAL_SERVER_ERROR).send(error);
 		}
 	}
 }

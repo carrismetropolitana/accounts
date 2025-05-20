@@ -32,12 +32,12 @@ server.register(
 			},
 			AccountsController.getByDeviceId,
 		);
-		
+
 		// GET /persona
 		instance.get(
 			'/persona',
 			{
-				//preHandler: authorizationMiddleware,
+				// preHandler: authorizationMiddleware,
 			},
 			AccountsController.getPersona,
 		);
@@ -46,7 +46,7 @@ server.register(
 		instance.get(
 			'/persona/:id',
 			{
-				//preHandler: authorizationMiddleware,
+				// preHandler: authorizationMiddleware,
 			},
 			AccountsController.getPersonaImageById,
 		);

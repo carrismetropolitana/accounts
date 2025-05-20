@@ -4,8 +4,8 @@ import FastifyService from '@/services/fastify.service.js';
 import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
 import fastifyMultipart from '@fastify/multipart';
-import { FastifyServerOptions } from 'fastify';
 import fastifyStatic from '@fastify/static';
+import { FastifyServerOptions } from 'fastify';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -51,15 +51,13 @@ async function main() {
 		origin,
 	});
 
-	//Setup Public
+	// Setup Public
 
 	await fastifyService.server.register(fastifyStatic, {
-	root: path.join(__dirname, '../public'),
-  });
+		root: path.join(__dirname, '../public'),
+	});
 
 	await fastifyService.start();
 }
 
 main();
-
-
