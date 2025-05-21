@@ -121,10 +121,19 @@ dist
 .yarn/install-state.gz
 .pnp.*
 .DS_Store
-package-lock.json
 temp/
 results/
 
 nginx/uptime.conf
 
 build/
+
+# Yalc
+.yalc
+yalc.lock
+
+# Public
+server/public/
+
+# Secrets
+secrets/

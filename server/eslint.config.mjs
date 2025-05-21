@@ -8,7 +8,7 @@ export default [
   ...node,
   {
     rules: {
-      '@stylistic/brace-style': 'off',
+      '@typescript-eslint/no-extraneous-class': 'off',
     },
   },
 ]

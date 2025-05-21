@@ -1,0 +1,127 @@
+# # #
+
+name: cmet-accounts
+
+volumes:
+  certbotdata:
+
+services:
+  #
+
+  # # # # # # # # # # # # # # # # # # # # #
+  # # # # # # # # # # # # # # # # # # # # #
+
+  watchtower:
+    image: containrrr/watchtower
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+      resources:
+        limits:
+          memory: 100mb
+    logging:
+      options:
+        max-size: '1m'
+        max-file: '1'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_POLL_INTERVAL=10
+      - WATCHTOWER_CLEANUP=TRUE
+      - WATCHTOWER_INCLUDE_STOPPED=TRUE
+      - WATCHTOWER_REVIVE_STOPPED=TRUE
+      - WATCHTOWER_ROLLING_RESTART=TRUE
+
+  # # # # # # # # # # # # # # # # # # # # #
+  # # # # # # # # # # # # # # # # # # # # #
+
+  nginx:
+    image: ghcr.io/carrismetropolitana/accounts-nginx:staging
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+      resources:
+        limits:
+          memory: 1gb
+    logging:
+      options:
+        max-size: '1m'
+        max-file: '1'
+    volumes:
+      - ./letsencrypt:/etc/letsencrypt:ro
+      - certbotdata:/var/www/certbot:ro
+    ports:
+      - 80:80
+      - 443:443
+    command: '/bin/sh -c ''while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g "daemon off;"'''
+
+  # # # # # # # # # # # # # # # # # # # # #
+  # # # # # # # # # # # # # # # # # # # # #
+
+  certbot:
+    image: certbot/certbot
+    restart: unless-stopped
+    mem_limit: 2g
+    volumes:
+      - ./letsencrypt:/etc/letsencrypt
+      - certbotdata:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
+  # # # # # # # # # # # # # # # # # # # # #
+  # # # # # # # # # # # # # # # # # # # # #
+
+  server:
+    image: ghcr.io/carrismetropolitana/accounts-server:staging
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+      resources:
+        limits:
+          memory: 2gb
+    volumes:
+      - ./public:/app/dist/public
+    logging:
+      options:
+        max-size: '1m'
+        max-file: '1'
+    env_file:
+      - ./secrets/.env
+
+  # # # # # # # # # # # # # # # # # # # # #
+  # # # # # # # # # # # # # # # # # # # # #
+
+  accounts-db:
+    image: mongo:latest
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - ./accounts-entrypoint.sh:/docker-entrypoint-initdb.d/init.sh:ro
+      - ./accounts-keyfile.key:/data/replica.key
+      - ./accounts-db-data:/data/db
+    env_file:
+      - ./secrets/.env
+    entrypoint:
+      - bash
+      - -c
+      - |
+          chmod 400 /data/replica.key
+          chown 999:999 /data/replica.key
+          exec docker-entrypoint.sh $$@
+    command: mongod --bind_ip_all --auth --replSet rs0 --keyFile /data/replica.key --port 27017
+
+  # # # # # # # # # # # # # # # # # # # # #
+  # # # # # # # # # # # # # # # # # # # # #
+
+  backupd:
+    image: ghcr.io/tmlmobilidade/backupd:production
+    volumes:
+      - ./backupd-data:/data/backups
+      - ./secrets/backupd.yaml:/config.yaml
+    environment:
+      - CONFIG_PATH=/config.yaml
+    depends_on:
+      - accounts-db
