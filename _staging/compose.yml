@@ -82,7 +82,7 @@ services:
         limits:
           memory: 2gb
     volumes:
-      - ./public:/app/public
+      - ./public:/app/dist/public
     logging:
       options:
         max-size: '1m'

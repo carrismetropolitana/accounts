@@ -1,5 +1,9 @@
 #!/bin/bash
 
+echo "+----------------------------------------------+"
+echo "|    Initializing MongoDB Entrypoint Script    |"
+echo "+----------------------------------------------+"
+
 mongosh <<EOF
 use admin
 
@@ -14,24 +18,25 @@ while (!rs.isMaster().ismaster) {
 // Create the admin user
 db.createUser({
 	user: "admin",
-	pwd: "$PLANS_ADMIN_PASSWORD",
+	pwd: "$ACCOUNTS_ADMIN_PASSWORD",
 	roles: ["root"]
 })
-
-// Authenticate as admin to create other users
-// db.auth("admin", "$PLANS_ADMIN_PASSWORD")
 
 // Create a read-only user
 db.createUser({
 	user: "read",
-	pwd: "$PLANS_READ_PASSWORD",
+	pwd: "$ACCOUNTS_READ_PASSWORD",
 	roles: [ { role: "read", db: "production" } ]
 })
 
 // Create a read-write user
 db.createUser({
 	user: "write",
-	pwd: "$PLANS_WRITE_PASSWORD",
+	pwd: "$ACCOUNTS_WRITE_PASSWORD",
 	roles: [ { role: "readWrite", db: "production" } ]
 })
 EOF
+
+echo "+----------------------------------------------+"
+echo "|      MongoDB replica set initialized         |"
+echo "+----------------------------------------------+"
