@@ -132,3 +132,6 @@ build/
 # Yalc
 .yalc
 yalc.lock
+
+# Public
+server/public/

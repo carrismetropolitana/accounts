@@ -7,7 +7,8 @@
 	"keywords": [],
 	"main": "index.js",
 	"scripts": {
-		"build": "tsc",
+		"build": "npm run clean && tsc && resolve-tspaths",
+		"clean": "rm -rf dist",
 		"dev": "dotenv-run -f ../_dev/secrets/.env -- tsx src/index.ts",
 		"lint": "eslint ./src && tsc --noEmit",
 		"test": "echo \"Error: no test specified\" && exit 1",
@@ -24,7 +25,7 @@
 		"fastify": "5.3.3",
 		"mongodb": "^6.16.0",
 		"pino-pretty": "13.0.0",
-		"resolve-tspaths": "0.8.23",
+		"resolve-tspaths": "^0.8.23",
 		"zod": "3.24.4"
 	},
 	"devDependencies": {
