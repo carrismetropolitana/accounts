@@ -120,7 +120,7 @@ services:
     image: ghcr.io/tmlmobilidade/backupd:production
     volumes:
       - ./backupd-data:/data/backups
-      - ./backupd.yaml:/config.yaml
+      - ./secrets/backupd.yaml:/config.yaml
     environment:
       - CONFIG_PATH=/config.yaml
     depends_on:

@@ -134,3 +134,6 @@ yalc.lock
 
 # Public
 server/public/
+
+# Secrets
+secrets/
