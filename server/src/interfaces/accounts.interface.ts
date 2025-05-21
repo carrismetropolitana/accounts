@@ -110,7 +110,7 @@ class AccountsClass extends MongoCollectionClass<Account, CreateAccountDto, Upda
 	}
 
 	protected getEnvName(): string {
-		return 'ACCOUNTS_DB_URI';
+		return 'TML_INTERFACE_AUTH';
 	}
 }
 
