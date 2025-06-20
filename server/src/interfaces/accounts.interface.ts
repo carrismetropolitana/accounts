@@ -1,10 +1,10 @@
 import { personas } from '@/lib/personas.js';
 import { MongoCollectionClass } from '@tmlmobilidade/interfaces';
 import { HttpException } from '@tmlmobilidade/lib';
-import { AsyncSingletonProxy } from '@tmlmobilidade/utils';
+import { AsyncSingletonProxy, convertObject } from '@tmlmobilidade/utils';
 import { Filter, IndexDescription, WithId } from 'mongodb';
 
-import { Account, AccountSchema, UpdateAccountDto, UpdateAccountSchema } from './account.type.js';
+import { Account, AccountSchema, AccountWidget, UpdateAccountDto, UpdateAccountSchema } from './account.type.js';
 import { CreateAccountDto } from './account.type.js';
 
 class AccountsClass extends MongoCollectionClass<Account, CreateAccountDto, UpdateAccountDto> {
@@ -24,6 +24,25 @@ class AccountsClass extends MongoCollectionClass<Account, CreateAccountDto, Upda
 			AccountsClass._instance = instance;
 		}
 		return AccountsClass._instance;
+	}
+
+	/**
+	 * Add Widget to Account
+	 * @param device_id - The ID of the account to add the widget to
+	 * @param widget - The widget to add
+	 * @returns A promise that resolves to the updated account
+	 */
+	async addWidget(device_id: string, widget: AccountWidget) {
+		const account = await this.findByDeviceId(device_id);
+
+		if (!account) {
+			throw new HttpException(404, 'Account not found');
+		}
+
+		account.widgets.push(widget);
+		await this.updateById(account._id, convertObject(account, this.updateSchema));
+
+		return account;
 	}
 
 	/**

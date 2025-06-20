@@ -1,5 +1,7 @@
-import { CreateAccountDto } from '@/interfaces/account.type.js';
+import { AccountWidget, CreateAccountDto, SmartNotification } from '@/interfaces/account.type.js';
 import { accounts } from '@/interfaces/accounts.interface.js';
+import { calculateGeoFence } from '@/lib/utils';
+import PatternService from '@/services/pattern.service';
 import { sessions } from '@tmlmobilidade/interfaces';
 import { HttpStatus } from '@tmlmobilidade/lib';
 import { randomUUID } from 'crypto';
@@ -49,6 +51,37 @@ export class AccountsController {
 		catch (error) {
 			return reply.status(HttpStatus.INTERNAL_SERVER_ERROR).send(error);
 		}
+	}
+
+	/**
+	 * Creates a new smart notification for an account
+	 * @param request Fastify request containing account ID in params and smart notification data in body
+	 * @param reply Fastify reply
+	 */
+	static async createSmartNotification(
+		request: FastifyRequest<{ Body: AccountWidget, Params: { id: string } }>,
+		reply: FastifyReply,
+	) {
+		const { id } = request.params;
+		const notification = request.body;
+
+		if (notification.data.type !== 'smart_notifications') {
+			return reply.status(HttpStatus.BAD_REQUEST).send({
+				message: 'Invalid notification type',
+			});
+		}
+
+		const pattern = await PatternService.getInstance().getPattern(notification.data.pattern_id);
+		const geoFence = await calculateGeoFence(pattern[0], notification.data.stop_id, notification.data.distance);
+
+		const notificationData: SmartNotification = {
+			...notification.data,
+			geojson: geoFence,
+		};
+
+		const account = await accounts.addWidget(id, { ...notification, data: notificationData });
+
+		return reply.status(HttpStatus.CREATED).send(account);
 	}
 
 	/**

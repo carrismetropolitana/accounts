@@ -44,6 +44,7 @@ const WidgetStopsSchema = z.object({
 export const WidgetSmartNotificationsSchema = z.object({
 	distance: z.number(),
 	end_time: z.number().gt(0).lte(86400),
+	geojson: z.any().nullish(),
 	id: z.string(),
 	pattern_id: z.string(),
 	start_time: z.number().gte(0).lt(86400),
@@ -123,6 +124,7 @@ export type AccountWidgetType = z.infer<typeof WidgetTypeSchema>;
 export type AccountFavorites = z.infer<typeof FavoritesSchema>;
 export type AccountWidget = z.infer<typeof WidgetSchema>;
 export type AccountDevice = Omit<z.infer<typeof DeviceSchema>, 'type'> & { type: AccountDeviceType };
+export type SmartNotification = z.infer<typeof WidgetSmartNotificationsSchema>;
 
 export type AccountProfile = Omit<z.infer<typeof ProfileSchema>,
   | 'activity'
