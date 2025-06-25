@@ -2,6 +2,12 @@ import { sessions } from '@tmlmobilidade/interfaces';
 import { HttpException, HttpStatus } from '@tmlmobilidade/lib';
 import { FastifyReply, FastifyRequest } from 'fastify';
 
+declare module 'fastify' {
+	export interface FastifyRequest {
+		user_id?: string
+	}
+}
+
 export default async function authorizationMiddleware(request: FastifyRequest, reply: FastifyReply) {
 	const token = request.cookies.session_token;
 
@@ -13,13 +19,13 @@ export default async function authorizationMiddleware(request: FastifyRequest, r
 	}
 
 	try {
-		// TODO: Implement caching with redis
-
 		const session = await sessions.findOne({ token });
 
 		if (!session) {
 			throw new HttpException(HttpStatus.UNAUTHORIZED, 'Session not found');
 		}
+
+		request.user_id = session.user_id;
 	}
 	catch (error) {
 		reply

@@ -17,20 +17,20 @@ server.register(
 	(instance, opts, next) => {
 		// GET /accounts
 		instance.get(
-			'/',
+			'/all',
 			{
 				preHandler: authorizationMiddleware,
 			},
 			AccountsController.getAll,
 		);
 
-		// GET /accounts/:id
+		// GET /accounts/
 		instance.get(
-			'/:id',
+			'/',
 			{
 				preHandler: authorizationMiddleware,
 			},
-			AccountsController.getByDeviceId,
+			AccountsController.getByUserId,
 		);
 
 		// GET /persona
@@ -57,27 +57,27 @@ server.register(
 			AccountsController.create,
 		);
 
-		// PUT /accounts/:id
+		// PUT /accounts/
 		instance.put(
-			'/:id',
+			'/',
 			{
 				preHandler: authorizationMiddleware,
 			},
 			AccountsController.update,
 		);
 
-		// POST /accounts/:id/smart-notification
+		// POST /accounts//smart-notification
 		instance.post(
-			'/:id/smart-notifications',
+			'/smart-notifications',
 			{
 				preHandler: authorizationMiddleware,
 			},
 			AccountsController.createSmartNotification,
 		);
 
-		// DELETE /accounts/:id
+		// DELETE /accounts/
 		instance.delete(
-			'/:id',
+			'/',
 			{
 				preHandler: authorizationMiddleware,
 			},

@@ -59,12 +59,10 @@ export class AccountsController {
 	 * @param reply Fastify reply
 	 */
 	static async createSmartNotification(
-		request: FastifyRequest<{ Body: AccountWidget, Params: { id: string } }>,
+		request: FastifyRequest<{ Body: AccountWidget }>,
 		reply: FastifyReply,
 	) {
-		console.log(request.body);
-		const { id } = request.params;
-		const accountExists = await accounts.findByDeviceId(id);
+		const accountExists = await accounts.findById(request.user_id);
 
 		if (!accountExists) {
 			return reply.status(HttpStatus.NOT_FOUND).send({
@@ -93,7 +91,7 @@ export class AccountsController {
 			geojson: geoFence,
 		};
 
-		const account = await accounts.addWidget(id, { ...notification, data: notificationData });
+		const account = await accounts.addWidget(request.user_id, { ...notification, data: notificationData });
 
 		return reply.status(HttpStatus.CREATED).send(account);
 	}
@@ -104,11 +102,11 @@ export class AccountsController {
 	 * @param reply Fastify reply
 	 */
 	static async delete(
-		request: FastifyRequest<{ Params: { id: string } }>,
+		request: FastifyRequest,
 		reply: FastifyReply,
 	) {
 		try {
-			const account = await accounts.deleteOne({ devices: { $elemMatch: { device_id: request.params.id } } });
+			const account = await accounts.deleteById(request.user_id);
 			return reply.status(HttpStatus.OK).send(account);
 		}
 		catch (error) {
@@ -136,12 +134,12 @@ export class AccountsController {
 	 * @param request Fastify request containing device ID in params
 	 * @param reply Fastify reply
 	 */
-	static async getByDeviceId(
-		request: FastifyRequest<{ Params: { id: string } }>,
+	static async getByUserId(
+		request: FastifyRequest,
 		reply: FastifyReply,
 	) {
 		try {
-			const account = await accounts.findByDeviceId(request.params.id);
+			const account = await accounts.findById(request.user_id);
 			return reply.status(HttpStatus.OK).send(account);
 		}
 		catch (error) {
@@ -192,7 +190,7 @@ export class AccountsController {
 		reply: FastifyReply,
 	) {
 		try {
-			const account = await accounts.updateOne({ devices: { $elemMatch: { device_id: request.params.id } } }, request.body);
+			const account = await accounts.updateById(request.user_id, request.body);
 			return reply.status(HttpStatus.OK).send(account);
 		}
 		catch (error) {
