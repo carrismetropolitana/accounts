@@ -62,7 +62,15 @@ export class AccountsController {
 		request: FastifyRequest<{ Body: AccountWidget, Params: { id: string } }>,
 		reply: FastifyReply,
 	) {
+		console.log(request.body);
 		const { id } = request.params;
+		const accountExists = await accounts.findByDeviceId(id);
+
+		if (!accountExists) {
+			return reply.status(HttpStatus.NOT_FOUND).send({
+				message: 'Account not found',
+			});
+		}
 		const notification = request.body;
 
 		if (notification.data.type !== 'smart_notifications') {
@@ -73,6 +81,14 @@ export class AccountsController {
 
 		const pattern = await PatternService.getInstance().getPattern(notification.data.pattern_id);
 		const geoFence = await calculateGeoFence(pattern[0], notification.data.stop_id, notification.data.distance);
+
+		console.log('==========>', geoFence);
+
+		if (!geoFence) {
+			return reply.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
+				message: 'Invalid geo fence',
+			});
+		}
 
 		const notificationData: SmartNotification = {
 			...notification.data,

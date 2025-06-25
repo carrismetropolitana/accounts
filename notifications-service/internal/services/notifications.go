@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"notifications-service/internal/utils"
@@ -9,29 +10,28 @@ import (
 	"time"
 )
 
-func NotificationsService( redisService *RedisService, vehiclesHashMap *map[string]models.Vehicle){
-	ticker := time.NewTicker(3 * time.Second)   
+func NotificationsService(redisService *RedisService, firebaseService *FirebaseService, vehiclesHashMap *map[string][]models.Vehicle) {
+	ticker := time.NewTicker(3 * time.Second)
 	defer ticker.Stop()
-		
-	notificationService(redisService, vehiclesHashMap) // Run immediately notificationService
+
+	notificationService(redisService, firebaseService, vehiclesHashMap) // Run immediately notificationService
 
 	// This loop runs every time the ticker ticks
 	for range ticker.C {
-		notificationService(redisService, vehiclesHashMap) // Call the function to execute cron jobs
+		notificationService(redisService, firebaseService, vehiclesHashMap) // Call the function to execute cron jobs
 	}
 }
 
-func notificationService(RedisService *RedisService, vehiclesHashMap *map[string]models.Vehicle) {
+func notificationService(RedisService *RedisService, firebaseService *FirebaseService, vehiclesHashMap *map[string][]models.Vehicle) {
 
 	fmt.Println("⤷ Checking for notifications")
 
 	// If the vehicles hashmap is empty, return
-	if(len(*vehiclesHashMap) == 0){
+	if len(*vehiclesHashMap) == 0 {
 		fmt.Println("Vehicles hashmap is empty")
 		return
 	}
 
-	getNotifications(RedisService)
 	notifications, err := getNotifications(RedisService)
 	if err != nil {
 		fmt.Printf("Error getting notifications: %v\n", err)
@@ -42,58 +42,113 @@ func notificationService(RedisService *RedisService, vehiclesHashMap *map[string
 	var wg sync.WaitGroup
 	errChan := make(chan error, len(notifications))
 
-	for _, notification := range notifications {
+	for key, notification := range notifications {
 		wg.Add(1)
 
-		go func(notification models.Notification) {
-			defer wg.Done()                    // Decrement the counter when the goroutine completes
-			vehicle, ok := (*vehiclesHashMap)[notification.PatternId]
+		go func(key string, notification models.Notification) {
+			defer wg.Done() // Decrement the counter when the goroutine completes
+			vehicles, ok := (*vehiclesHashMap)[notification.PatternId]
 			if !ok {
-				// fmt.Printf("Vehicle with PatternId %s not found\n", notification.PatternId)
+				fmt.Printf("Vehicle with PatternId %s not found\n", notification.PatternId)
 				return
 			}
 
 			// Define a point and a polygon
-			point := models.Point{X: vehicle.Lon, Y: vehicle.Lat}
-			polygon := []models.Point{}
-			for _, coordinate := range notification.GeoJSON.Geometry.Coordinates[0] {
-				polygon = append(polygon, models.Point{X: coordinate[0], Y: coordinate[1]})
-			}
+			for _, vehicle := range vehicles {
 
-			//Check if the bus is in the radius of stop
-			if utils.PointInPolygon(point, polygon) {
-				fmt.Printf("Bus %s is in a radius of %v %s Stop %s\n", vehicle.Id, notification.Distance, notification.DistanceUnit ,notification.StopId)
+				fmt.Println("==========>", notification.Id, vehicle.Id)
 
-				// Send a message to Firebas Messaging Service
+				point := models.Point{X: vehicle.Lon, Y: vehicle.Lat}
+				polygon := []models.Point{}
+				for _, coordinate := range notification.GeoJSON.Geometry.Coordinates[0] {
+					polygon = append(polygon, models.Point{X: coordinate[0], Y: coordinate[1]})
+				}
+
+				//Check if the bus is in the radius of stop
+				if utils.PointInPolygon(point, polygon) {
+					if !notification.Sent {
+						fmt.Printf("Bus %s is in a radius of %v %s Stop %s\n", vehicle.Id, notification.Distance, notification.DistanceUnit, notification.StopId)
+
+						// Send a message to Firebase Messaging Service to topic notification.id
+						title := "Bus Approaching"
+						body := fmt.Sprintf("Bus %s is approaching stop %s", vehicle.Id, notification.StopId)
+						err := firebaseService.SendToTopic(notification.Id, title, body)
+						if err != nil {
+							fmt.Printf("Error sending notification: %v\n", err)
+						} else {
+							fmt.Printf("Notification sent for vehicle %s and stop %s\n", vehicle.Id, notification.StopId)
+							notification.Sent = true
+							notificationJSON, err := json.Marshal(notification)
+							if err != nil {
+								fmt.Printf("Error marshalling notification: %v\n", err)
+							} else {
+								err := RedisService.Set(key, string(notificationJSON))
+								if err != nil {
+									fmt.Printf("Error updating notification in Redis: %v\n", err)
+								}
+							}
+						}
+					}
+				} else {
+					if notification.Sent {
+						// Bus is out of the polygon, reset the Sent flag
+						notification.Sent = false
+						notificationJSON, err := json.Marshal(notification)
+						if err != nil {
+							fmt.Printf("Error marshalling notification: %v\n", err)
+						} else {
+							err := RedisService.Set(key, string(notificationJSON))
+							if err != nil {
+								fmt.Printf("Error updating notification in Redis: %v\n", err)
+							} else {
+								fmt.Printf("Notification flag reset for vehicle %s and stop %s\n", vehicle.Id, notification.StopId)
+							}
+						}
+					}
+				}
 			}
-		}(notification)
+		}(key, notification)
 	}
 
 	wg.Wait()      // Wait for all goroutines to complete
 	close(errChan) // Close the error channel as no more errors will be sent
 }
 
-func getNotifications(redisService *RedisService) ([]models.Notification, error) {
-	notifications := []models.Notification{}
+func getNotifications(redisService *RedisService) (map[string]models.Notification, error) {
+	notificationsMap := make(map[string]models.Notification)
 
-	// Get Notifications from redis processed:*
-	values, err := redisService.MGetPattern("processed:*")
+	// Get keys from redis processed:*
+	keys, err := redisService.Client().Keys(context.Background(), "processed:*").Result()
+	if err != nil {
+		fmt.Printf("Error getting notification keys from redis: %v\n", err)
+		return notificationsMap, err
+	}
+
+	if len(keys) == 0 {
+		return notificationsMap, nil
+	}
+
+	// Get Notifications from redis
+	values, err := redisService.Client().MGet(context.Background(), keys...).Result()
 	if err != nil {
 		fmt.Printf("Error getting notifications from redis: %v\n", err)
-		return notifications, err
+		return notificationsMap, err
 	}
 
 	//Cast values to Notification
-	for _, value := range values {
+	for i, value := range values {
+		if value == nil {
+			continue
+		}
 		notificationWrapper := models.Notification{}
 		err = json.Unmarshal([]byte(value.(string)), &notificationWrapper)
 		if err != nil {
 			fmt.Printf("Error unmarshalling notification: %v\n", err)
-			return notifications, err
+			continue
 		}
 
-		notifications = append(notifications, notificationWrapper)
+		notificationsMap[keys[i]] = notificationWrapper
 	}
 
-	return notifications, nil
+	return notificationsMap, nil
 }

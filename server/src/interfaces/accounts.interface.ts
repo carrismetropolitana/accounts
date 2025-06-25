@@ -4,7 +4,7 @@ import { HttpException } from '@tmlmobilidade/lib';
 import { AsyncSingletonProxy, convertObject } from '@tmlmobilidade/utils';
 import { Filter, IndexDescription, WithId } from 'mongodb';
 
-import { Account, AccountSchema, AccountWidget, UpdateAccountDto, UpdateAccountSchema } from './account.type.js';
+import { Account, AccountSchema, AccountWidget, SmartNotification, UpdateAccountDto, UpdateAccountSchema } from './account.type.js';
 import { CreateAccountDto } from './account.type.js';
 
 class AccountsClass extends MongoCollectionClass<Account, CreateAccountDto, UpdateAccountDto> {
@@ -37,6 +37,24 @@ class AccountsClass extends MongoCollectionClass<Account, CreateAccountDto, Upda
 
 		if (!account) {
 			throw new HttpException(404, 'Account not found');
+		}
+
+		if (widget.data.type === 'smart_notifications') {
+			if (!widget.data.id) {
+				throw new HttpException(400, 'Smart notification widget must have an id');
+			}
+
+			const hasSmartNotificationWidget = account.widgets.find(w => w.data.type === 'smart_notifications' && (w.data as SmartNotification).id === (widget.data as SmartNotification).id);
+			if (hasSmartNotificationWidget) {
+				account.widgets = account.widgets.map((w) => {
+					if (w.data.type === 'smart_notifications' && (w.data as SmartNotification).id === (widget.data as SmartNotification).id) {
+						return widget;
+					}
+					return w;
+				});
+				await this.updateById(account._id, convertObject(account, this.updateSchema));
+				return account;
+			}
 		}
 
 		account.widgets.push(widget);

@@ -24,8 +24,21 @@ type MongoService struct {
 func NewMongoService(url, dbName string) *MongoService {
 	clientOptions := options.Client().ApplyURI(url)
 	client, err := mongo.Connect(context.Background(), clientOptions)
+	maxRetries := 5
+	retryDelay := time.Second * 5
+
+	for i := range maxRetries {
+		if err == nil {
+			break
+		}
+		fmt.Printf("Failed to connect to MongoDB (attempt %d/%d): %v\n", i+1, maxRetries, err)
+		time.Sleep(retryDelay)
+		client, err = mongo.Connect(context.Background(), clientOptions)
+	}
+
 	if err != nil {
-		panic(err)
+		fmt.Printf("Failed to connect to MongoDB after %d attempts: %v\n", maxRetries, err)
+		return nil
 	}
 	
 	database := client.Database(dbName)

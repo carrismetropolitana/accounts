@@ -18,7 +18,7 @@ import (
  * Loop that runs every 9 seconds to get vehicles from API and store them in a hashmap.
  * The hashmap is used to retrieve vehicles by pattern Id.
  */
-func GetVehiclesHashMap(myHashMap *map[string]models.Vehicle) {
+func GetVehiclesHashMap(myHashMap *map[string][]models.Vehicle) {
 	ticker := time.NewTicker(9 * time.Second)   
 	defer ticker.Stop()                        // Ensures that the ticker vehicles when the function exits to free up resources
 	
@@ -45,16 +45,16 @@ func GetVehiclesHashMap(myHashMap *map[string]models.Vehicle) {
   * Gets vehicles from API and stores vehicles in a hashmap.
   * The hashmap is used to retrieve vehicles by pattern Id.
 */
-func getVehiclesHashMap() (map[string]models.Vehicle, error) {
+func getVehiclesHashMap() (map[string][]models.Vehicle, error) {
 	vehicles, err := getVehicles()
 	if err != nil {
 		return nil, err
 	}
 
 	// Create a new map to store the vehicles by ID
-	vehicleHashMap := make(map[string]models.Vehicle)
+	vehicleHashMap := make(map[string][]models.Vehicle)
 	for _, vehicle := range vehicles {
-	vehicleHashMap[vehicle.PatternId] = vehicle
+		vehicleHashMap[vehicle.PatternId] = append(vehicleHashMap[vehicle.PatternId], vehicle)
 	}
 
 	return vehicleHashMap, nil

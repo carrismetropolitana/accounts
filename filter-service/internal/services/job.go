@@ -13,7 +13,7 @@ import (
 
 // Start Cron Job
 func StartCronJobs(redisService *RedisService, mongoService *MongoService) {
-	ticker := time.NewTicker(60 * time.Second) // Creates a new ticker that ticks every 60 seconds (1 minute)
+	ticker := time.NewTicker(10 * time.Second) // Creates a new ticker that ticks every 60 seconds (1 minute)
 	defer ticker.Stop()                        // Ensures that the ticker stops when the function exits to free up resources
 
 	// Run first time

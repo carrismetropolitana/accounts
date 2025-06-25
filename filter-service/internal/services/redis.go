@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -23,8 +24,20 @@ func NewRedisService(url string) *RedisService {
 	}
 	client := redis.NewClient(options)
 	
+	maxRetries := 5
+	retryDelay := time.Second * 5
+
+	for i := range maxRetries {
+		if err := client.Ping(context.Background()).Err(); err == nil {
+			break
+		}
+		fmt.Printf("Failed to connect to Redis (attempt %d/%d): %v\n", i+1, maxRetries, err)
+		time.Sleep(retryDelay)
+	}
+
 	if err := client.Ping(context.Background()).Err(); err != nil {
-		panic(err)
+		fmt.Printf("Failed to connect to Redis after %d attempts: %v\n", maxRetries, err)
+		return nil
 	}
 	
 	return &RedisService{client: client}

@@ -66,9 +66,9 @@ server.register(
 			AccountsController.update,
 		);
 
-		// PUT /accounts/:id/persona
+		// POST /accounts/:id/smart-notification
 		instance.post(
-			'/:id/smart-notification',
+			'/:id/smart-notifications',
 			{
 				preHandler: authorizationMiddleware,
 			},
