@@ -87,7 +87,13 @@ func ClearCollectionByPattern(client *redis.Client, pattern string) error {
  * @returns The current second in the day.
  */
 func GetCurrentSecondInDay() int {
-	now := time.Now()
+	loc, err := time.LoadLocation("Europe/Lisbon")
+	if err != nil {
+		// Fallback to UTC if timezone loading fails
+		now := time.Now().UTC() 
+		return now.Hour()*3600 + now.Minute()*60 + now.Second()
+	}
+	now := time.Now().In(loc)
 	return now.Hour()*3600 + now.Minute()*60 + now.Second()
 }
 
