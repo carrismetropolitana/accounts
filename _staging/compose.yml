@@ -125,3 +125,51 @@ services:
       - CONFIG_PATH=/config.yaml
     depends_on:
       - accounts-db
+
+  # # # # # # # # # # # # # # # # # # # # #
+  # # # # # # # # # # # # # # # # # # # # #
+
+  redis:
+    image: redis:latest
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+    ports:
+      - 6379:6379
+    volumes:
+      - ./redis-data:/data
+    command: redis-server --appendonly yes
+
+  # # # # # # # # # # # # # # # # # # # # #
+  # # # # # # # # # # # # # # # # # # # # #
+
+  filter-service:
+    image: ghcr.io/carrismetropolitana/accounts-filter-service:staging
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+    env_file:
+      - ./secrets/.env
+    volumes:
+      - ./notifications-service-data:/data
+    depends_on:
+      - redis
+
+  # # # # # # # # # # # # # # # # # # # # #
+  # # # # # # # # # # # # # # # # # # # # #
+
+  notifications-service:
+    image: ghcr.io/carrismetropolitana/accounts-notifications-service:staging
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+    env_file:
+      - ./secrets/.env
+    volumes:
+      - ./notifications-service-data:/data
+    depends_on:
+      - redis
+      - filter-service
