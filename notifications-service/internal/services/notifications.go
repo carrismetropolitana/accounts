@@ -56,8 +56,6 @@ func notificationService(RedisService *RedisService, firebaseService *FirebaseSe
 			// Define a point and a polygon
 			for _, vehicle := range vehicles {
 
-				fmt.Println("==========>", notification.Id, vehicle.Id)
-
 				point := models.Point{X: vehicle.Lon, Y: vehicle.Lat}
 				polygon := []models.Point{}
 				for _, coordinate := range notification.GeoJSON.Geometry.Coordinates[0] {
@@ -66,7 +64,7 @@ func notificationService(RedisService *RedisService, firebaseService *FirebaseSe
 
 				//Check if the bus is in the radius of stop
 				if utils.PointInPolygon(point, polygon) {
-					if !notification.Sent {
+					if notification.SentVehicleId == nil {
 						fmt.Printf("Bus %s is in a radius of %v %s Stop %s\n", vehicle.Id, notification.Distance, notification.DistanceUnit, notification.StopId)
 
 						// Send a message to Firebase Messaging Service to topic notification.id
@@ -77,7 +75,7 @@ func notificationService(RedisService *RedisService, firebaseService *FirebaseSe
 							fmt.Printf("Error sending notification: %v\n", err)
 						} else {
 							fmt.Printf("Notification sent for vehicle %s and stop %s\n", vehicle.Id, notification.StopId)
-							notification.Sent = true
+							notification.SentVehicleId = &vehicle.Id
 							notificationJSON, err := json.Marshal(notification)
 							if err != nil {
 								fmt.Printf("Error marshalling notification: %v\n", err)
@@ -90,9 +88,9 @@ func notificationService(RedisService *RedisService, firebaseService *FirebaseSe
 						}
 					}
 				} else {
-					if notification.Sent {
+					if notification.SentVehicleId != nil && *notification.SentVehicleId == vehicle.Id {
 						// Bus is out of the polygon, reset the Sent flag
-						notification.Sent = false
+						notification.SentVehicleId = nil
 						notificationJSON, err := json.Marshal(notification)
 						if err != nil {
 							fmt.Printf("Error marshalling notification: %v\n", err)
