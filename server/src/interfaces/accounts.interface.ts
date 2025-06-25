@@ -32,8 +32,8 @@ class AccountsClass extends MongoCollectionClass<Account, CreateAccountDto, Upda
 	 * @param widget - The widget to add
 	 * @returns A promise that resolves to the updated account
 	 */
-	async addWidget(device_id: string, widget: AccountWidget) {
-		const account = await this.findByDeviceId(device_id);
+	async addWidget(user_id: string, widget: AccountWidget) {
+		const account = await this.findById(user_id);
 
 		if (!account) {
 			throw new HttpException(404, 'Account not found');
