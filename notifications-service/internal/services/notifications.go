@@ -55,6 +55,7 @@ func notificationService(RedisService *RedisService, firebaseService *FirebaseSe
 
 			// Define a point and a polygon
 			for _, vehicle := range vehicles {
+				fmt.Printf("Notification: %+v | PatternId: %s | Vehicle: %+v\n", notification.Id, notification.PatternId, vehicle)
 
 				point := models.Point{X: vehicle.Lon, Y: vehicle.Lat}
 				polygon := []models.Point{}
