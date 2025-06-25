@@ -82,8 +82,6 @@ export class AccountsController {
 		const pattern = await PatternService.getInstance().getPattern(notification.data.pattern_id);
 		const geoFence = await calculateGeoFence(pattern[0], notification.data.stop_id, notification.data.distance);
 
-		console.log('==========>', geoFence);
-
 		if (!geoFence) {
 			return reply.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
 				message: 'Invalid geo fence',
