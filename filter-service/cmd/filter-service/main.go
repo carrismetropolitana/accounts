@@ -9,7 +9,11 @@ import (
 )
 
 func main() {
-	envPath := os.Args[1]
+	envPath := ""
+	if len(os.Args) > 1 {
+		envPath = os.Args[1]
+	}
+
 	// Load environment variables from .env file
 	if err := godotenv.Load(envPath); err != nil {
 		log.Printf("Warning: Error loading .env file: %v\n", err)
