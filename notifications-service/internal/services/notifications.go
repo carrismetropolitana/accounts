@@ -55,8 +55,6 @@ func notificationService(RedisService *RedisService, firebaseService *FirebaseSe
 
 			// Define a point and a polygon
 			for _, vehicle := range vehicles {
-				fmt.Printf("Notification: %+v | PatternId: %s | Vehicle: %+v\n", notification.Id, notification.PatternId, vehicle)
-
 				point := models.Point{X: vehicle.Lon, Y: vehicle.Lat}
 				polygon := []models.Point{}
 				
@@ -75,8 +73,8 @@ func notificationService(RedisService *RedisService, firebaseService *FirebaseSe
 						fmt.Printf("Bus %s is in a radius of %v %s Stop %s\n", vehicle.Id, notification.Distance, notification.DistanceUnit, notification.StopId)
 
 						// Send a message to Firebase Messaging Service to topic notification.id
-						title := "Bus Approaching"
-						body := fmt.Sprintf("Bus %s is approaching stop %s", vehicle.Id, notification.StopId)
+						title := "Olh'ó Autocarro"
+						body := fmt.Sprintf("O autocarro %s está a chegar à paragem %s", vehicle.LineId , notification.StopId)
 						err := firebaseService.SendToTopic(notification.Id, title, body)
 						if err != nil {
 							fmt.Printf("Error sending notification: %v\n", err)
