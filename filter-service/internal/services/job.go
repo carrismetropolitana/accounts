@@ -47,6 +47,8 @@ func runCronJobs(redisService *RedisService, mongoService *MongoService) {
 	weekDay := utils.GetCurrentWeekDay()
 
 	// Find accounts with smart notifications that match the current time and day.
+	fmt.Printf("Current second: %v\n", currentSecond)
+	fmt.Printf("Week day: %v\n", weekDay)
 	filter := bson.M{
 		"widgets": bson.M{
 			"$elemMatch": bson.M{
