@@ -59,6 +59,12 @@ func notificationService(RedisService *RedisService, firebaseService *FirebaseSe
 
 				point := models.Point{X: vehicle.Lon, Y: vehicle.Lat}
 				polygon := []models.Point{}
+				
+				if len(notification.GeoJSON.Geometry.Coordinates) <= 0 {
+					fmt.Printf("Notification %s has no polygon\n", notification.Id)
+					continue
+				}
+
 				for _, coordinate := range notification.GeoJSON.Geometry.Coordinates[0] {
 					polygon = append(polygon, models.Point{X: coordinate[0], Y: coordinate[1]})
 				}
