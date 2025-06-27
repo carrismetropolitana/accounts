@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { personas } from '@/lib/personas.js';
 import { MongoCollectionClass } from '@tmlmobilidade/interfaces';
 import { HttpException } from '@tmlmobilidade/lib';
@@ -52,13 +53,13 @@ class AccountsClass extends MongoCollectionClass<Account, CreateAccountDto, Upda
 					}
 					return w;
 				});
-				await this.updateById(account._id, convertObject(account, this.updateSchema));
+				await this.updateById(account._id, convertObject(account, this.updateSchema as any));
 				return account;
 			}
 		}
 
 		account.widgets.push(widget);
-		await this.updateById(account._id, convertObject(account, this.updateSchema));
+		await this.updateById(account._id, convertObject(account, this.updateSchema as any));
 
 		return account;
 	}
