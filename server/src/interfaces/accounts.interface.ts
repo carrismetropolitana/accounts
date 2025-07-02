@@ -45,6 +45,10 @@ class AccountsClass extends MongoCollectionClass<Account, CreateAccountDto, Upda
 				throw new HttpException(400, 'Smart notification widget must have an id');
 			}
 
+			if (!account.widgets) {
+				account.widgets = [];
+			}
+
 			const hasSmartNotificationWidget = account.widgets.find(w => w.data.type === 'smart_notifications' && (w.data as SmartNotification).id === (widget.data as SmartNotification).id);
 			if (hasSmartNotificationWidget) {
 				account.widgets = account.widgets.map((w) => {
