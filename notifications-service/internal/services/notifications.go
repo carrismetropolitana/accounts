@@ -67,47 +67,29 @@ func notificationService(RedisService *RedisService, firebaseService *FirebaseSe
 					polygon = append(polygon, models.Point{X: coordinate[0], Y: coordinate[1]})
 				}
 
-				//Check if the bus is in the radius of stop
-				if utils.PointInPolygon(point, polygon) {
-					if notification.SentVehicleId == nil {
-						fmt.Printf("Bus %s is in a radius of %v %s Stop %s\n", vehicle.Id, notification.Distance, notification.DistanceUnit, notification.StopId)
+				// Check if the bus is within the polygon (stop area)
+				inPolygon := utils.PointInPolygon(point, polygon)
 
-						// Send a message to Firebase Messaging Service to topic notification.id
-						title := "Olh'ó Autocarro"
-						body := fmt.Sprintf("O autocarro %s está a chegar à paragem %s", vehicle.LineId , notification.StopId)
-						err := firebaseService.SendToTopic(notification.Id, title, body)
-						if err != nil {
-							fmt.Printf("Error sending notification: %v\n", err)
-						} else {
-							fmt.Printf("Notification sent for vehicle %s and stop %s\n", vehicle.Id, notification.StopId)
-							notification.SentVehicleId = &vehicle.Id
-							notificationJSON, err := json.Marshal(notification)
-							if err != nil {
-								fmt.Printf("Error marshalling notification: %v\n", err)
-							} else {
-								err := RedisService.Set(key, string(notificationJSON))
-								if err != nil {
-									fmt.Printf("Error updating notification in Redis: %v\n", err)
-								}
-							}
-						}
+				// Handle bus entering the polygon (send notification if not already sent)
+				if inPolygon && notification.SentVehicleId == nil {
+					fmt.Printf("Bus %s is within %v %s of Stop %s\n", vehicle.Id, notification.Distance, notification.DistanceUnit, notification.StopId)
+
+					// Send notification to firebase
+					title := "Olh'ó Autocarro"
+					body := fmt.Sprintf("O autocarro %s está a chegar à paragem %s", vehicle.LineId, notification.StopId)
+					err := firebaseService.SendToTopic(notification.Id, title, body)
+					if err != nil {
+						fmt.Printf("Error sending notification for vehicle %s and stop %s: %v\n", vehicle.Id, notification.StopId, err)
+						return
 					}
-				} else {
-					if notification.SentVehicleId != nil && *notification.SentVehicleId == vehicle.Id {
-						// Bus is out of the polygon, reset the Sent flag
-						notification.SentVehicleId = nil
-						notificationJSON, err := json.Marshal(notification)
-						if err != nil {
-							fmt.Printf("Error marshalling notification: %v\n", err)
-						} else {
-							err := RedisService.Set(key, string(notificationJSON))
-							if err != nil {
-								fmt.Printf("Error updating notification in Redis: %v\n", err)
-							} else {
-								fmt.Printf("Notification flag reset for vehicle %s and stop %s\n", vehicle.Id, notification.StopId)
-							}
-						}
-					}
+
+					fmt.Printf("Notification sent for vehicle %s and stop %s\n", vehicle.Id, notification.StopId)
+					notification.SentVehicleId = &vehicle.Id // Set the notification flag to the vehicle id
+				}
+
+				// Handle bus leaving the polygon (reset notification flag if it was set for this vehicle)
+				if !inPolygon && notification.SentVehicleId != nil && *notification.SentVehicleId == vehicle.Id {
+					notification.SentVehicleId = nil // Reset the notification flag
 				}
 			}
 		}(key, notification)

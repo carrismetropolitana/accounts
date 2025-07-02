@@ -82,6 +82,7 @@ services:
         limits:
           memory: 2gb
     volumes:
+      - ./secrets/firebase.json:/app/firebase.json
       - ./public:/app/dist/public
     logging:
       options:
