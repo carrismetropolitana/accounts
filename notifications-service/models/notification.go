@@ -4,6 +4,7 @@ type Notification struct {
 	Id          string `json:"id"`
 	PatternId   string `json:"pattern_id"`
 	StopId      string `json:"stop_id"`
+	StopName    string `json:"stop_name"`
 	Distance    float32 `json:"distance"`
 	DistanceUnit string `json:"distance_unit"`
 	StartTime   int64 `json:"start_time"`

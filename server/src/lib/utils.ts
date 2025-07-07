@@ -1,6 +1,5 @@
 import ShapeService from '@/services/shape.service';
-import StopsService from '@/services/stops.service';
-import { Pattern } from '@carrismetropolitana/api-types/network';
+import { Pattern, Stop } from '@carrismetropolitana/api-types/network';
 import { HttpException, HttpStatus } from '@tmlmobilidade/lib';
 import * as turf from '@turf/turf';
 import { Feature, LineString, MultiPolygon, Polygon, Position } from 'geojson';
@@ -8,17 +7,13 @@ import { Feature, LineString, MultiPolygon, Polygon, Position } from 'geojson';
 /**
  * Calculates the GeoFence Path from a distance the stop selected
  * @param pattern The pattern to calculate the GeoFence
- * @param stopId The stop id to calculate the GeoFence
+ * @param stop The stop to calculate the GeoFence
  * @param notificationDistance The distance to calculate the GeoFence
  */
-export async function calculateGeoFence(pattern: Pattern, stopId: string, notificationDistance: number): Promise<Feature<MultiPolygon | Polygon, GeoJSON.GeoJsonProperties>> {
+export async function calculateGeoFence(pattern: Pattern, stop: Stop, notificationDistance: number): Promise<Feature<MultiPolygon | Polygon, GeoJSON.GeoJsonProperties>> {
 	// Find Stop in pattern
-	const stop = pattern.path.find(path => path.stop_id === stopId);
-
-	if (!stop) throw new HttpException(HttpStatus.NOT_FOUND, `Stop ${stopId} not found in pattern ${pattern.id}`);
-	if (stop.stop_sequence <= 1) throw new HttpException(HttpStatus.BAD_REQUEST, `Stop ${stopId} is the first stop in pattern ${pattern.id}`);
-
-	const stopData = await StopsService.getInstance().getStop(stop.stop_id);
+	const stopInPattern = pattern.path.find(path => path.stop_id === stop.id);
+	if (stopInPattern.stop_sequence <= 1) throw new HttpException(HttpStatus.BAD_REQUEST, `Stop ${stop.id} is the first stop in pattern ${pattern.id}`);
 
 	// Find shape in pattern
 	const shape = await ShapeService.getInstance().getShape(pattern.shape_id);
@@ -35,7 +30,7 @@ export async function calculateGeoFence(pattern: Pattern, stopId: string, notifi
 
 	const feature = turf.cleanCoords(turf.lineString(coordinates));
 
-	const point = turf.point([Number(stopData.lon), Number(stopData.lat)]);
+	const point = turf.point([Number(stop.lon), Number(stop.lat)]);
 	const nearestPointOnLine = turf.nearestPointOnLine(feature, point);
 
 	const split = turf.lineSplit(feature, nearestPointOnLine);

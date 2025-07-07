@@ -2,6 +2,7 @@ import { AccountWidget, CreateAccountDto, SmartNotification } from '@/interfaces
 import { accounts } from '@/interfaces/accounts.interface.js';
 import { calculateGeoFence } from '@/lib/utils';
 import PatternService from '@/services/pattern.service';
+import StopsService from '@/services/stops.service';
 import { sessions } from '@tmlmobilidade/interfaces';
 import { HttpStatus } from '@tmlmobilidade/lib';
 import { randomUUID } from 'crypto';
@@ -77,8 +78,11 @@ export class AccountsController {
 			});
 		}
 
+		// Get Stop
+		const stop = await StopsService.getInstance().getStop(notification.data.stop_id);
+
 		const pattern = await PatternService.getInstance().getPattern(notification.data.pattern_id);
-		const geoFence = await calculateGeoFence(pattern[0], notification.data.stop_id, notification.data.distance);
+		const geoFence = await calculateGeoFence(pattern[0], stop, notification.data.distance);
 
 		if (!geoFence) {
 			return reply.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
@@ -89,6 +93,7 @@ export class AccountsController {
 		const notificationData: SmartNotification = {
 			...notification.data,
 			geojson: geoFence,
+			stop_name: stop.long_name,
 		};
 
 		const account = await accounts.addWidget(request.user_id, { ...notification, data: notificationData });

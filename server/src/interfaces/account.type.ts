@@ -49,6 +49,7 @@ export const WidgetSmartNotificationsSchema = z.object({
 	pattern_id: z.string(),
 	start_time: z.number().gte(0).lt(86400),
 	stop_id: z.string(),
+	stop_name: z.string().nullish(),
 	type: WidgetTypeSchema.pipe(z.literal('smart_notifications')),
 	user_id: z.string(),
 	week_days: z.array(z.enum(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'])).nonempty(),
