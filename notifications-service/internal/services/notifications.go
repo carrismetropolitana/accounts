@@ -80,7 +80,7 @@ func notificationService(RedisService *RedisService, firebaseService *FirebaseSe
 					fmt.Printf("Bus %s is within %v %s of Stop %s\n", vehicle.Id, notification.Distance, notification.DistanceUnit, notification.StopId)
 
 					// Send notification to firebase
-					title := "Olh'ó Autocarro"
+					title := "OLHÓ Autocarro 👀 🚌 "
 					body := fmt.Sprintf("O autocarro %s está a chegar à paragem %s", vehicle.LineId, notification.StopId)
 					err := firebaseService.SendToTopic(notification.Id, title, body)
 					if err != nil {
@@ -102,8 +102,7 @@ func notificationService(RedisService *RedisService, firebaseService *FirebaseSe
 
 	wg.Wait()      // Wait for all goroutines to complete
 	close(errChan) // Close the error channel as no more errors will be sent
-}
-
+} 
 func getNotifications(redisService *RedisService) (map[string]models.Notification, error) {
 	notificationsMap := make(map[string]models.Notification)
 
