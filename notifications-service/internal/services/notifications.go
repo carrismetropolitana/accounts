@@ -73,7 +73,7 @@ func notificationService(RedisService *RedisService, firebaseService *FirebaseSe
 				// Handle bus entering the polygon (send notification if not already sent)
 				if inPolygon  {
 					processed, _ := RedisService.Get(fmt.Sprintf("sent:%s", key))
-					if processed != vehicle.Id {
+					if processed != "" {
 						continue
 					}
 
