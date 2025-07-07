@@ -10,5 +10,4 @@ type Notification struct {
 	EndTime     int64 `json:"end_time"`
 	WeekDays    []string `json:"week_days"`
 	GeoJSON     GeoJSON `json:"geojson"`
-	SentVehicleId        *string     
 }

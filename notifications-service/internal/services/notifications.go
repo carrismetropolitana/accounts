@@ -71,7 +71,12 @@ func notificationService(RedisService *RedisService, firebaseService *FirebaseSe
 				inPolygon := utils.PointInPolygon(point, polygon)
 
 				// Handle bus entering the polygon (send notification if not already sent)
-				if inPolygon && notification.SentVehicleId == nil {
+				if inPolygon  {
+					processed, _ := RedisService.Get(fmt.Sprintf("sent:%s", key))
+					if processed != vehicle.Id {
+						continue
+					}
+
 					fmt.Printf("Bus %s is within %v %s of Stop %s\n", vehicle.Id, notification.Distance, notification.DistanceUnit, notification.StopId)
 
 					// Send notification to firebase
@@ -84,12 +89,12 @@ func notificationService(RedisService *RedisService, firebaseService *FirebaseSe
 					}
 
 					fmt.Printf("Notification sent for vehicle %s and stop %s\n", vehicle.Id, notification.StopId)
-					notification.SentVehicleId = &vehicle.Id // Set the notification flag to the vehicle id
+					RedisService.Set(fmt.Sprintf("sent:%s", key), vehicle.Id)
 				}
 
 				// Handle bus leaving the polygon (reset notification flag if it was set for this vehicle)
-				if !inPolygon && notification.SentVehicleId != nil && *notification.SentVehicleId == vehicle.Id {
-					notification.SentVehicleId = nil // Reset the notification flag
+				if !inPolygon {
+					RedisService.Del(fmt.Sprintf("sent:%s", key))
 				}
 			}
 		}(key, notification)
