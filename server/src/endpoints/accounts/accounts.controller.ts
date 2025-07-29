@@ -1,5 +1,8 @@
-import { Account } from '@/interfaces/account.type';
+import { Account, SmartNotification } from '@/interfaces/account.type';
 import { accounts } from '@/interfaces/accounts.interface.js';
+import { calculateGeoFence } from '@/lib/utils';
+import PatternService from '@/services/pattern.service';
+import StopsService from '@/services/stops.service';
 import { FastifyReply, FastifyRequest } from '@tmlmobilidade/connectors';
 import { HttpException, HttpStatus } from '@tmlmobilidade/lib';
 
@@ -101,12 +104,55 @@ export class AccountsController {
 	 * @param reply Fastify reply
 	 */
 	static async sync(request: FastifyRequest<{ Body: Account }>, reply: FastifyReply<Account>) {
-		const account = await accounts.findByDeviceId(request.account._id);
+		const currentAccount = await accounts.findByDeviceId(request.headers.authorization?.split(' ')[1]);
 
-		if (!account) {
-			throw new HttpException(HttpStatus.NOT_FOUND, 'Account not found');
+		const smartNotificationsToProcess: SmartNotification[] = [];
+		for (const widget of request.body.widgets) {
+			if (widget.data.type != 'smart_notifications') continue;
+
+			const smartNotification = widget.data as SmartNotification;
+
+			// A. Check if the smart notification does not exist in the current account
+			const currentSmartNotification = currentAccount.widgets.find(w => w.data.type === 'smart_notifications' && (w.data as SmartNotification).id === smartNotification.id);
+			if (!currentSmartNotification) {
+				smartNotificationsToProcess.push(smartNotification);
+				continue;
+			}
+
+			// B. Check if the smart notification is different from the current one
+			if (JSON.stringify(currentSmartNotification.data) !== JSON.stringify(smartNotification)) {
+				smartNotificationsToProcess.push(smartNotification);
+				continue;
+			}
 		}
+
+		if (smartNotificationsToProcess.length === 0) {
+			const account = await accounts.updateOne({ 'devices.device_id': { $in: [request.body._id] } }, request.body);
+			return reply.send({ data: account, error: null, statusCode: HttpStatus.OK });
+		}
+
+		const processedAccount = await processSmartNotifications(request.body, smartNotificationsToProcess);
+		const account = await accounts.updateOne({ 'devices.device_id': { $in: [request.body._id] } }, processedAccount);
 
 		return reply.send({ data: account, error: null, statusCode: HttpStatus.OK });
 	}
+}
+
+async function processSmartNotifications(account: Account, smartNotificationsToProcess: SmartNotification[]): Promise<Account> {
+	for (const smartNotification of smartNotificationsToProcess) {
+		// Get Stop
+		const stop = await StopsService.getInstance().getStop(smartNotification.stop_id);
+
+		const pattern = await PatternService.getInstance().getPattern(smartNotification.pattern_id);
+		const geoFence = await calculateGeoFence(pattern[0], stop, smartNotification.distance);
+
+		if (!geoFence) {
+			throw new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, 'Invalid geo fence');
+		}
+
+		const notificationData: SmartNotification = { ...smartNotification, geojson: geoFence, stop_name: stop.long_name };
+		account.widgets.find(w => w.data.type === 'smart_notifications' && (w.data as SmartNotification).id === smartNotification.id).data = notificationData;
+	}
+
+	return account;
 }

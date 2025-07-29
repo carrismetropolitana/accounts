@@ -15,49 +15,19 @@ const namespace = '/accounts';
 server.register(
 	(instance, opts, next) => {
 		// GET /persona
-		instance.get(
-			'/persona',
-			{
-				// preHandler: authorizationMiddleware,
-			},
-			AccountsController.getPersona,
-		);
+		instance.get('/persona', AccountsController.getPersona);
 
 		// GET /persona/:id
-		instance.get(
-			'/persona/:id',
-			{
-				// preHandler: authorizationMiddleware,
-			},
-			AccountsController.getPersonaImageById,
-		);
+		instance.get('/persona/:id', AccountsController.getPersonaImageById);
 
 		// GET /accounts
-		instance.get(
-			'/',
-			{
-				preHandler: authorizationMiddleware,
-			},
-			AccountsController.getByUserId,
-		);
+		instance.get('/', { preHandler: authorizationMiddleware }, AccountsController.getByUserId);
 
-		// POST /accounts
-		instance.post(
-			'/',
-			{
-				preHandler: authorizationMiddleware,
-			},
-			AccountsController.getByUserId,
-		);
+		// POST /accounts (Sync)
+		instance.post('/', AccountsController.sync);
 
 		// DELETE /accounts/
-		instance.delete(
-			'/',
-			{
-				preHandler: authorizationMiddleware,
-			},
-			AccountsController.delete,
-		);
+		instance.delete('/', { preHandler: authorizationMiddleware }, AccountsController.delete);
 
 		next();
 	},

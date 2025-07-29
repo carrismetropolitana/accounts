@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { personas } from '@/lib/personas.js';
-import { Filter, IndexDescription, MongoCollectionClass, WithId } from '@tmlmobilidade/interfaces';
-import { HttpException } from '@tmlmobilidade/lib';
+import { Filter, IndexDescription, MongoCollectionClass, UpdateOptions, WithId } from '@tmlmobilidade/interfaces';
+import { HttpException, HttpStatus } from '@tmlmobilidade/lib';
 import { AsyncSingletonProxy, convertObject } from '@tmlmobilidade/utils';
 
 import { Account, AccountSchema, AccountWidget, SmartNotification, UpdateAccountDto, UpdateAccountSchema } from './account.type.js';
@@ -137,6 +137,45 @@ class AccountsClass extends MongoCollectionClass<Account, CreateAccountDto, Upda
 		}
 
 		return persona;
+	}
+
+	/**
+	 * Updates a single account document matching the filter criteria.
+	 *
+	 * @param filter - The filter criteria to match the account to update
+	 * @param updateFields - The fields to update in the account
+	 * @param options - The options for the update operation
+	 * @returns A promise that resolves to the updated account document
+	 * @throws {HttpException} If validation fails, update is not acknowledged, or updated document is not found
+	 */
+	override async updateOne(filter: Filter<Account>, updateFields: UpdateAccountDto, options?: UpdateOptions): Promise<WithId<Account>> {
+		let parsedUpdateFields = updateFields;
+
+		if (this.updateSchema) {
+			try {
+				parsedUpdateFields = this.updateSchema.parse(updateFields);
+			}
+			catch (error) {
+				throw new HttpException(HttpStatus.BAD_REQUEST, error.message, { cause: error });
+			}
+		}
+
+		const result = await this.mongoCollection.updateOne(
+			filter,
+			{ $set: parsedUpdateFields } as unknown as Partial<Account>,
+			{ ...options, upsert: true },
+		);
+
+		if (!result.acknowledged) {
+			throw new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, 'Failed to update document', result);
+		}
+
+		const updated_doc = await this.findOne(filter, options);
+		if (!updated_doc) {
+			throw new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, 'Failed to update document', result);
+		}
+
+		return updated_doc;
 	}
 
 	protected getCollectionIndexes(): IndexDescription[] {
