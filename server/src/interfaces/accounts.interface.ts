@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { personas } from '@/lib/personas.js';
-import { MongoCollectionClass } from '@tmlmobilidade/interfaces';
+import { Filter, IndexDescription, MongoCollectionClass, WithId } from '@tmlmobilidade/interfaces';
 import { HttpException } from '@tmlmobilidade/lib';
 import { AsyncSingletonProxy, convertObject } from '@tmlmobilidade/utils';
-import { Filter, IndexDescription, WithId } from 'mongodb';
 
 import { Account, AccountSchema, AccountWidget, SmartNotification, UpdateAccountDto, UpdateAccountSchema } from './account.type.js';
 import { CreateAccountDto } from './account.type.js';
