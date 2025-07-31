@@ -5,7 +5,7 @@ import PatternService from '@/services/pattern.service';
 import StopsService from '@/services/stops.service';
 import { FastifyReply, FastifyRequest } from '@tmlmobilidade/connectors';
 import { HttpException, HttpStatus } from '@tmlmobilidade/lib';
-import { UpdateAgencySchema } from '@tmlmobilidade/types';
+import { UpdateAgencyDto, UpdateAgencySchema } from '@tmlmobilidade/types';
 
 /**
  * This is an example controller that is using the accounts interface.
@@ -108,7 +108,7 @@ export class AccountsController {
 	 * @param request Fastify request
 	 * @param reply Fastify reply
 	 */
-	static async sync(request: FastifyRequest<{ Body: Account }>, reply: FastifyReply<Account>) {
+	static async sync(request: FastifyRequest<{ Body: UpdateAgencyDto }>, reply: FastifyReply<Account>) {
 		const deviceId = request.headers.authorization?.split(' ')[1];
 		const { data, error, success } = UpdateAgencySchema.safeParse(request.body);
 
