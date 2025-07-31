@@ -4,14 +4,13 @@ import { Filter, IndexDescription, MongoCollectionClass, UpdateOptions, WithId }
 import { HttpException, HttpStatus } from '@tmlmobilidade/lib';
 import { AsyncSingletonProxy, convertObject } from '@tmlmobilidade/utils';
 
-import { Account, AccountSchema, AccountWidget, SmartNotification, UpdateAccountDto, UpdateAccountSchema } from './account.type.js';
-import { CreateAccountDto } from './account.type.js';
+import { Account, AccountSchema, AccountWidget, SmartNotification } from './account.type.js';
 
-class AccountsClass extends MongoCollectionClass<Account, CreateAccountDto, UpdateAccountDto> {
+class AccountsClass extends MongoCollectionClass<Account, Account, Account> {
 	private static _instance: AccountsClass;
 
 	protected override createSchema = AccountSchema;
-	protected override updateSchema = UpdateAccountSchema;
+	protected override updateSchema = AccountSchema;
 
 	private constructor() {
 		super();
@@ -74,9 +73,7 @@ class AccountsClass extends MongoCollectionClass<Account, CreateAccountDto, Upda
      * @returns A promise that resolves to the matching document or null if not found
      */
 	async findByDeviceId(deviceId: string) {
-		console.log(deviceId);
-
-		const user = await this.mongoCollection.findOne({ devices: { $elemMatch: { device_id: deviceId } } } as unknown as Filter<Account>);
+		const user = await this.mongoCollection.findOne({ 'devices.device_id': deviceId } as unknown as Filter<Account>);
 		if (!user) {
 			throw new HttpException(404, 'Account not found');
 		}
@@ -148,16 +145,11 @@ class AccountsClass extends MongoCollectionClass<Account, CreateAccountDto, Upda
 	 * @returns A promise that resolves to the updated account document
 	 * @throws {HttpException} If validation fails, update is not acknowledged, or updated document is not found
 	 */
-	override async updateOne(filter: Filter<Account>, updateFields: UpdateAccountDto, options?: UpdateOptions): Promise<WithId<Account>> {
-		let parsedUpdateFields = updateFields;
+	override async updateOne(filter: Filter<Account>, updateFields: Partial<Account>, options?: UpdateOptions): Promise<WithId<Account>> {
+		const parsedUpdateFields = this.createSchema.partial().safeParse(updateFields);
 
-		if (this.updateSchema) {
-			try {
-				parsedUpdateFields = this.updateSchema.parse(updateFields);
-			}
-			catch (error) {
-				throw new HttpException(HttpStatus.BAD_REQUEST, error.message, { cause: error });
-			}
+		if (!parsedUpdateFields.success) {
+			throw new HttpException(HttpStatus.BAD_REQUEST, 'Invalid update fields: ' + parsedUpdateFields.error.issues.map(issue => issue.message).join(', '), parsedUpdateFields.error);
 		}
 
 		const result = await this.mongoCollection.updateOne(

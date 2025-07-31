@@ -1,10 +1,11 @@
-import { Account, SmartNotification } from '@/interfaces/account.type';
+import { Account, AccountSchema, SmartNotification } from '@/interfaces/account.type';
 import { accounts } from '@/interfaces/accounts.interface.js';
 import { calculateGeoFence } from '@/lib/utils';
 import PatternService from '@/services/pattern.service';
 import StopsService from '@/services/stops.service';
 import { FastifyReply, FastifyRequest } from '@tmlmobilidade/connectors';
 import { HttpException, HttpStatus } from '@tmlmobilidade/lib';
+import { UpdateAgencySchema } from '@tmlmobilidade/types';
 
 /**
  * This is an example controller that is using the accounts interface.
@@ -66,7 +67,7 @@ export class AccountsController {
 		request: FastifyRequest,
 		reply: FastifyReply<void>,
 	) {
-		await accounts.deleteById(request.account._id);
+		await accounts.deleteOne({ 'devices.device_id': request.account_id });
 		return reply.send({ data: null, error: null, statusCode: HttpStatus.OK });
 	}
 
@@ -76,7 +77,11 @@ export class AccountsController {
 	 * @param reply Fastify reply
 	 */
 	static async getByUserId(request: FastifyRequest, reply: FastifyReply<Account>) {
-		return reply.send({ data: request.account, error: null, statusCode: HttpStatus.OK });
+		const account = await accounts.findByDeviceId(request.account_id);
+
+		if (!account) throw new HttpException(HttpStatus.NOT_FOUND, 'Account not found');
+
+		return reply.send({ data: account, error: null, statusCode: HttpStatus.OK });
 	}
 
 	/**
@@ -104,42 +109,49 @@ export class AccountsController {
 	 * @param reply Fastify reply
 	 */
 	static async sync(request: FastifyRequest<{ Body: Account }>, reply: FastifyReply<Account>) {
-		const currentAccount = await accounts.findByDeviceId(request.headers.authorization?.split(' ')[1]);
+		const deviceId = request.headers.authorization?.split(' ')[1];
+		const { data, error, success } = UpdateAgencySchema.safeParse(request.body);
 
-		const smartNotificationsToProcess: SmartNotification[] = [];
-		for (const widget of request.body.widgets) {
-			if (widget.data.type != 'smart_notifications') continue;
-
-			const smartNotification = widget.data as SmartNotification;
-
-			// A. Check if the smart notification does not exist in the current account
-			const currentSmartNotification = currentAccount.widgets.find(w => w.data.type === 'smart_notifications' && (w.data as SmartNotification).id === smartNotification.id);
-			if (!currentSmartNotification) {
-				smartNotificationsToProcess.push(smartNotification);
-				continue;
-			}
-
-			// B. Check if the smart notification is different from the current one
-			if (JSON.stringify(currentSmartNotification.data) !== JSON.stringify(smartNotification)) {
-				smartNotificationsToProcess.push(smartNotification);
-				continue;
-			}
+		if (!success) {
+			throw new HttpException(HttpStatus.BAD_REQUEST, `Invalid Body: ${error.issues.map(i => i.message).join(', ')}`);
 		}
 
-		if (smartNotificationsToProcess.length === 0) {
-			const account = await accounts.updateOne({ 'devices.device_id': { $in: [request.body._id] } }, request.body);
-			return reply.send({ data: account, error: null, statusCode: HttpStatus.OK });
-		}
+		// const currentAccount = await accounts.findByDeviceId(deviceId);
 
-		const processedAccount = await processSmartNotifications(request.body, smartNotificationsToProcess);
-		const account = await accounts.updateOne({ 'devices.device_id': { $in: [request.body._id] } }, processedAccount);
+		// const smartNotificationsToProcess: SmartNotification[] = [];
+		// for (const widget of request.body.widgets ?? []) {
+		// 	if (widget.data.type != 'smart_notifications') continue;
+
+		// 	const smartNotification = widget.data as SmartNotification;
+
+		// 	// A. Check if the smart notification does not exist in the current account
+		// 	const currentSmartNotification = currentAccount?.widgets?.find(w => w.data.type === 'smart_notifications' && (w.data as SmartNotification).id === smartNotification.id);
+		// 	if (!currentSmartNotification) {
+		// 		smartNotificationsToProcess.push(smartNotification);
+		// 		continue;
+		// 	}
+
+		// 	// B. Check if the smart notification is different from the current one
+		// 	if (JSON.stringify(currentSmartNotification.data) !== JSON.stringify(smartNotification)) {
+		// 		smartNotificationsToProcess.push(smartNotification);
+		// 		continue;
+		// 	}
+		// }
+
+		// if (smartNotificationsToProcess.length === 0) {
+		// 	const account = await accounts.updateOne({ 'devices.device_id': { $in: [deviceId] } }, request.body);
+		// 	return reply.send({ data: account, error: null, statusCode: HttpStatus.OK });
+		// }
+
+		// const processedAccount = await processSmartNotifications(request.body, smartNotificationsToProcess);
+		const account = await accounts.updateOne({ 'devices.device_id': { $in: [deviceId] } }, data);
 
 		return reply.send({ data: account, error: null, statusCode: HttpStatus.OK });
 	}
 }
 
 async function processSmartNotifications(account: Account, smartNotificationsToProcess: SmartNotification[]): Promise<Account> {
-	for (const smartNotification of smartNotificationsToProcess) {
+	for (const smartNotification of smartNotificationsToProcess ?? []) {
 		// Get Stop
 		const stop = await StopsService.getInstance().getStop(smartNotification.stop_id);
 

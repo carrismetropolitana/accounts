@@ -3,7 +3,6 @@ import { z } from 'zod';
 
 // ENUMS
 const GENDER_VALUES = ['male', 'female'] as const;
-const ROLE_VALUES = ['owner', 'admin', 'user'] as const;
 const WORK_SETTING_VALUES = ['hybrid', 'remote', 'office'] as const;
 const UTILIZATION_TYPE_VALUES = ['frequent', 'occasional'] as const;
 const ACTIVITY_VALUES = ['student', 'university', 'working', 'retired', 'other'] as const;
@@ -13,7 +12,6 @@ const INTERESTS_VALUES = ['network changes, events and news, carris metropolitan
 
 // ENUM SCHEMAS
 export const GenderSchema = z.enum(GENDER_VALUES);
-export const RoleSchema = z.enum(ROLE_VALUES);
 export const WorkSettingSchema = z.enum(WORK_SETTING_VALUES);
 export const UtilizationTypeSchema = z.enum(UTILIZATION_TYPE_VALUES);
 export const ActivitySchema = z.enum(ACTIVITY_VALUES);
@@ -102,20 +100,11 @@ export const AccountSchema = DocumentSchema.extend({
 		network: z.boolean().default(true),
 	}).nullish(),
 	profile: ProfileSchema.nullish(),
-	role: RoleSchema.default('user'),
 	widgets: z.array(WidgetSchema).nullish(),
 }).strict();
 
-export const CreateAccountSchema = AccountSchema
-	.omit({ _id: true, created_at: true, notification_preferences: true, role: true, updated_at: true });
-
-export const UpdateAccountSchema = AccountSchema
-	.omit({ _id: true, created_at: true, role: true, updated_at: true })
-	.partial();
-
 // TYPES
 export type AccountGender = z.infer<typeof GenderSchema>;
-export type AccountRole = z.infer<typeof RoleSchema>;
 export type AccountWorkSetting = z.infer<typeof WorkSettingSchema>;
 export type AccountUtilizationType = z.infer<typeof UtilizationTypeSchema>;
 export type AccountInterests = z.infer<typeof InterestsSchema>;
@@ -164,20 +153,3 @@ export type Account = Omit<
 	updated_at: UnixTimestamp
 	widgets?: AccountWidget[]
 };
-
-export type CreateAccountDto = Omit<
-	z.infer<typeof CreateAccountSchema>,
-	| 'date_of_birth'
-	| 'email_verified'
-	| 'favorites'
-	| 'profile'
-	| 'widgets'
-> & {
-	date_of_birth?: null | undefined | UnixTimestamp
-	email_verified?: null | undefined | UnixTimestamp
-	favorites?: AccountFavorites
-	profile?: AccountProfile
-	widgets?: AccountWidget[]
-};
-
-export type UpdateAccountDto = Partial<Omit<CreateAccountDto, 'created_by'>>;
