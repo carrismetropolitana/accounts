@@ -5,7 +5,7 @@ import PatternService from '@/services/pattern.service';
 import StopsService from '@/services/stops.service';
 import { FastifyReply, FastifyRequest } from '@tmlmobilidade/connectors';
 import { HttpException, HttpStatus } from '@tmlmobilidade/lib';
-import { UpdateAgencyDto, UpdateAgencySchema } from '@tmlmobilidade/types';
+import { AgencySchema, UpdateAgencySchema } from '@tmlmobilidade/types';
 
 /**
  * This is an example controller that is using the accounts interface.
@@ -108,9 +108,9 @@ export class AccountsController {
 	 * @param request Fastify request
 	 * @param reply Fastify reply
 	 */
-	static async sync(request: FastifyRequest<{ Body: UpdateAgencyDto }>, reply: FastifyReply<Account>) {
+	static async sync(request: FastifyRequest<{ Body: Account }>, reply: FastifyReply<Account>) {
 		const deviceId = request.headers.authorization?.split(' ')[1];
-		const { data, error, success } = UpdateAgencySchema.safeParse(request.body);
+		const { data, error, success } = AgencySchema.safeParse(request.body);
 
 		if (!success) {
 			throw new HttpException(HttpStatus.BAD_REQUEST, `Invalid Body: ${error.issues.map(i => i.message).join(', ')}`);
