@@ -9,9 +9,11 @@ const ACTIVITY_VALUES = ['student', 'university', 'working', 'retired', 'other']
 const DEVICE_TYPE_VALUES = ['android', 'ios', 'web'] as const;
 const WIDGET_TYPE_VALUES = ['lines', 'stops', 'smart_notifications'] as const;
 const INTERESTS_VALUES = ['network changes, events and news, carris metropolitana'] as const;
+const ROLE_VALUES = ['owner', 'admin', 'user'] as const;
 
 // ENUM SCHEMAS
 export const GenderSchema = z.enum(GENDER_VALUES);
+export const RoleSchema = z.enum(ROLE_VALUES);
 export const WorkSettingSchema = z.enum(WORK_SETTING_VALUES);
 export const UtilizationTypeSchema = z.enum(UTILIZATION_TYPE_VALUES);
 export const ActivitySchema = z.enum(ACTIVITY_VALUES);
@@ -81,7 +83,7 @@ const ProfileSchema = z.object({
 	email: z.string().email().nullish(),
 	first_name: z.string().nullish(),
 	gender: GenderSchema.nullish(),
-	interests: InterestsSchema.nullish(),
+	interests: z.array(z.string(InterestsSchema)).nullish(),
 	last_name: z.string().nullish(),
 	phone: PhoneSchema.nullish(),
 	profile_image: z.string().nullish(),
@@ -100,11 +102,13 @@ export const AccountSchema = DocumentSchema.extend({
 		network: z.boolean().default(true),
 	}).nullish(),
 	profile: ProfileSchema.nullish(),
+	role: RoleSchema.default('user'),
 	widgets: z.array(WidgetSchema).nullish(),
 }).strict();
 
 // TYPES
 export type AccountGender = z.infer<typeof GenderSchema>;
+export type AccountRole = z.infer<typeof RoleSchema>;
 export type AccountWorkSetting = z.infer<typeof WorkSettingSchema>;
 export type AccountUtilizationType = z.infer<typeof UtilizationTypeSchema>;
 export type AccountInterests = z.infer<typeof InterestsSchema>;

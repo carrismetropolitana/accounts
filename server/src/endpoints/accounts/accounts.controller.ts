@@ -5,7 +5,9 @@ import PatternService from '@/services/pattern.service';
 import StopsService from '@/services/stops.service';
 import { FastifyReply, FastifyRequest } from '@tmlmobilidade/connectors';
 import { HttpException, HttpStatus } from '@tmlmobilidade/lib';
-import { AgencySchema, UpdateAgencySchema } from '@tmlmobilidade/types';
+import z from 'zod';
+
+import { safeParse } from './../../../node_modules/zod/src/v4/classic/parse';
 
 /**
  * This is an example controller that is using the accounts interface.
@@ -109,44 +111,50 @@ export class AccountsController {
 	 * @param reply Fastify reply
 	 */
 	static async sync(request: FastifyRequest<{ Body: Account }>, reply: FastifyReply<Account>) {
+		let account: Account;
 		const deviceId = request.headers.authorization?.split(' ')[1];
-		const { data, error, success } = AgencySchema.safeParse(request.body);
+		const { data, error, success } = AccountSchema.safeParse(request.body);
 
 		if (!success) {
-			throw new HttpException(HttpStatus.BAD_REQUEST, `Invalid Body: ${error.issues.map(i => i.message).join(', ')}`);
+			const issues = error.issues.map(i => `${i.path.join('.')} - ${i.message}`).join('; ');
+			throw new HttpException(HttpStatus.BAD_REQUEST, `Invalid Body: ${issues}`);
 		}
 
-		// const currentAccount = await accounts.findByDeviceId(deviceId);
+		const currentAccount = await accounts.findByDeviceId(deviceId);
 
-		// const smartNotificationsToProcess: SmartNotification[] = [];
-		// for (const widget of request.body.widgets ?? []) {
-		// 	if (widget.data.type != 'smart_notifications') continue;
+		const smartNotificationsToProcess: SmartNotification[] = [];
+		for (const widget of request.body.widgets ?? []) {
+			if (widget.data.type != 'smart_notifications') continue;
 
-		// 	const smartNotification = widget.data as SmartNotification;
+			const smartNotification = widget.data as SmartNotification;
 
-		// 	// A. Check if the smart notification does not exist in the current account
-		// 	const currentSmartNotification = currentAccount?.widgets?.find(w => w.data.type === 'smart_notifications' && (w.data as SmartNotification).id === smartNotification.id);
-		// 	if (!currentSmartNotification) {
-		// 		smartNotificationsToProcess.push(smartNotification);
-		// 		continue;
-		// 	}
+			// A. Check if the smart notification does not exist in the current account
+			const currentSmartNotification = currentAccount?.widgets?.find(w => w.data.type === 'smart_notifications' && (w.data as SmartNotification).id === smartNotification.id);
+			if (!currentSmartNotification) {
+				smartNotificationsToProcess.push(smartNotification);
+				continue;
+			}
 
-		// 	// B. Check if the smart notification is different from the current one
-		// 	if (JSON.stringify(currentSmartNotification.data) !== JSON.stringify(smartNotification)) {
-		// 		smartNotificationsToProcess.push(smartNotification);
-		// 		continue;
-		// 	}
-		// }
+			// B. Check if the smart notification is different from the current one
+			if (JSON.stringify(currentSmartNotification.data) !== JSON.stringify(smartNotification)) {
+				smartNotificationsToProcess.push(smartNotification);
+				continue;
+			}
+		}
 
-		// if (smartNotificationsToProcess.length === 0) {
-		// 	const account = await accounts.updateOne({ 'devices.device_id': { $in: [deviceId] } }, request.body);
-		// 	return reply.send({ data: account, error: null, statusCode: HttpStatus.OK });
-		// }
+		if (smartNotificationsToProcess.length === 0) {
+			account = await accounts.updateOne({ 'devices.device_id': { $in: [deviceId] } }, request.body);
+		}
+		else {
+			const processedAccount = await processSmartNotifications(request.body, smartNotificationsToProcess);
+			account = await accounts.updateOne({ 'devices.device_id': { $in: [deviceId] } }, processedAccount);
+		}
 
-		// const processedAccount = await processSmartNotifications(request.body, smartNotificationsToProcess);
-		const account = await accounts.updateOne({ 'devices.device_id': { $in: [deviceId] } }, data);
-
-		return reply.send({ data: account, error: null, statusCode: HttpStatus.OK });
+		return reply.send({
+			data: account,
+			error: null,
+			statusCode: HttpStatus.OK,
+		});
 	}
 }
 
@@ -162,8 +170,18 @@ async function processSmartNotifications(account: Account, smartNotificationsToP
 			throw new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, 'Invalid geo fence');
 		}
 
+		const widgetIndex = account.widgets.findIndex(
+			w => w.data.type === 'smart_notifications' && (w.data as SmartNotification).id === smartNotification.id,
+		);
+
 		const notificationData: SmartNotification = { ...smartNotification, geojson: geoFence, stop_name: stop.long_name };
-		account.widgets.find(w => w.data.type === 'smart_notifications' && (w.data as SmartNotification).id === smartNotification.id).data = notificationData;
+
+		if (widgetIndex !== -1) {
+			account.widgets[widgetIndex].data = notificationData;
+		}
+		else {
+			account.widgets.push({ data: notificationData, settings: { display_order: 0, is_open: true, label: null } });
+		}
 	}
 
 	return account;

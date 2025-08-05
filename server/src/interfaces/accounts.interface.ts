@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { personas } from '@/lib/personas.js';
-import { Filter, IndexDescription, MongoCollectionClass, UpdateOptions, WithId } from '@tmlmobilidade/interfaces';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Filter, IndexDescription, MongoCollectionClass, UpdateOptions, UpdateResult, WithId } from '@tmlmobilidade/interfaces';
 import { HttpException, HttpStatus } from '@tmlmobilidade/lib';
 import { AsyncSingletonProxy, convertObject } from '@tmlmobilidade/utils';
 
@@ -145,8 +145,8 @@ class AccountsClass extends MongoCollectionClass<Account, Account, Account> {
 	 * @returns A promise that resolves to the updated account document
 	 * @throws {HttpException} If validation fails, update is not acknowledged, or updated document is not found
 	 */
-	override async updateOne(filter: Filter<Account>, updateFields: Partial<Account>, options?: UpdateOptions): Promise<WithId<Account>> {
-		const parsedUpdateFields = this.createSchema.partial().safeParse(updateFields);
+	override async updateOne<TReturnDocument extends boolean = true>(filter: Filter<Account>, updateFields: Partial<Account>, options?: UpdateOptions & { returnResult?: TReturnDocument }): Promise<TReturnDocument extends true ? WithId<Account> : UpdateResult<Account>> {
+		const parsedUpdateFields = this.updateSchema.safeParse(updateFields);
 
 		if (!parsedUpdateFields.success) {
 			throw new HttpException(HttpStatus.BAD_REQUEST, 'Invalid update fields: ' + parsedUpdateFields.error.issues.map(issue => issue.message).join(', '), parsedUpdateFields.error);
@@ -154,7 +154,7 @@ class AccountsClass extends MongoCollectionClass<Account, Account, Account> {
 
 		const result = await this.mongoCollection.updateOne(
 			filter,
-			{ $set: parsedUpdateFields } as unknown as Partial<Account>,
+			{ $set: parsedUpdateFields.data } as unknown as Partial<Account>,
 			{ ...options, upsert: true },
 		);
 
@@ -162,12 +162,14 @@ class AccountsClass extends MongoCollectionClass<Account, Account, Account> {
 			throw new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, 'Failed to update document', result);
 		}
 
+		if (options && options.returnResult === false) return result as TReturnDocument extends true ? WithId<Account> : UpdateResult<Account>;
+
 		const updated_doc = await this.findOne(filter, options);
 		if (!updated_doc) {
 			throw new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, 'Failed to update document', result);
 		}
 
-		return updated_doc;
+		return updated_doc as TReturnDocument extends true ? WithId<Account> : UpdateResult<Account>;
 	}
 
 	protected getCollectionIndexes(): IndexDescription[] {
