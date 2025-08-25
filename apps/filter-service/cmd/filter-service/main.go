@@ -22,7 +22,7 @@ func main() {
 	// Get required environment variables
 	requiredEnvVars := map[string]string{
 		"REDIS_URL": os.Getenv("REDIS_URL"),
-		"MONGO_URL": os.Getenv("TML_INTERFACE_AUTH"),
+		"MONGO_URL": os.Getenv("DATABASE_URI"),
 	}
 
 	// Validate required environment variables

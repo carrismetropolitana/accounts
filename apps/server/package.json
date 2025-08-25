@@ -1,5 +1,5 @@
 {
-	"name": "server2",
+	"name": "@carrismetropolitana/accounts-server",
 	"description": "",
 	"version": "1.0.0",
 	"author": "",
@@ -9,10 +9,9 @@
 	"scripts": {
 		"build": "npm run clean && tsc && resolve-tspaths",
 		"clean": "rm -rf dist",
-		"dev": "dotenv-run -f ../../environments/development/secrets/.env -- tsx watch src/index.ts",
+		"dev": "tsx watch src/index.ts",
 		"lint": "eslint ./src && tsc --noEmit",
-		"test": "echo \"Error: no test specified\" && exit 1",
-		"yalc:link": "yalc link @tmlmobilidade/connectors @tmlmobilidade/interfaces @tmlmobilidade/lib @tmlmobilidade/utils @tmlmobilidade/types --no-prune"
+		"lint:fix": "eslint ./src --fix"
 	},
 	"dependencies": {
 		"@carrismetropolitana/api-types": "^20250820.1130.53",
