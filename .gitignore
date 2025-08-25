@@ -133,7 +133,7 @@ build/
 yalc.lock
 
 # Public
-server/public/
+apps/server/public/
 
 # Secrets
 secrets/
