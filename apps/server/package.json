@@ -9,20 +9,20 @@
 	"scripts": {
 		"build": "npm run clean && tsc && resolve-tspaths",
 		"clean": "rm -rf dist",
-		"dev": "dotenv-run -f ../_dev/secrets/.env -- tsx watch src/index.ts",
+		"dev": "dotenv-run -f ../../environments/development/secrets/.env -- tsx watch src/index.ts",
 		"lint": "eslint ./src && tsc --noEmit",
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"yalc:link": "yalc link @tmlmobilidade/connectors @tmlmobilidade/interfaces @tmlmobilidade/lib @tmlmobilidade/utils @tmlmobilidade/types --no-prune"
 	},
 	"dependencies": {
-		"@carrismetropolitana/api-types": "^20250730.1209.8",
+		"@carrismetropolitana/api-types": "^20250820.1130.53",
 		"@fastify/cookie": "11.0.2",
 		"@fastify/static": "^8.2.0",
-		"@tmlmobilidade/connectors": "^20250805.1044.36",
-		"@tmlmobilidade/interfaces": "^20250805.1044.36",
-		"@tmlmobilidade/lib": "^20250805.1044.36",
-		"@tmlmobilidade/types": "^20250805.1044.36",
-		"@tmlmobilidade/utils": "^20250805.1044.36",
+		"@tmlmobilidade/connectors": "^20250825.1202.16",
+		"@tmlmobilidade/interfaces": "^20250825.1202.16",
+		"@tmlmobilidade/lib": "^20250825.1202.16",
+		"@tmlmobilidade/types": "^20250825.1202.16",
+		"@tmlmobilidade/utils": "^20250825.1202.16",
 		"@turf/turf": "^7.2.0",
 		"firebase-admin": "^13.4.0",
 		"pino-pretty": "13.1.1",
@@ -32,10 +32,10 @@
 	"devDependencies": {
 		"@carrismetropolitana/eslint": "^20250622.1204.50",
 		"@dotenv-run/cli": "^1.3.6",
-		"@tmlmobilidade/tsconfig": "^20250805.1044.36",
-		"@types/node": "^24.2.0",
+		"@tmlmobilidade/tsconfig": "^20250825.1202.16",
+		"@types/node": "^24.3.0",
 		"ts-node": "^10.9.2",
-		"tsx": "^4.20.3",
+		"tsx": "^4.20.5",
 		"typescript": "^5.9.2"
 	}
 }

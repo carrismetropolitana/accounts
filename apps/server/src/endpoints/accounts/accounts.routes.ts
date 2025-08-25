@@ -24,7 +24,7 @@ server.register(
 		instance.get('/', { preHandler: authorizationMiddleware }, AccountsController.getByUserId);
 
 		// POST /accounts (Sync)
-		instance.post('/', AccountsController.sync);
+		instance.post('/', { preHandler: authorizationMiddleware }, AccountsController.sync);
 
 		// DELETE /accounts/
 		instance.delete('/', { preHandler: authorizationMiddleware }, AccountsController.delete);

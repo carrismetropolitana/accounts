@@ -75,7 +75,7 @@ class AccountsClass extends MongoCollectionClass<Account, Account, Account> {
 	async findByDeviceId(deviceId: string) {
 		const user = await this.mongoCollection.findOne({ 'devices.device_id': deviceId } as unknown as Filter<Account>);
 		if (!user) {
-			throw new HttpException(404, 'Account not found');
+			return null;
 		}
 		return user as WithId<Account>;
 	}
@@ -155,7 +155,7 @@ class AccountsClass extends MongoCollectionClass<Account, Account, Account> {
 		const result = await this.mongoCollection.updateOne(
 			filter,
 			{ $set: parsedUpdateFields.data } as unknown as Partial<Account>,
-			{ ...options, upsert: true },
+			{ ...options },
 		);
 
 		if (!result.acknowledged) {
@@ -166,7 +166,7 @@ class AccountsClass extends MongoCollectionClass<Account, Account, Account> {
 
 		const updated_doc = await this.findOne(filter, options);
 		if (!updated_doc) {
-			throw new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, 'Failed to update document', result);
+			throw new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, 'Failed to find updated document', result);
 		}
 
 		return updated_doc as TReturnDocument extends true ? WithId<Account> : UpdateResult<Account>;
@@ -184,7 +184,7 @@ class AccountsClass extends MongoCollectionClass<Account, Account, Account> {
 	}
 
 	protected getEnvName(): string {
-		return 'TML_INTERFACE_AUTH';
+		return 'DATABASE_URI';
 	}
 }
 

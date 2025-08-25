@@ -70,7 +70,7 @@ export class AccountsController {
 			throw new HttpException(HttpStatus.BAD_REQUEST, `Invalid Body: ${issues}`);
 		}
 
-		const currentAccount = await accounts.findByDeviceId(deviceId);
+		const currentAccount = await accounts.findByDeviceId(deviceId) ?? await accounts.insertOne(request.body);
 
 		const smartNotificationsToProcess: SmartNotification[] = [];
 		for (const widget of request.body.widgets ?? []) {
