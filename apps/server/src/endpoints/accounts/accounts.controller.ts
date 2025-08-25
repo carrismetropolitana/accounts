@@ -5,61 +5,11 @@ import PatternService from '@/services/pattern.service';
 import StopsService from '@/services/stops.service';
 import { FastifyReply, FastifyRequest } from '@tmlmobilidade/connectors';
 import { HttpException, HttpStatus } from '@tmlmobilidade/lib';
-import z from 'zod';
-
-import { safeParse } from './../../../node_modules/zod/src/v4/classic/parse';
 
 /**
  * This is an example controller that is using the accounts interface.
  */
 export class AccountsController {
-	// /**
-	//  * Creates a new smart notification for an account
-	//  * @param request Fastify request containing account ID in params and smart notification data in body
-	//  * @param reply Fastify reply
-	//  */
-	// static async createSmartNotification(
-	// 	request: FastifyRequest<{ Body: AccountWidget }>,
-	// 	reply: FastifyReply,
-	// ) {
-	// 	const accountExists = await accounts.findById(request.user_id);
-
-	// 	if (!accountExists) {
-	// 		return reply.status(HttpStatus.NOT_FOUND).send({
-	// 			message: 'Account not found',
-	// 		});
-	// 	}
-	// 	const notification = request.body;
-
-	// 	if (notification.data.type !== 'smart_notifications') {
-	// 		return reply.status(HttpStatus.BAD_REQUEST).send({
-	// 			message: 'Invalid notification type',
-	// 		});
-	// 	}
-
-	// 	// Get Stop
-	// 	const stop = await StopsService.getInstance().getStop(notification.data.stop_id);
-
-	// 	const pattern = await PatternService.getInstance().getPattern(notification.data.pattern_id);
-	// 	const geoFence = await calculateGeoFence(pattern[0], stop, notification.data.distance);
-
-	// 	if (!geoFence) {
-	// 		return reply.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
-	// 			message: 'Invalid geo fence',
-	// 		});
-	// 	}
-
-	// 	const notificationData: SmartNotification = {
-	// 		...notification.data,
-	// 		geojson: geoFence,
-	// 		stop_name: stop.long_name,
-	// 	};
-
-	// 	const account = await accounts.addWidget(request.user_id, { ...notification, data: notificationData });
-
-	// 	return reply.status(HttpStatus.CREATED).send(account);
-	// }
-
 	/**
 	 * Deletes an account by ID
 	 * @param request Fastify request containing account ID in params
@@ -113,7 +63,7 @@ export class AccountsController {
 	static async sync(request: FastifyRequest<{ Body: Account }>, reply: FastifyReply<Account>) {
 		let account: Account;
 		const deviceId = request.headers.authorization?.split(' ')[1];
-		const { data, error, success } = AccountSchema.safeParse(request.body);
+		const { error, success } = AccountSchema.safeParse(request.body);
 
 		if (!success) {
 			const issues = error.issues.map(i => `${i.path.join('.')} - ${i.message}`).join('; ');
