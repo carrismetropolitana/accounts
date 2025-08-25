@@ -1,0 +1,10 @@
+{
+	"name": "@carrismetropolitana/accounts-notifications-service",
+	"version": "1.0.0",
+	"author": "Carris Metropolitana",
+	"license": "ISC",
+	"scripts": {
+        "dev": "go run cmd/notifications-service/main.go ../../environments/development/secrets/.env",
+        "build": "go build cmd/notifications-service/main.go"
+    }
+}

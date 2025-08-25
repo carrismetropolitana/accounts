@@ -4,7 +4,7 @@
 		"editor.codeActionsOnSave": {
 			"source.fixAll.stylelint": "explicit"
 		},
-		"editor.defaultFormatter": "vscode.css-language-features"
+		"editor.defaultFormatter": "stylelint.vscode-stylelint"
 	},
 
 	"[typescriptreact]": {
@@ -37,7 +37,7 @@
 		"toml",
 		"astro"
 	],
-	"eslint.workingDirectories": [{ "mode": "auto" }],
+	"eslint.workingDirectories": ["auto"],
 	"files.eol": "\n",
 
 	"less.validate": false,
@@ -54,8 +54,4 @@
 		"**/components/**/*.js": "${dirname} (${extname})",
 		"**/components/**/*.tsx": "${dirname} (${extname})"
 	},
-	"github-actions.workflows.pinned.workflows": [
-		".github/workflows/build-alerts.yml"
-	]
-
 }

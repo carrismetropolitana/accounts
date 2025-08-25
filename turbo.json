@@ -1,0 +1,24 @@
+{
+	"$schema": "https://turbo.build/schema.json",
+	"envMode": "loose",
+	"globalEnv": ["NODE_ENV"],
+	"tasks": {
+		"dev": {
+			"cache": false,
+			"persistent": true
+		},
+		"lint": {
+			"cache": false,
+			"persistent": true
+		},
+		"lint:fix": {
+			"cache": false,
+			"persistent": true
+		},	
+		"build": {
+			"cache": false,
+			"persistent": true
+		}
+	},
+	"ui": "tui"
+}

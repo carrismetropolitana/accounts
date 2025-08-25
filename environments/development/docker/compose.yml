@@ -1,0 +1,53 @@
+# # #
+
+name: cmet-accounts
+
+services:
+  #
+
+  # # # # # # # # # # # # # # # # # # # # #
+  # # # # # # # # # # # # # # # # # # # # #
+
+  accounts-db:
+    image: mongo:latest
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - ./accounts.dump:/dump/db.dump
+      - ./local-setup.sh:/docker-entrypoint-initdb.d/init.sh
+      - ./local-keyfile.key:/data/replica.key
+    entrypoint:
+      - bash
+      - -c
+      - |
+          chmod 400 /data/replica.key
+          chown 999:999 /data/replica.key
+          exec docker-entrypoint.sh $$@
+    command: mongod --bind_ip_all --auth --replSet rs0 --keyFile /data/replica.key --port 27017
+
+  # # # # # # # # # # # # # # # # # # # # #
+  # # # # # # # # # # # # # # # # # # # # #
+
+  redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - 6379:6379
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+
+  # # # # # # # # # # # # # # # # # # # # #
+  # # # # # # # # # # # # # # # # # # # # #
+  
+  redis-commander:
+    image: ghcr.io/joeferner/redis-commander:latest
+    restart: always
+    ports:
+      - 8085:8081
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=root
+    depends_on:
+      - redis

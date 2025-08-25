@@ -137,3 +137,6 @@ server/public/
 
 # Secrets
 secrets/
+
+# Turbo
+.turbo
