@@ -23,7 +23,7 @@ func NewFirebaseService(credentialsPath string) *FirebaseService {
 	return &FirebaseService{app: app}
 }
 
-func (s *FirebaseService) SendToTopic(topic string, title string, body string) error {
+func (s *FirebaseService) SendToTopic(topic string, title string, body string, data string) error {
 	ctx := context.Background()
 	client, err := s.app.Messaging(ctx)
 	if err != nil {
@@ -36,6 +36,9 @@ func (s *FirebaseService) SendToTopic(topic string, title string, body string) e
 			Body:  body,
 		},
 		Topic: topic,
+		Data: map[string]string{
+			"vehicle_id": data,
+		},
 	}
 
 	_, err = client.Send(ctx, message)
