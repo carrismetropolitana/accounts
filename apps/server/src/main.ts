@@ -24,7 +24,7 @@ const options: FastifyServiceOptions = {
 			target: 'pino-pretty',
 		},
 	},
-	port: 4321,
+	port: 5050,
 };
 
 async function main() {
