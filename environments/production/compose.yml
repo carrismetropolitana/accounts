@@ -82,6 +82,7 @@ services:
         limits:
           memory: 2gb
     volumes:
+      - ./secrets/firebase.json:/app/firebase.json
       - ./public:/app/dist/public
     logging:
       options:
@@ -145,7 +146,7 @@ services:
   # # # # # # # # # # # # # # # # # # # # #
 
   filter-service:
-    image: ghcr.io/carrismetropolitana/accounts-filter-service:staging
+    image: ghcr.io/carrismetropolitana/accounts-filter-service:production
     deploy:
       restart_policy:
         condition: on-failure
@@ -161,7 +162,7 @@ services:
   # # # # # # # # # # # # # # # # # # # # #
 
   notifications-service:
-    image: ghcr.io/carrismetropolitana/accounts-notifications-service:staging
+    image: ghcr.io/carrismetropolitana/accounts-notifications-service:production
     deploy:
       restart_policy:
         condition: on-failure
