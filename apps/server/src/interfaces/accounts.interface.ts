@@ -1,8 +1,10 @@
-import { personas } from '@/lib/personas.js';
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { Filter, IndexDescription, MongoCollectionClass, UpdateOptions, UpdateResult, WithId } from '@tmlmobilidade/interfaces';
 import { HttpException, HttpStatus } from '@tmlmobilidade/lib';
 import { AsyncSingletonProxy, convertObject } from '@tmlmobilidade/utils';
+import fs from 'fs';
+import path from 'path';
 
 import { Account, AccountSchema, AccountWidget, SmartNotification } from './account.type.js';
 
@@ -116,29 +118,15 @@ class AccountsClass extends MongoCollectionClass<Account, Account, Account> {
      * @returns An id that represents the persona
      */
 	async findPersona() {
-		const randomIndex = Math.floor(Math.random() * personas.length);
-		return personas[randomIndex];
-	}
-
-	/**
-     * Finds a document by its device ID.
-     *
-     * @param imageId - The image ID  to find
-     * @returns A promise that resolves to the matching image or null if not found
-     */
-	async findPersonaImageById(imageId: string) {
-		const persona = personas.find((item: { url: string }) => item.url === imageId);
-
-		if (!persona) {
-			throw new Error(`Persona with image ID "${imageId}" not found`);
-		}
-
-		return persona;
+		const imagesDir = path.join(process.cwd(), 'public', 'personas');
+		const availableImages = fs.readdirSync(imagesDir);
+		const randomIndex = Math.floor(Math.random() * availableImages.length);
+		const randomSelection = availableImages[randomIndex];
+		return { id: randomSelection, url: `/personas/${randomSelection}` };
 	}
 
 	/**
 	 * Updates a single account document matching the filter criteria.
-	 *
 	 * @param filter - The filter criteria to match the account to update
 	 * @param updateFields - The fields to update in the account
 	 * @param options - The options for the update operation
