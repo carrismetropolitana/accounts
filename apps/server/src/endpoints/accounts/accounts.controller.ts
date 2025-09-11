@@ -45,7 +45,7 @@ export class AccountsController {
 		const availableImages = fs.readdirSync(imagesDir);
 		const randomIndex = Math.floor(Math.random() * availableImages.length);
 		const randomSelection = availableImages[randomIndex];
-		return reply.send({ data: { id: randomSelection, url: `/personas/${randomSelection}` }, error: null, statusCode: HttpStatus.OK });
+		return reply.send({ data: { id: randomSelection, url: randomSelection }, error: null, statusCode: HttpStatus.OK });
 	}
 
 	/**
