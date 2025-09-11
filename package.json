@@ -1,11 +1,12 @@
 {
-	"name": "@carrismetropolitana/aps",
+	"name": "@carrismetropolitana/accounts",
 	"version": "1.0.0",
 	"keywords": [],
 	"main": "index.js",
 	"scripts": {
 		"build": "turbo build",
 		"dev": "dotenv-run -f ./environments/development/secrets/.env -- turbo dev",
+		"dev:server": "dotenv-run -f ./environments/development/secrets/.env -- turbo dev --filter=@carrismetropolitana/accounts-server",
 		"lint": "turbo lint",
 		"lint:fix": "turbo lint:fix"
 	},

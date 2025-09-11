@@ -1,3 +1,5 @@
+/* * */
+
 import { Account, AccountSchema, SmartNotification } from '@/interfaces/account.type';
 import { accounts } from '@/interfaces/accounts.interface.js';
 import { calculateGeoFence } from '@/lib/utils';
@@ -5,20 +7,19 @@ import PatternService from '@/services/pattern.service';
 import StopsService from '@/services/stops.service';
 import { FastifyReply, FastifyRequest } from '@tmlmobilidade/connectors';
 import { HttpException, HttpStatus } from '@tmlmobilidade/lib';
+import fs from 'node:fs';
 
-/**
- * This is an example controller that is using the accounts interface.
- */
+/* * */
+
 export class AccountsController {
+	//
+
 	/**
 	 * Deletes an account by ID
 	 * @param request Fastify request containing account ID in params
 	 * @param reply Fastify reply
 	 */
-	static async delete(
-		request: FastifyRequest,
-		reply: FastifyReply<void>,
-	) {
+	static async delete(request: FastifyRequest, reply: FastifyReply<void>) {
 		await accounts.deleteOne({ 'devices.device_id': request.account_id });
 		return reply.send({ data: null, error: null, statusCode: HttpStatus.OK });
 	}
@@ -30,20 +31,22 @@ export class AccountsController {
 	 */
 	static async getByUserId(request: FastifyRequest, reply: FastifyReply<Account>) {
 		const account = await accounts.findByDeviceId(request.account_id);
-
 		if (!account) throw new HttpException(HttpStatus.NOT_FOUND, 'Account not found');
-
 		return reply.send({ data: account, error: null, statusCode: HttpStatus.OK });
 	}
 
 	/**
-	 * Retrieves a record from composite_map.json
-	  * @param request Fastify request
+	 * Retrieves a persona
+	 * @param request Fastify request
 	 * @param reply Fastify reply
 	 */
 	static async getPersona(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply<{ id: string, url: string }>) {
-		const persona = await accounts.findPersona();
-		return reply.send({ data: { id: persona.id, url: persona.url }, error: null, statusCode: HttpStatus.OK });
+		const imagesDir = '/app/dist/public/personas';
+		const availableImages = fs.readdirSync(imagesDir);
+		console.log(availableImages);
+		const randomIndex = Math.floor(Math.random() * availableImages.length);
+		const randomSelection = availableImages[randomIndex];
+		return reply.send({ data: { id: randomSelection, url: `/personas/${randomSelection}` }, error: null, statusCode: HttpStatus.OK });
 	}
 
 	/**
@@ -52,7 +55,7 @@ export class AccountsController {
 	 * @param reply Fastify reply
 	 */
 	static async getPersonaImageById(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply<void>) {
-		return reply.sendFile(`/personas/${request.params.id}`);
+		return reply.sendFile(`/app/dist/public/personas/${request.params.id}`);
 	}
 
 	/**

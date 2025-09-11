@@ -3,8 +3,6 @@
 import { Filter, IndexDescription, MongoCollectionClass, UpdateOptions, UpdateResult, WithId } from '@tmlmobilidade/interfaces';
 import { HttpException, HttpStatus } from '@tmlmobilidade/lib';
 import { AsyncSingletonProxy, convertObject } from '@tmlmobilidade/utils';
-import fs from 'fs';
-import path from 'path';
 
 import { Account, AccountSchema, AccountWidget, SmartNotification } from './account.type.js';
 
@@ -110,19 +108,6 @@ class AccountsClass extends MongoCollectionClass<Account, Account, Account> {
 		}
 
 		return user as WithId<Account>;
-	}
-
-	/**
-     * Finds a record from composite_map.json
-     *
-     * @returns An id that represents the persona
-     */
-	async findPersona() {
-		const imagesDir = path.join(process.cwd(), 'dist', 'public', 'personas');
-		const availableImages = fs.readdirSync(imagesDir);
-		const randomIndex = Math.floor(Math.random() * availableImages.length);
-		const randomSelection = availableImages[randomIndex];
-		return { id: randomSelection, url: `/personas/${randomSelection}` };
 	}
 
 	/**
