@@ -43,7 +43,6 @@ export class AccountsController {
 	static async getPersona(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply<{ id: string, url: string }>) {
 		const imagesDir = '/app/dist/public/personas';
 		const availableImages = fs.readdirSync(imagesDir);
-		console.log(availableImages);
 		const randomIndex = Math.floor(Math.random() * availableImages.length);
 		const randomSelection = availableImages[randomIndex];
 		return reply.send({ data: { id: randomSelection, url: `/personas/${randomSelection}` }, error: null, statusCode: HttpStatus.OK });
@@ -55,6 +54,10 @@ export class AccountsController {
 	 * @param reply Fastify reply
 	 */
 	static async getPersonaImageById(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply<void>) {
+		console.log(request.params.id);
+		if (!fs.existsSync(`/app/dist/public/personas/${request.params.id}`)) {
+			throw new HttpException(HttpStatus.NOT_FOUND, 'Persona not found');
+		}
 		return reply.sendFile(`/app/dist/public/personas/${request.params.id}`);
 	}
 
