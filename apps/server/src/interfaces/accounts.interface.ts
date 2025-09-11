@@ -118,7 +118,7 @@ class AccountsClass extends MongoCollectionClass<Account, Account, Account> {
      * @returns An id that represents the persona
      */
 	async findPersona() {
-		const imagesDir = path.join(process.cwd(), 'public', 'personas');
+		const imagesDir = path.join(process.cwd(), 'dist', 'public', 'personas');
 		const availableImages = fs.readdirSync(imagesDir);
 		const randomIndex = Math.floor(Math.random() * availableImages.length);
 		const randomSelection = availableImages[randomIndex];

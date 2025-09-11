@@ -83,7 +83,7 @@ services:
           memory: 2gb
     volumes:
       - ./secrets/firebase.json:/app/firebase.json
-      - ./public:/app/public
+      - ./public:/app/dist/public
     logging:
       options:
         max-size: '1m'
