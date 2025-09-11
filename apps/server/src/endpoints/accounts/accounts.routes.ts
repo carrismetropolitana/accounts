@@ -7,7 +7,7 @@ import { AccountsController } from './accounts.controller.js';
 
 /* * */
 
-const server = FastifyService.getInstance({ maxParamLength: 200 }).server;
+const server = FastifyService.getInstance().server;
 const namespace = '/accounts';
 
 /* * */
