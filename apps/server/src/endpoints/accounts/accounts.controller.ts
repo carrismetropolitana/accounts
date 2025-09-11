@@ -54,7 +54,7 @@ export class AccountsController {
 	 * @param reply Fastify reply
 	 */
 	static async getPersonaImageById(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply<void>) {
-		console.log(request.params.id);
+		console.log('here111', request.params.id);
 		if (!fs.existsSync(`/app/dist/public/personas/${request.params.id}`)) {
 			throw new HttpException(HttpStatus.NOT_FOUND, 'Persona not found');
 		}
