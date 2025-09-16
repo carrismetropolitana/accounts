@@ -7,7 +7,7 @@ declare module 'fastify' {
 	}
 }
 
-export default async function authorizationMiddleware(request: FastifyRequest) {
+export async function authorizationMiddleware(request: FastifyRequest) {
 	const authHeader = request.headers.authorization;
 
 	if (!authHeader || !authHeader.startsWith('Bearer ')) {

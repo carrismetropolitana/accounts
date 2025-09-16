@@ -1,12 +1,14 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* * */
 
-import { Filter, IndexDescription, MongoCollectionClass, UpdateOptions, UpdateResult, WithId } from '@tmlmobilidade/interfaces';
-import { HttpException, HttpStatus } from '@tmlmobilidade/lib';
-import { AsyncSingletonProxy, convertObject } from '@tmlmobilidade/utils';
+import { type Account, AccountSchema } from '@/schemas/account';
+import { type IndexDescription, MongoCollectionClass } from '@tmlmobilidade/interfaces';
+import { AsyncSingletonProxy } from '@tmlmobilidade/utils';
 
-import { Account, AccountSchema, AccountWidget, SmartNotification } from './account.type.js';
+/* * */
 
 class AccountsClass extends MongoCollectionClass<Account, Account, Account> {
+	//
+
 	private static _instance: AccountsClass;
 
 	protected override createSchema = AccountSchema;
@@ -26,128 +28,103 @@ class AccountsClass extends MongoCollectionClass<Account, Account, Account> {
 	}
 
 	/**
-	 * Add Widget to Account
-	 * @param device_id - The ID of the account to add the widget to
-	 * @param widget - The widget to add
+	 * Add a widget to an account.
+	 * @param account_id The ID of the account to add the widget to
+	 * @param widget The widget to add
 	 * @returns A promise that resolves to the updated account
 	 */
-	async addWidget(user_id: string, widget: AccountWidget) {
-		const account = await this.findById(user_id);
+	// async addWidget(account_id: string, widget: Widget) {
+	// 	const account = await this.findById(account_id);
+	// 	if (!account) throw new HttpException(404, 'Account not found');
 
-		if (!account) {
-			throw new HttpException(404, 'Account not found');
-		}
+	// 	if (widget.data.type === 'smart_notifications') {
+	// 		if (!widget.data.id) {
+	// 			throw new HttpException(400, 'Smart notification widget must have an id');
+	// 		}
 
-		if (widget.data.type === 'smart_notifications') {
-			if (!widget.data.id) {
-				throw new HttpException(400, 'Smart notification widget must have an id');
-			}
+	// 		if (!account.widgets) {
+	// 			account.widgets = [];
+	// 		}
 
-			if (!account.widgets) {
-				account.widgets = [];
-			}
+	// 		const hasSmartNotificationWidget = account.widgets.find(w => w.data.type === 'smart_notifications' && (w.data as SmartNotification).id === (widget.data as SmartNotification).id);
+	// 		if (hasSmartNotificationWidget) {
+	// 			account.widgets = account.widgets.map((w) => {
+	// 				if (w.data.type === 'smart_notifications' && (w.data as SmartNotification).id === (widget.data as SmartNotification).id) {
+	// 					return widget;
+	// 				}
+	// 				return w;
+	// 			});
+	// 			await this.updateById(account._id, convertObject(account, this.updateSchema as any));
+	// 			return account;
+	// 		}
+	// 	}
 
-			const hasSmartNotificationWidget = account.widgets.find(w => w.data.type === 'smart_notifications' && (w.data as SmartNotification).id === (widget.data as SmartNotification).id);
-			if (hasSmartNotificationWidget) {
-				account.widgets = account.widgets.map((w) => {
-					if (w.data.type === 'smart_notifications' && (w.data as SmartNotification).id === (widget.data as SmartNotification).id) {
-						return widget;
-					}
-					return w;
-				});
-				await this.updateById(account._id, convertObject(account, this.updateSchema as any));
-				return account;
-			}
-		}
+	// 	account.widgets.push(widget);
+	// 	await this.updateById(account._id, convertObject(account, this.updateSchema as any));
 
-		account.widgets.push(widget);
-		await this.updateById(account._id, convertObject(account, this.updateSchema as any));
-
-		return account;
-	}
+	// 	return account;
+	// }
 
 	/**
-     * Finds a document by its device ID.
-     *
-     * @param deviceId - The device ID of the document to find
-     * @returns A promise that resolves to the matching document or null if not found
-     */
-	async findByDeviceId(deviceId: string) {
-		const user = await this.mongoCollection.findOne({ 'devices.device_id': deviceId } as unknown as Filter<Account>);
-		if (!user) {
-			return null;
-		}
-		return user as WithId<Account>;
-	}
-
-	/**
-	 * Finds a user document by its email.
-	 *
-	 * @param email - The email of the user to find
-	 * @returns A promise that resolves to the matching user document or null if not found
+	 * Finds an account document by its device ID.
+	 * @param deviceId The device ID of the document to find.
+	 * @returns A promise that resolves to the matching document or null if not found.
 	 */
-	async findByEmail(email: string): Promise<null | WithId<Account>> {
-		const user = await this.mongoCollection.findOne({ email } as Filter<Account>);
-		if (!user) {
-			return null;
-		}
-
-		return user as WithId<Account>;
+	async findByDeviceId(deviceId: string): Promise<Account | null> {
+		const foundAccount = await this.mongoCollection.findOne({ 'devices.device_id': { $eq: deviceId } });
+		if (!foundAccount) return null;
+		return foundAccount;
 	}
 
 	/**
-	 * Finds a document by its ID.
-	 *
-	 * @param id - The ID of the document to find
-	 * @returns A promise that resolves to the matching document or null if not found
+	 * Finds an account document by its email.
+	 * @param email The email of the account to find
+	 * @returns A promise that resolves to the matching account document or null if not found
 	 */
-	override async findById(id: string) {
-		const user = await this.mongoCollection.findOne({ _id: id } as unknown as Filter<Account>);
-		if (!user) {
-			return null;
-		}
-
-		return user as WithId<Account>;
+	async findByEmail(email: string): Promise<Account | null> {
+		const foundAccount = await this.mongoCollection.findOne({ 'profile.email': { $eq: email } });
+		if (!foundAccount) return null;
+		return foundAccount;
 	}
 
-	/**
-	 * Updates a single account document matching the filter criteria.
-	 * @param filter - The filter criteria to match the account to update
-	 * @param updateFields - The fields to update in the account
-	 * @param options - The options for the update operation
-	 * @returns A promise that resolves to the updated account document
-	 * @throws {HttpException} If validation fails, update is not acknowledged, or updated document is not found
-	 */
-	override async updateOne<TReturnDocument extends boolean = true>(filter: Filter<Account>, updateFields: Partial<Account>, options?: UpdateOptions & { returnResult?: TReturnDocument }): Promise<TReturnDocument extends true ? WithId<Account> : UpdateResult<Account>> {
-		const parsedUpdateFields = this.updateSchema.safeParse(updateFields);
+	// /**
+	//  * Updates a single account document matching the filter criteria.
+	//  * @param filter The filter criteria to match the account to update
+	//  * @param updateFields The fields to update in the account
+	//  * @param options The options for the update operation
+	//  * @returns A promise that resolves to the updated account document
+	//  * @throws {HttpException} If validation fails, update is not acknowledged, or updated document is not found
+	//  */
+	// override async updateById<TReturnDocument extends boolean = true>(filter: Filter<Account>, updateFields: Partial<Account>, options?: UpdateOptions & { returnResult?: TReturnDocument }): Promise<TReturnDocument extends true ? WithId<Account> : UpdateResult<Account>> {
+	// 	const parsedUpdateFields = this.updateSchema.safeParse(updateFields);
 
-		if (!parsedUpdateFields.success) {
-			throw new HttpException(HttpStatus.BAD_REQUEST, 'Invalid update fields: ' + parsedUpdateFields.error.issues.map(issue => issue.message).join(', '), parsedUpdateFields.error);
-		}
+	// 	if (!parsedUpdateFields.success) {
+	// 		throw new HttpException(HttpStatus.BAD_REQUEST, 'Invalid update fields: ' + parsedUpdateFields.error.issues.map(issue => issue.message).join(', '), parsedUpdateFields.error);
+	// 	}
 
-		const result = await this.mongoCollection.updateOne(
-			filter,
-			{ $set: parsedUpdateFields.data } as unknown as Partial<Account>,
-			{ ...options },
-		);
+	// 	const result = await this.mongoCollection.updateOne(
+	// 		filter,
+	// 		{ $set: parsedUpdateFields.data } as unknown as Partial<Account>,
+	// 		{ ...options },
+	// 	);
 
-		if (!result.acknowledged) {
-			throw new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, 'Failed to update document', result);
-		}
+	// 	if (!result.acknowledged) {
+	// 		throw new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, 'Failed to update document', result);
+	// 	}
 
-		if (options && options.returnResult === false) return result as TReturnDocument extends true ? WithId<Account> : UpdateResult<Account>;
+	// 	if (options && options.returnResult === false) return result as TReturnDocument extends true ? WithId<Account> : UpdateResult<Account>;
 
-		const updated_doc = await this.findOne(filter, options);
-		if (!updated_doc) {
-			throw new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, 'Failed to find updated document', result);
-		}
+	// 	const updated_doc = await this.findOne(filter, options);
+	// 	if (!updated_doc) {
+	// 		throw new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, 'Failed to find updated document', result);
+	// 	}
 
-		return updated_doc as TReturnDocument extends true ? WithId<Account> : UpdateResult<Account>;
-	}
+	// 	return updated_doc as TReturnDocument extends true ? WithId<Account> : UpdateResult<Account>;
+	// }
 
 	protected getCollectionIndexes(): IndexDescription[] {
 		return [
-			{ background: true, key: { email: 1 }, unique: true },
+			{ background: true, key: { 'profile.email': 1 }, unique: true },
 			{ background: true, key: { 'devices.device_id': 1 }, unique: true },
 		];
 	}
@@ -159,6 +136,10 @@ class AccountsClass extends MongoCollectionClass<Account, Account, Account> {
 	protected getEnvName(): string {
 		return 'DATABASE_URI';
 	}
+
+	//
 }
+
+/* * */
 
 export const accounts = AsyncSingletonProxy(AccountsClass);

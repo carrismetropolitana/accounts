@@ -1,1 +1,1 @@
-import './accounts/accounts.routes';
+import '@/accounts/accounts.routes';

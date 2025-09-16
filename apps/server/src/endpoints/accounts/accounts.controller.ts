@@ -1,6 +1,5 @@
 /* * */
 
-import { Account, AccountSchema, SmartNotification } from '@/interfaces/account.type';
 import { accounts } from '@/interfaces/accounts.interface.js';
 import { calculateGeoFence } from '@/lib/utils';
 import PatternService from '@/services/pattern.service';

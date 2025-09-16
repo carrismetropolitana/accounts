@@ -1,12 +1,11 @@
 /* * */
 
+import PatternService from '@/services/pattern.service';
+import ShapeService from '@/services/shape.service';
+import StopsService from '@/services/stops.service';
 import fastifyStatic from '@fastify/static';
 import { FastifyService, FastifyServiceOptions } from '@tmlmobilidade/connectors';
 import path from 'path';
-
-import PatternService from './services/pattern.service';
-import ShapeService from './services/shape.service';
-import StopsService from './services/stops.service';
 
 /* * */
 

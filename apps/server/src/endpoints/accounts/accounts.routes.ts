@@ -1,9 +1,8 @@
 /* * */
 
-import authorizationMiddleware from '@/middleware/authorization.middleware.js';
+import { AccountsController } from '@/endpoints/accounts/accounts.controller.js';
+import { authorizationMiddleware } from '@/middleware/authorization.middleware.js';
 import { FastifyService } from '@tmlmobilidade/connectors';
-
-import { AccountsController } from './accounts.controller.js';
 
 /* * */
 
@@ -14,6 +13,8 @@ const namespace = '/accounts';
 
 server.register(
 	(instance, opts, next) => {
+		//
+
 		// GET /persona
 		instance.get('/persona', AccountsController.getPersona);
 
@@ -26,7 +27,7 @@ server.register(
 		// POST /accounts (Sync)
 		instance.post('/', { preHandler: authorizationMiddleware }, AccountsController.sync);
 
-		// DELETE /accounts/
+		// DELETE /accounts
 		instance.delete('/', { preHandler: authorizationMiddleware }, AccountsController.delete);
 
 		next();
