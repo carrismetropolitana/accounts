@@ -22,10 +22,13 @@ server.register(
 		instance.get('/persona/:id', AccountsController.getPersonaImageById);
 
 		// GET /accounts
-		instance.get('/', { preHandler: authorizationMiddleware }, AccountsController.getByUserId);
+		instance.get('/', { preHandler: authorizationMiddleware }, AccountsController.get);
 
-		// POST /accounts (Sync)
-		instance.post('/', { preHandler: authorizationMiddleware }, AccountsController.sync);
+		// POST /accounts
+		instance.post('/', { preHandler: authorizationMiddleware }, AccountsController.create);
+
+		// PUT /accounts
+		instance.put('/', { preHandler: authorizationMiddleware }, AccountsController.update);
 
 		// DELETE /accounts
 		instance.delete('/', { preHandler: authorizationMiddleware }, AccountsController.delete);
