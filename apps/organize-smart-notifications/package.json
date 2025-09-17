@@ -17,14 +17,14 @@
 		"@carrismetropolitana/accounts-interfaces": "*",
 		"@helperkits/logger": "20250628.901.58",
 		"@helperkits/timer": "20240627.34.23",
-		"@tmlmobilidade/interfaces": "20250916.1705.17",
-		"@tmlmobilidade/lib": "20250916.1705.17",
-		"@tmlmobilidade/utils": "20250916.1705.17"
+		"@tmlmobilidade/interfaces": "20250917.1446.59",
+		"@tmlmobilidade/lib": "20250917.1446.59",
+		"@tmlmobilidade/utils": "20250917.1446.59"
 	},
 	"devDependencies": {
 		"@carrismetropolitana/accounts-types": "*",
-		"@tmlmobilidade/tsconfig": "20250916.1705.17",
-		"@tmlmobilidade/types": "20250916.1705.17",
+		"@tmlmobilidade/tsconfig": "20250917.1446.59",
+		"@tmlmobilidade/types": "20250917.1446.59",
 		"@types/node": "24.5.1",
 		"resolve-tspaths": "0.8.23",
 		"tsx": "4.20.5",

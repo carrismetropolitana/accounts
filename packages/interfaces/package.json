@@ -17,13 +17,13 @@
 		"lint:fix": "eslint --fix"
 	},
 	"dependencies": {
-		"@tmlmobilidade/interfaces": "20250916.1705.17",
-		"@tmlmobilidade/utils": "20250916.1705.17"
+		"@tmlmobilidade/interfaces": "20250917.1446.59",
+		"@tmlmobilidade/utils": "20250917.1446.59"
 	},
 	"devDependencies": {
 		"@carrismetropolitana/accounts-types": "*",
 		"@carrismetropolitana/eslint": "20250622.1204.50",
-		"@tmlmobilidade/tsconfig": "20250916.1705.17",
+		"@tmlmobilidade/tsconfig": "20250917.1446.59",
 		"@types/node": "24.5.1",
 		"resolve-tspaths": "0.8.23",
 		"rimraf": "6.0.1",
