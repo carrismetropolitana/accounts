@@ -18,8 +18,8 @@ server.register(
 		// GET /accounts
 		instance.get('/', { preHandler: authorizationMiddleware }, AccountsController.get);
 
-		// POST /accounts
-		instance.get('/new', { preHandler: authorizationMiddleware }, AccountsController.create);
+		// GET /accounts/new
+		instance.get('/new', AccountsController.create);
 
 		// PUT /accounts
 		instance.put('/', { preHandler: authorizationMiddleware }, AccountsController.update);
