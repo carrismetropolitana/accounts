@@ -1,2 +1,2 @@
-import '@/accounts/accounts.routes';
-import '@/accounts/personas.routes';
+import '@/endpoints/accounts/accounts.routes.js';
+import '@/endpoints/personas/personas.routes.js';
