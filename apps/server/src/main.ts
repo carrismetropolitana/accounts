@@ -1,7 +1,6 @@
 /* * */
 
-import fastifyStatic from '@fastify/static';
-import { FastifyService, FastifyServiceOptions } from '@tmlmobilidade/connectors';
+import { FastifyService, type FastifyServiceOptions } from '@tmlmobilidade/connectors';
 
 /* * */
 
@@ -27,7 +26,6 @@ const options: FastifyServiceOptions = {
 
 async function main() {
 	const fastifyService = FastifyService.getInstance(options);
-	await fastifyService.server.register(fastifyStatic);
 	await fastifyService.start();
 }
 

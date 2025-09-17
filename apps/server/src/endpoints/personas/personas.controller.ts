@@ -14,8 +14,11 @@ export class PersonasController {
 	 * @param request Fastify request
 	 * @param reply Fastify reply
 	 */
-	static async getImageById(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply<void>) {
-		return reply.sendFile(`/app/dist/public/personas/${request.params.id}`);
+	static async getImageById(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply<ReadableStream>) {
+		// Read the image file from the filesystem
+		const fileStream = fs.createReadStream(`/app/dist/public/personas/${request.params.id}`);
+		// Send the image file as a response
+		return reply.type('image/png').send(fileStream);
 	}
 
 	/**
