@@ -31,7 +31,8 @@ export class PersonasController {
 		const availableImages = fs.readdirSync(imagesDir);
 		const randomIndex = Math.floor(Math.random() * availableImages.length);
 		const randomSelection = availableImages[randomIndex];
-		return reply.send({ data: randomSelection, error: null, statusCode: HttpStatus.OK });
+		const randomSelectionId = randomSelection.replace('.png', '');
+		return reply.send({ data: randomSelectionId, error: null, statusCode: HttpStatus.OK });
 	}
 
 	//
