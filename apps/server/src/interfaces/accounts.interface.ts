@@ -1,6 +1,6 @@
 /* * */
 
-import { type Account, AccountSchema } from '@/schemas/account';
+import { type Account, AccountSchema } from '@carrismetropolitana/accounts-types';
 import { type IndexDescription, MongoCollectionClass } from '@tmlmobilidade/interfaces';
 import { AsyncSingletonProxy } from '@tmlmobilidade/utils';
 

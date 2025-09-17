@@ -5,7 +5,9 @@
 	"main": "index.js",
 	"scripts": {
 		"build": "turbo build",
-		"build:packages": "turbo build --filter=./packages/*",
+		"build:organizer": "turbo build --filter=@carrismetropolitana/accounts-organizer",
+		"build:server": "turbo build --filter=@carrismetropolitana/accounts-server",
+		"build:types": "turbo build --filter=@carrismetropolitana/accounts-types",
 		"dev": "dotenv-run -f ./environments/development/secrets/.env -- turbo dev",
 		"dev:server": "dotenv-run -f ./environments/development/secrets/.env -- turbo dev --filter=@carrismetropolitana/accounts-server",
 		"lint": "turbo lint",
