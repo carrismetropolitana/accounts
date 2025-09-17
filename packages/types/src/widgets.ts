@@ -1,6 +1,6 @@
 /* * */
 
-import { DocumentSchema } from '@tmlmobilidade/types';
+import { DocumentSchema, ProcessingStatusSchema } from '@tmlmobilidade/types';
 import { z } from 'zod';
 
 /* * */
@@ -21,8 +21,8 @@ const WidgetBaseSchema = DocumentSchema.extend({
 		send_notifications: z.boolean().default(true),
 	}),
 	status: z.object({
-		error_code: z.string().nullable(),
-		error_message: z.string().nullable(),
+		code: ProcessingStatusSchema.default('waiting'),
+		message: z.string().nullable(),
 	}),
 });
 

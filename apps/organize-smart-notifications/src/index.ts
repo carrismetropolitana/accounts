@@ -1,70 +1,158 @@
 /* * */
 
-import { type LocationsApiResponse } from '@/types';
-import LOGGER from '@helperkits/logger';
+import { calculateGeoFence } from '@/geofence';
+import { accounts, apiPatterns, apiShapes, apiStops } from '@carrismetropolitana/accounts-interfaces';
+import { type Account, type Widget } from '@carrismetropolitana/accounts-types';
 import TIMETRACKER from '@helperkits/timer';
-import { stops } from '@tmlmobilidade/interfaces';
-import { getAppConfig } from '@tmlmobilidade/lib';
-import { fetchData } from '@tmlmobilidade/utils';
+import { Logs } from '@tmlmobilidade/utils';
 
 /**
- * This script ensures Stop documents have up to date attributes concerning
- * Locations data (Districts, Municipalities, Parishes, Localities) and other
- * relevant metadata (Facilities, Equipments, etc.).
+ * Organizes Smart Notifications for all accounts.
+ * This function will:
+ * - Stream all accounts
+ * - For each account, check if it has any smart_notification widgets
+ * - For each smart_notification widget, validate the stop, pattern, and shape
+ * - Calculate the geofence for the smart_notification
+ * - Update the smart_notification widget with the new geofence
+ * - Save the updated account back to the database
  */
 async function organizeSmartNotifications() {
 	//
 
-	LOGGER.init();
+	Logs.init();
 
 	const globalTimer = new TIMETRACKER();
 
 	//
-	// Get all Account documents from the database
+	// Stream all Account documents
 
-	const allStopsData = await stops.all();
-
-	LOGGER.info(`Found ${allStopsData.length} stops.`);
+	const accountsCollection = await accounts.getCollection();
+	const accountsStream = accountsCollection.find().stream();
 
 	//
-	// Loop through all stops and request updated attributes for each document
+	// Loop through all Account documents
+	// and ensure their smart notifications are organized
 
-	for (const stopData of allStopsData) {
+	for await (const accountItem of accountsStream) {
 		//
 
-		//
-		// Check that the stop has the required properties
+		const accountData: Account = accountItem;
 
-		if (!stopData.latitude || !stopData.longitude) {
-			LOGGER.error(`Stop ${stopData._id} does not have a latitude or longitude. Skipping.`);
+		//
+		// Check that this account has any smart_notification widget
+
+		const smartNotificationWidgets = accountData.widgets?.filter(item => item.type === 'smart_notification');
+
+		if (!smartNotificationWidgets || smartNotificationWidgets.length === 0) {
+			Logs.error(`Account ${accountData._id} does not have any smart_notification widgets. Skipping.`);
 			continue;
 		}
 
 		//
-		// Fetch the relevant Location data for this coordinate pair
+		// Transform widgets into a Map for easier access
 
-		const locationsApiUrl = `${getAppConfig('locations', 'frontend_url', 'production')}/api/locations/coordinates?lat=${stopData.latitude}&lon=${stopData.longitude}`;
+		const widgetsMap = new Map<string, Widget>();
 
-		const { data: locationsData } = await fetchData<LocationsApiResponse>(locationsApiUrl);
+		accountData.widgets.forEach(widget => widgetsMap.set(widget._id, widget));
 
-		if (!locationsData) {
-			LOGGER.error(`No locations data found for stop ${stopData._id}. Skipping.`);
-			continue;
+		//
+		// Process smart notifications
+
+		Logs.info(`Processing Account ${accountData._id} with ${smartNotificationWidgets.length} smart_notification widgets...`);
+
+		for (const smartNotification of smartNotificationWidgets) {
+			//
+
+			//
+			// Get entities needed to calculate geofence
+
+			const stopData = await apiStops.getStop(smartNotification.properties.stop_id);
+			const patternData = await apiPatterns.getPattern(smartNotification.properties.pattern_id);
+			const shapeData = patternData ? await apiShapes.getShape(patternData.shape_id) : null;
+
+			//
+			// Validate that entities are available
+
+			if (!stopData) {
+				Logs.error(`Stop ${smartNotification.properties.stop_id} not found for Account ${accountData._id}. Skipping this smart notification.`);
+				widgetsMap.set(smartNotification._id, { ...smartNotification, status: { code: 'error', message: `STOP_NOT_FOUND` } });
+				continue;
+			}
+
+			if (!patternData) {
+				Logs.error(`Pattern ${smartNotification.properties.pattern_id} not found for Account ${accountData._id}. Skipping this smart notification.`);
+				widgetsMap.set(smartNotification._id, { ...smartNotification, status: { code: 'error', message: `PATTERN_NOT_FOUND` } });
+				continue;
+			}
+
+			if (!shapeData) {
+				Logs.error(`Shape ${patternData.shape_id} not found for Account ${accountData._id}. Skipping this smart notification.`);
+				widgetsMap.set(smartNotification._id, { ...smartNotification, status: { code: 'error', message: `SHAPE_NOT_FOUND` } });
+				continue;
+			}
+
+			//
+			// Validate that stop is in pattern and is not the first stop
+
+			const sortedPath = patternData.path.sort((a, b) => a.stop_sequence - b.stop_sequence);
+			const stopIndexInPattern = sortedPath.findIndex(path => path.stop_id === smartNotification.properties.stop_id && path.stop_sequence === smartNotification.properties.stop_sequence);
+
+			if (stopIndexInPattern < 0) {
+				Logs.error(`Stop ${smartNotification.properties.stop_id} is not in Pattern ${patternData.id} for Account ${accountData._id}. Skipping this smart notification.`);
+				widgetsMap.set(smartNotification._id, { ...smartNotification, status: { code: 'error', message: `STOP_NOT_IN_PATTERN` } });
+				continue;
+			}
+
+			if (stopIndexInPattern === 0) {
+				Logs.error(`Stop ${smartNotification.properties.stop_id} is the first stop in Pattern ${patternData.id} for Account ${accountData._id}. Skipping this smart notification.`);
+				widgetsMap.set(smartNotification._id, { ...smartNotification, status: { code: 'error', message: `STOP_IS_FIRST` } });
+				continue;
+			}
+
+			//
+			// Calculate the geofence buffer
+
+			const geofenceData = calculateGeoFence(stopData, patternData, shapeData, smartNotification.properties.distance);
+
+			if (!geofenceData) {
+				Logs.error(`Could not calculate geofence for Stop ${smartNotification.properties.stop_id} in Pattern ${patternData.id} for Account ${accountData._id}. Skipping this smart notification.`);
+				widgetsMap.set(smartNotification._id, { ...smartNotification, status: { code: 'error', message: `GEOFENCE_NOT_FOUND` } });
+				continue;
+			}
+
+			//
+			// Save the updated smart notification
+
+			widgetsMap.set(smartNotification._id, {
+				...smartNotification,
+				properties: {
+					...smartNotification.properties,
+					geojson: geofenceData,
+				},
+				status: {
+					code: 'complete',
+					message: null,
+				},
+			});
+
+			Logs.success(`Smart notification ${smartNotification._id} for Account ${accountData._id} processed successfully.`);
+
+			//
 		}
 
-		await stops.updateById(stopData._id, {
-			district_id: locationsData.district?._id ?? null,
-			locality_id: locationsData.locality?._id ?? null,
-			municipality_id: locationsData.municipality?._id ?? null,
-			parish_id: locationsData.parish?._id ?? null,
-		});
+		//
+		// Save the updated widgets back to the account
 
-		LOGGER.success(`Updated stop ${stopData._id}: District ${locationsData.district?._id ?? null} | Municipality ${locationsData.municipality?._id ?? null} | Parish ${locationsData.parish?._id ?? null} | Locality ${locationsData.locality?._id ?? null} ${locationsData.locality?.name ?? null}`);
+		accountData.widgets = Array.from(widgetsMap.values());
+
+		await accounts.updateById(accountData._id, { widgets: accountData.widgets });
+
+		Logs.success(`Account ${accountData._id} updated successfully with organized smart notifications.`);
 
 		//
 	}
 
-	LOGGER.terminate(`Organization completed in ${globalTimer.get()}`);
+	Logs.terminate(`Organization completed in ${globalTimer.get()}`);
 
 	//
 }
@@ -73,7 +161,7 @@ async function organizeSmartNotifications() {
 
 (async function init() {
 	const runOnInterval = async () => {
-		await cleanOldValidations();
+		await organizeSmartNotifications();
 		setTimeout(runOnInterval, 300_000); // 5 minutes in milliseconds
 	};
 	runOnInterval();

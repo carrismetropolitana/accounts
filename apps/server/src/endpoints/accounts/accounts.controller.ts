@@ -74,34 +74,3 @@ export class AccountsController {
 
 	//
 }
-
-/* * */
-
-// async function processSmartNotifications(account: Account, smartNotificationsToProcess: SmartNotification[]): Promise<Account> {
-// 	for (const smartNotification of smartNotificationsToProcess ?? []) {
-// 		// Get Stop
-// 		const stop = await StopsService.getInstance().getStop(smartNotification.stop_id);
-
-// 		const pattern = await PatternService.getInstance().getPattern(smartNotification.pattern_id);
-// 		const geoFence = await calculateGeoFence(pattern[0], stop, smartNotification.distance);
-
-// 		if (!geoFence) {
-// 			throw new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, 'Invalid geo fence');
-// 		}
-
-// 		const widgetIndex = account.widgets.findIndex(
-// 			w => w.data.type === 'smart_notifications' && (w.data as SmartNotification).id === smartNotification.id,
-// 		);
-
-// 		const notificationData: SmartNotification = { ...smartNotification, geojson: geoFence, stop_name: stop.long_name };
-
-// 		if (widgetIndex !== -1) {
-// 			account.widgets[widgetIndex].data = notificationData;
-// 		}
-// 		else {
-// 			account.widgets.push({ data: notificationData, settings: { display_order: 0, is_open: true, label: null } });
-// 		}
-// 	}
-
-// 	return account;
-// }
