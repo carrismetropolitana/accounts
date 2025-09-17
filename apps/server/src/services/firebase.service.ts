@@ -1,10 +1,6 @@
 import { credential } from 'firebase-admin';
 import { App, initializeApp } from 'firebase-admin/app';
-import {
-	getMessaging,
-	Messaging,
-	TopicMessage,
-} from 'firebase-admin/messaging';
+import { getMessaging, Messaging, TopicMessage } from 'firebase-admin/messaging';
 
 interface NotificationPayload {
 	body: string

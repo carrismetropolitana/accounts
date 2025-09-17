@@ -1,21 +1,28 @@
 {
-	"name": "@carrismetropolitana/aps",
+	"name": "@carrismetropolitana/accounts",
 	"version": "1.0.0",
 	"keywords": [],
 	"main": "index.js",
 	"scripts": {
 		"build": "turbo build",
+		"build:organizer": "turbo build --filter=@carrismetropolitana/accounts-organizer",
+		"build:server": "turbo build --filter=@carrismetropolitana/accounts-server",
+		"build:types": "turbo build --filter=@carrismetropolitana/accounts-types",
+		"build:interfaces": "turbo build --filter=@carrismetropolitana/accounts-interfaces",
 		"dev": "dotenv-run -f ./environments/development/secrets/.env -- turbo dev",
+		"dev:server": "dotenv-run -f ./environments/development/secrets/.env -- turbo dev --filter=@carrismetropolitana/accounts-server",
 		"lint": "turbo lint",
 		"lint:fix": "turbo lint:fix"
 	},
 	"devDependencies": {
 		"@carrismetropolitana/eslint": "20250622.1204.50",
 		"@dotenv-run/cli": "1.3.6",
-		"turbo": "2.5.6"
+		"turbo": "2.5.6",
+		"typescript": "5.9.2"
 	},
-	"packageManager": "npm@11.5.2",
+	"packageManager": "npm@11.6.0",
 	"workspaces": [
-		"apps/*"
+		"apps/*",
+		"packages/*"
 	]
 }

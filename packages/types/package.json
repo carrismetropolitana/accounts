@@ -1,0 +1,31 @@
+{
+	"name": "@carrismetropolitana/accounts-types",
+	"private": true,
+	"type": "module",
+	"files": [
+		"dist/"
+	],
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		}
+	},
+	"scripts": {
+		"build": "rimraf ./dist && tsc && resolve-tspaths",
+		"lint": "eslint && tsc --noEmit",
+		"lint:fix": "eslint --fix"
+	},
+	"dependencies": {
+		"@tmlmobilidade/types": "20250917.1446.59",
+		"zod": "3.25.76"
+	},
+	"devDependencies": {
+		"@carrismetropolitana/eslint": "20250622.1204.50",
+		"@tmlmobilidade/tsconfig": "20250917.1446.59",
+		"@types/node": "24.5.1",
+		"resolve-tspaths": "0.8.23",
+		"rimraf": "6.0.1",
+		"typescript": "5.9.2"
+	}
+}

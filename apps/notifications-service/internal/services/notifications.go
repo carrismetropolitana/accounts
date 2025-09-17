@@ -80,7 +80,7 @@ func notificationService(RedisService *RedisService, firebaseService *FirebaseSe
 					fmt.Printf("Bus %s is within %v %s of Stop %s\n", vehicle.Id, notification.Distance, notification.DistanceUnit, notification.StopName)
 
 					// Send notification to firebase
-					title := "OLHÓ Autocarro 👀 🚌 "
+					title := "Olha o autocarro! 👀 🚌 "
 					body := fmt.Sprintf("O autocarro %s está a chegar à paragem %s", vehicle.LineId, notification.StopName)
 					data := vehicle.Id
 					err := firebaseService.SendToTopic(notification.Id, title, body, data)

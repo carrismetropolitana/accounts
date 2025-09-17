@@ -1,0 +1,51 @@
+/* * */
+
+import { type Pattern, type Shape, type Stop } from '@carrismetropolitana/api-types/network';
+import { chunkLineByDistance } from '@tmlmobilidade/utils';
+import * as turf from '@turf/turf';
+import { type Feature, type MultiPolygon, type Polygon } from 'geojson';
+
+/**
+ * Calculates the GeoFence Path from a distance the stop selected
+ * @param pattern The pattern to calculate the GeoFence
+ * @param stop The stop to calculate the GeoFence
+ * @param notificationDistance The distance to calculate the GeoFence
+ */
+export function calculateGeoFence(stopData: Stop, patternData: Pattern, shapeData: Shape, distance: number): Feature<MultiPolygon | Polygon, GeoJSON.GeoJsonProperties> {
+	//
+
+	//
+	// Chunk the shape into smaller segments to ensure accuracy
+
+	const chunkedLineString = chunkLineByDistance(shapeData.geojson.geometry, 10);
+
+	//
+	// Detect the nearest point on the shape to the stop
+
+	const stopPoint = turf.point([Number(stopData.lon), Number(stopData.lat)]);
+	const nearestPointOnLine = turf.nearestPointOnLine(chunkedLineString, stopPoint);
+
+	//
+	// Cut the line at the nearest point.
+	// This will create two segments, one before the stop and one after the stop.
+	// We want the segment before the stop as this will be the notification region.
+
+	const splitShape = turf.lineSplit(chunkedLineString, nearestPointOnLine);
+
+	//
+	// Calculate the total split segment length and the initial distance to start the notification region.
+	// If the distance is greater than the split segment length, we start at 0, which means the notification region
+	// will be from the start of the segment to the stop.
+
+	const splitSegmentLength = turf.length(splitShape.features[0], { units: 'meters' });
+	const initialDistance = splitSegmentLength - distance >= 0 ? splitSegmentLength - distance : 0;
+
+	const notificationRegionSegment = turf.lineSliceAlong(splitShape.features[0], initialDistance, splitSegmentLength, { units: 'meters' });
+
+	//
+	// Create a buffer of 20 meters around the notification region segment.
+
+	return turf.buffer(notificationRegionSegment, 20, { units: 'meters' });
+
+	//
+}

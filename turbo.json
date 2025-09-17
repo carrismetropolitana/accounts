@@ -3,21 +3,34 @@
 	"envMode": "loose",
 	"globalEnv": ["NODE_ENV"],
 	"tasks": {
+		"build": {
+			"dependsOn": [
+				"^build"
+			],
+			"outputs": [
+				"dist/**"
+			]
+		},
+		"clean": {
+			"cache": false
+		},
 		"dev": {
 			"cache": false,
 			"persistent": true
 		},
 		"lint": {
-			"cache": false,
-			"persistent": true
+			"dependsOn": [
+				"^lint"
+			]
 		},
-		"lint:fix": {
-			"cache": false,
-			"persistent": true
-		},	
-		"build": {
-			"cache": false,
-			"persistent": true
+		"start": {
+			"dependsOn": [
+				"^build",
+				"^start"
+			],
+			"outputs": [
+				"dist/**"
+			]
 		}
 	},
 	"ui": "tui"

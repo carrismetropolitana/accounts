@@ -1,5 +1,9 @@
+/* * */
+
 import { FastifyRequest } from '@tmlmobilidade/connectors';
 import { HttpException, HttpStatus } from '@tmlmobilidade/lib';
+
+/* * */
 
 declare module 'fastify' {
 	export interface FastifyRequest {
@@ -7,18 +11,18 @@ declare module 'fastify' {
 	}
 }
 
-export default async function authorizationMiddleware(request: FastifyRequest) {
+/* * */
+
+export async function authorizationMiddleware(request: FastifyRequest) {
+	// Extract Bearer token from Authorization header
 	const authHeader = request.headers.authorization;
-
-	if (!authHeader || !authHeader.startsWith('Bearer ')) {
-		throw new HttpException(HttpStatus.UNAUTHORIZED, 'Missing or invalid Bearer token');
-	}
-
+	// Validate the presence and format of the token
+	if (!authHeader) throw new HttpException(HttpStatus.UNAUTHORIZED, 'Missing Bearer token');
+	if (!authHeader.startsWith('Bearer ')) throw new HttpException(HttpStatus.UNAUTHORIZED, 'Invalid Bearer token');
+	// Extract the token from the Authorization header
 	const token = authHeader.split(' ')[1];
-
-	if (!token) {
-		throw new HttpException(HttpStatus.UNAUTHORIZED, 'Invalid authorization token');
-	}
-
+	// Validate the token (this is a placeholder, implement your own logic)
+	if (!token) throw new HttpException(HttpStatus.UNAUTHORIZED, 'Invalid authorization token');
+	// Attach the token to the request object for downstream handlers
 	request.account_id = token;
 }
