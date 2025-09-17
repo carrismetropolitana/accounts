@@ -1,39 +1,48 @@
-# Use a specific version of node:20-alpine for better reproducibility
-FROM node:20-alpine AS base
+# # #
+# DEFINE THE BASE IMAGE
 
-# Builder stage
+FROM node:alpine AS base
+
+ENV MODULE=server
+
+RUN npm install -g turbo@^2
+
+
+# # #
+# BUILDER STAGE
+
+FROM base AS pruner
+
+WORKDIR /app
+
+COPY . .
+
+RUN turbo prune --scope=@carrismetropolitana/accounts-${MODULE} --docker
+
+
+# # #
+# INSTALLER STAGE
+
 FROM base AS builder
 
 WORKDIR /app
 
-# Copy package files first to leverage Docker cache
-COPY package*.json ./
-RUN npm ci
+# First install the dependencies (as they change less often)
+COPY --from=pruner /app/out/json/ .
+RUN npm install
 
-# Copy source code
-COPY . .
+# Build the project
+COPY --from=pruner /app/out/full/ .
+RUN turbo run build --filter=@carrismetropolitana/accounts-${MODULE}
 
-# Build the application
-RUN npm run build
 
-# Runner stage
+# # #
+# RUNNER STAGE
+
 FROM base AS runner
 
 WORKDIR /app
 
-# Copy only necessary files from builder
-COPY --from=builder /app/dist/src ./dist/src
-COPY --from=builder /app/package*.json ./
+COPY --from=builder /app .
 
-# Install only production dependencies
-RUN npm ci --omit=dev --ignore-scripts
-
-# Use environment variables for configuration
-ENV NODE_ENV=production
-
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:3000/health', (r) => r.statusCode === 200 ? process.exit(0) : process.exit(1))"
-
-CMD ["node", "dist/src/index.js"]
+CMD node apps/${PROJECT}/dist/index.js
