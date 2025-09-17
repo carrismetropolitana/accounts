@@ -5,7 +5,6 @@ import { type Account, AccountSchema } from '@/schemas/account';
 import { type FastifyReply, type FastifyRequest } from '@tmlmobilidade/connectors';
 import { HttpException, HttpStatus } from '@tmlmobilidade/lib';
 import { generateRandomToken } from '@tmlmobilidade/utils';
-import fs from 'node:fs';
 
 /* * */
 
@@ -51,28 +50,6 @@ export class AccountsController {
 		const foundAccount = await accounts.findById(request.account_id);
 		if (!foundAccount) throw new HttpException(HttpStatus.NOT_FOUND, 'Account not found');
 		return reply.send({ data: foundAccount, error: null, statusCode: HttpStatus.OK });
-	}
-
-	/**
-	 * Retrieves a persona
-	 * @param request Fastify request
-	 * @param reply Fastify reply
-	 */
-	static async getPersona(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply<{ id: string, url: string }>) {
-		const imagesDir = '/app/dist/public/personas';
-		const availableImages = fs.readdirSync(imagesDir);
-		const randomIndex = Math.floor(Math.random() * availableImages.length);
-		const randomSelection = availableImages[randomIndex];
-		return reply.send({ data: { id: randomSelection, url: randomSelection }, error: null, statusCode: HttpStatus.OK });
-	}
-
-	/**
-	 * Retrieves a record from composite_map.json
-	 * @param request Fastify request
-	 * @param reply Fastify reply
-	 */
-	static async getPersonaImageById(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply<void>) {
-		return reply.sendFile(`/personas/${request.params.id}`);
 	}
 
 	/**

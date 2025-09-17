@@ -15,17 +15,11 @@ server.register(
 	(instance, opts, next) => {
 		//
 
-		// GET /persona
-		instance.get('/persona', AccountsController.getPersona);
-
-		// GET /persona/:id
-		instance.get('/persona/:id', AccountsController.getPersonaImageById);
-
 		// GET /accounts
 		instance.get('/', { preHandler: authorizationMiddleware }, AccountsController.get);
 
 		// POST /accounts
-		instance.post('/', { preHandler: authorizationMiddleware }, AccountsController.create);
+		instance.get('/new', { preHandler: authorizationMiddleware }, AccountsController.create);
 
 		// PUT /accounts
 		instance.put('/', { preHandler: authorizationMiddleware }, AccountsController.update);
