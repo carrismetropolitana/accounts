@@ -16,7 +16,7 @@ export class PersonasController {
 	 */
 	static async getImageById(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply<ReadableStream>) {
 		// Read the image file from the filesystem
-		const fileStream = fs.createReadStream(`/app/dist/public/personas/${request.params.id}`);
+		const fileStream = fs.createReadStream(`/app/dist/public/personas/${request.params.id}.png`);
 		// Send the image file as a response
 		return reply.type('image/png').send(fileStream);
 	}
@@ -26,12 +26,12 @@ export class PersonasController {
 	 * @param request Fastify request
 	 * @param reply Fastify reply
 	 */
-	static async getRandomImage(request: FastifyRequest, reply: FastifyReply<{ id: string, url: string }>) {
+	static async getRandomImage(request: FastifyRequest, reply: FastifyReply<string>) {
 		const imagesDir = '/app/dist/public/personas';
 		const availableImages = fs.readdirSync(imagesDir);
 		const randomIndex = Math.floor(Math.random() * availableImages.length);
 		const randomSelection = availableImages[randomIndex];
-		return reply.send({ data: { id: randomSelection, url: randomSelection }, error: null, statusCode: HttpStatus.OK });
+		return reply.send({ data: randomSelection, error: null, statusCode: HttpStatus.OK });
 	}
 
 	//
