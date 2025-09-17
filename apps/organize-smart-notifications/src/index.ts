@@ -12,7 +12,7 @@ import { fetchData } from '@tmlmobilidade/utils';
  * Locations data (Districts, Municipalities, Parishes, Localities) and other
  * relevant metadata (Facilities, Equipments, etc.).
  */
-async function cleanOldValidations() {
+async function organizeSmartNotifications() {
 	//
 
 	LOGGER.init();
@@ -20,7 +20,7 @@ async function cleanOldValidations() {
 	const globalTimer = new TIMETRACKER();
 
 	//
-	// Get all Stop documents from the database
+	// Get all Account documents from the database
 
 	const allStopsData = await stops.all();
 

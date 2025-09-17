@@ -14,11 +14,11 @@
 		"lint:fix": "eslint ./src --fix"
 	},
 	"dependencies": {
+		"@carrismetropolitana/accounts-interfaces": "*",
 		"@carrismetropolitana/api-types": "20250908.1050.36",
 		"@fastify/cookie": "11.0.2",
 		"@fastify/static": "8.2.0",
 		"@tmlmobilidade/connectors": "20250916.1705.17",
-		"@tmlmobilidade/interfaces": "20250916.1705.17",
 		"@tmlmobilidade/lib": "20250916.1705.17",
 		"@tmlmobilidade/types": "20250916.1705.17",
 		"@tmlmobilidade/utils": "20250916.1705.17",

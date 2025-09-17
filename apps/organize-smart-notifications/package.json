@@ -1,5 +1,5 @@
 {
-	"name": "@tmlmobilidade/sae-stops-organizer",
+	"name": "@carrismetropolitana/accounts-organize-smart-notifications",
 	"version": "1.0.0",
 	"type": "module",
 	"files": ["dist"],
@@ -14,6 +14,7 @@
 		"start": "node dist/index.js"
 	},
 	"dependencies": {
+		"@carrismetropolitana/accounts-interfaces": "*",
 		"@helperkits/logger": "20250628.901.58",
 		"@helperkits/timer": "20240627.34.23",
 		"@tmlmobilidade/interfaces": "20250916.1705.17",

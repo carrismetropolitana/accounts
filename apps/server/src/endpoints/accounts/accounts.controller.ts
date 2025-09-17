@@ -1,6 +1,6 @@
 /* * */
 
-import { accounts } from '@/interfaces/accounts.interface.js';
+import { accounts } from '@carrismetropolitana/accounts-interfaces';
 import { type Account, AccountSchema } from '@carrismetropolitana/accounts-types';
 import { type FastifyReply, type FastifyRequest } from '@tmlmobilidade/connectors';
 import { HttpException, HttpStatus } from '@tmlmobilidade/lib';
