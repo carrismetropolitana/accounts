@@ -12,7 +12,8 @@
 		"dev": "dotenv-run -f ./environments/development/secrets/.env -- turbo dev",
 		"dev:server": "dotenv-run -f ./environments/development/secrets/.env -- turbo dev --filter=@carrismetropolitana/accounts-server",
 		"lint": "turbo lint",
-		"lint:fix": "turbo lint:fix"
+		"lint:fix": "turbo lint:fix",
+		"rinse": "npx --yes @tmlmobilidade/repo-rinse"
 	},
 	"devDependencies": {
 		"@carrismetropolitana/eslint": "20250622.1204.50",
