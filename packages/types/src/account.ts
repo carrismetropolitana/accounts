@@ -27,6 +27,6 @@ export const AccountSchema = DocumentSchema.extend({
 	profile: ProfileSchema,
 	role: AccountRoleSchema.default('user'),
 	widgets: z.array(WidgetSchema).default([]),
-}).strict();
+});
 
 export type Account = z.infer<typeof AccountSchema>;
