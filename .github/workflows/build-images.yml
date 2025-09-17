@@ -15,7 +15,6 @@ jobs:
   # # # # # # # # # # # # # # # # # # # # #
 
   server:
-    name: Server (NodeJS)
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name }}
     permissions:
@@ -42,11 +41,40 @@ jobs:
           file: ./apps/server/Dockerfile
           tags: ghcr.io/carrismetropolitana/accounts-server:${{ github.ref_name }}
 
+  # # # # # # # # # # # # # # # # # # # # #
+  # # # # # # # # # # # # # # # # # # # # #
+
+  organize-smart-notifications:
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name }}
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@main
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@master
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@master
+        with:
+          push: true
+          context: ./apps/organize-smart-notifications
+          file: ./apps/organize-smart-notifications/Dockerfile
+          tags: ghcr.io/carrismetropolitana/accounts-organize-smart-notifications:${{ github.ref_name }}
+
   # # # # # # # # # # # # # # # # # # # #
   # # # # # # # # # # # # # # # # # # # #
 
   nginx:
-    name: nginx
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name }}
     permissions:
@@ -79,7 +107,6 @@ jobs:
   # # # # # # # # # # # # # # # # # # # # #
 
   filter-service:
-    name: Filter Service (Go)
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name }}
     permissions:
@@ -110,7 +137,6 @@ jobs:
   # # # # # # # # # # # # # # # # # # # # #
 
   notifications-service:
-    name: Notifications Service (Go)
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name }}
     permissions:

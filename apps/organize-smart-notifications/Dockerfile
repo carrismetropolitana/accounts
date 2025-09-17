@@ -3,8 +3,7 @@
 
 FROM node:alpine AS base
 
-ENV MODULE=stops
-ENV PROJECT=organizer
+ENV MODULE=organize-smart-notifications
 
 RUN npm install -g turbo@^2
 
@@ -18,7 +17,7 @@ WORKDIR /app
 
 COPY . .
 
-RUN turbo prune --scope=@tmlmobilidade/sae-${MODULE}-${PROJECT} --docker
+RUN turbo prune --scope=@carrismetropolitana/accounts-${MODULE} --docker
 
 
 # # #
@@ -34,7 +33,7 @@ RUN npm install
 
 # Build the project
 COPY --from=pruner /app/out/full/ .
-RUN turbo run build --filter=@tmlmobilidade/sae-${MODULE}-${PROJECT}
+RUN turbo run build --filter=@carrismetropolitana/accounts-${MODULE}
 
 
 # # #
