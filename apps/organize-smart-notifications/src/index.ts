@@ -1,6 +1,6 @@
 /* * */
 
-import { calculateGeoFence } from '@/geofence';
+import { calculateGeoFence } from '@/geofence.js';
 import { accounts, apiPatterns, apiShapes, apiStops } from '@carrismetropolitana/accounts-interfaces';
 import { type Account, type Widget } from '@carrismetropolitana/accounts-types';
 import TIMETRACKER from '@helperkits/timer';

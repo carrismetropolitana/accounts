@@ -6,10 +6,12 @@
 	"scripts": {
 		"build": "turbo build",
 		"build:interfaces": "turbo build --filter=@carrismetropolitana/accounts-interfaces",
+		"build:organize-smart-notifications": "turbo build --filter=@carrismetropolitana/accounts-organize-smart-notifications",
 		"build:organizer": "turbo build --filter=@carrismetropolitana/accounts-organizer",
 		"build:server": "turbo build --filter=@carrismetropolitana/accounts-server",
 		"build:types": "turbo build --filter=@carrismetropolitana/accounts-types",
 		"dev": "dotenv-run -f ./environments/development/secrets/.env -- turbo dev",
+		"dev:organize-smart-notifications": "dotenv-run -f ./environments/development/secrets/.env -- turbo dev --filter=@carrismetropolitana/accounts-organize-smart-notifications",
 		"dev:server": "dotenv-run -f ./environments/development/secrets/.env -- turbo dev --filter=@carrismetropolitana/accounts-server",
 		"lint": "turbo lint",
 		"lint:fix": "turbo lint:fix",

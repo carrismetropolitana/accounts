@@ -1,17 +1,17 @@
 {
 	"name": "@carrismetropolitana/accounts-server",
-	"description": "",
 	"version": "1.0.0",
-	"author": "",
-	"license": "ISC",
-	"keywords": [],
-	"main": "index.js",
+	"type": "module",
+	"files": ["dist"],
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
 	"scripts": {
 		"build": "npm run clean && tsc && resolve-tspaths",
 		"clean": "rm -rf dist",
-		"dev": "tsx watch src/index.ts",
-		"lint": "eslint ./src && tsc --noEmit",
-		"lint:fix": "eslint ./src --fix"
+		"dev": "tsx watch ./src/index.ts",
+		"lint": "eslint .",
+		"lint:fix": "eslint . --fix",
+		"start": "node dist/index.js"
 	},
 	"dependencies": {
 		"@carrismetropolitana/accounts-interfaces": "*",
