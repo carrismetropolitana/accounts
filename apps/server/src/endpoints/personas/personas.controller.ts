@@ -15,7 +15,7 @@ export class PersonasController {
 	 * @param reply Fastify reply
 	 */
 	static async getImageById(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply<void>) {
-		return reply.sendFile(`/personas/${request.params.id}`);
+		return reply.sendFile(`/app/dist/public/personas/${request.params.id}`);
 	}
 
 	/**
