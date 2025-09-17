@@ -22,6 +22,7 @@
 	},
 	"devDependencies": {
 		"@carrismetropolitana/accounts-types": "*",
+		"@carrismetropolitana/api-types": "20250908.1050.36",
 		"@carrismetropolitana/eslint": "20250622.1204.50",
 		"@tmlmobilidade/tsconfig": "20250917.1446.59",
 		"@types/node": "24.5.1",
