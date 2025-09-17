@@ -24,7 +24,6 @@ export class AccountsController {
 			// If it exists, generate a new token and try again
 			randomAccountId = generateRandomToken();
 		}
-		console.log(`Generated Account ID: ${randomAccountId}`);
 		// Create a new account object with default values and the generated Account ID
 		const newAccount = AccountSchema.parse({
 			_id: randomAccountId,
