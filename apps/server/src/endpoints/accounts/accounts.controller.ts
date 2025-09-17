@@ -4,7 +4,7 @@ import { accounts } from '@carrismetropolitana/accounts-interfaces';
 import { type Account, AccountSchema } from '@carrismetropolitana/accounts-types';
 import { type FastifyReply, type FastifyRequest } from '@tmlmobilidade/connectors';
 import { HttpException, HttpStatus } from '@tmlmobilidade/lib';
-import { generateRandomToken } from '@tmlmobilidade/utils';
+import { Dates, generateRandomToken } from '@tmlmobilidade/utils';
 
 /* * */
 
@@ -25,9 +25,15 @@ export class AccountsController {
 			randomAccountId = generateRandomToken();
 		}
 		// Create a new account object with default values and the generated Account ID
-		const newAccount = AccountSchema.strip().parse({ _id: randomAccountId });
+		const newAccount = AccountSchema
+			.strip()
+			.safeParse({
+				_id: randomAccountId,
+				created_at: Dates.now('Europe/Lisbon').unix_timestamp,
+				updated_at: Dates.now('Europe/Lisbon').unix_timestamp,
+			});
 		// Save the new account to the database
-		const createdAccount = await accounts.insertOne(newAccount);
+		const createdAccount = await accounts.insertOne(newAccount.data);
 		return reply.send({ data: createdAccount, error: null, statusCode: HttpStatus.CREATED });
 	}
 
