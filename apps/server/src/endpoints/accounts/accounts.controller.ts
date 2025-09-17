@@ -24,16 +24,15 @@ export class AccountsController {
 			// If it exists, generate a new token and try again
 			randomAccountId = generateRandomToken();
 		}
+		console.log(`Generated Account ID: ${randomAccountId}`);
 		// Create a new account object with default values and the generated Account ID
-		const newAccount = AccountSchema
-			.strip()
-			.safeParse({
-				_id: randomAccountId,
-				created_at: Dates.now('Europe/Lisbon').unix_timestamp,
-				updated_at: Dates.now('Europe/Lisbon').unix_timestamp,
-			});
+		const newAccount = AccountSchema.parse({
+			_id: randomAccountId,
+			created_at: Dates.now('Europe/Lisbon').unix_timestamp,
+			updated_at: Dates.now('Europe/Lisbon').unix_timestamp,
+		});
 		// Save the new account to the database
-		const createdAccount = await accounts.insertOne(newAccount.data);
+		const createdAccount = await accounts.insertOne(newAccount);
 		return reply.send({ data: createdAccount, error: null, statusCode: HttpStatus.CREATED });
 	}
 
