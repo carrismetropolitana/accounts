@@ -4,6 +4,7 @@ import { DeviceSchema } from '@/device.js';
 import { FavoritesSchema } from '@/favorites.js';
 import { NotificationsSchema } from '@/notifications.js';
 import { PersonaSchema } from '@/persona.js';
+import { PreferencesSchema } from '@/preferences.js';
 import { ProfileSchema } from '@/profile.js';
 import { WidgetSchema } from '@/widgets.js';
 import { DocumentSchema } from '@tmlmobilidade/types';
@@ -24,6 +25,7 @@ export const AccountSchema = DocumentSchema.extend({
 	favorites: FavoritesSchema.default({}),
 	notifications: NotificationsSchema.default({}),
 	persona: PersonaSchema.default({}),
+	preferences: PreferencesSchema.default({}),
 	profile: ProfileSchema.default({}),
 	role: AccountRoleSchema.default('user'),
 	widgets: z.array(WidgetSchema).default([]),
