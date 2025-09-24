@@ -23,7 +23,7 @@ func main() {
 	// Get required environment variables
 	requiredEnvVars := map[string]string{
 		"REDIS_URL":                 os.Getenv("REDIS_URL"),
-		"FIREBASE_CREDENTIALS_PATH": os.Getenv("FIREBASE_CREDENTIALS_PATH"),
+		// "FIREBASE_CREDENTIALS_PATH": os.Getenv("FIREBASE_CREDENTIALS_PATH"),
 	}
 
 	// Validate required environment variables
@@ -34,12 +34,12 @@ func main() {
 	}
 
 	redisURL := requiredEnvVars["REDIS_URL"]
-	firebaseCredentialsPath := requiredEnvVars["FIREBASE_CREDENTIALS_PATH"]
+	// firebaseCredentialsPath := requiredEnvVars["FIREBASE_CREDENTIALS_PATH"]
 
 	// Connect to Services
 	redisService := services.NewRedisService(redisURL)
 	defer redisService.Disconnect()
-	firebaseService := services.NewFirebaseService(firebaseCredentialsPath)
+	// firebaseService := services.NewFirebaseService(firebaseCredentialsPath)
 
 	var vehiclesHashMap = make(map[string][]models.Vehicle)
 
@@ -47,5 +47,5 @@ func main() {
 	go services.GetVehiclesHashMap(&vehiclesHashMap)
 
 	// Start the NotificationsService function in main thread
-	services.NotificationsService(redisService, firebaseService, &vehiclesHashMap)
+	services.NotificationsService(redisService, &vehiclesHashMap)
 }

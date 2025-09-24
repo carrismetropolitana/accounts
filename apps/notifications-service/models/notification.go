@@ -2,6 +2,7 @@ package models
 
 type Notification struct {
 	Id          string `json:"id"`
+	PushToken   string `json:"push_token"`
 	PatternId   string `json:"pattern_id"`
 	StopId      string `json:"stop_id"`
 	StopName    string `json:"stop_name"`

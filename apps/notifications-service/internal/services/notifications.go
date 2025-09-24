@@ -10,19 +10,19 @@ import (
 	"time"
 )
 
-func NotificationsService(redisService *RedisService, firebaseService *FirebaseService, vehiclesHashMap *map[string][]models.Vehicle) {
+func NotificationsService(redisService *RedisService, vehiclesHashMap *map[string][]models.Vehicle) {
 	ticker := time.NewTicker(3 * time.Second)
 	defer ticker.Stop()
 
-	notificationService(redisService, firebaseService, vehiclesHashMap) // Run immediately notificationService
+	notificationService(redisService, vehiclesHashMap) // Run immediately notificationService
 
 	// This loop runs every time the ticker ticks
 	for range ticker.C {
-		notificationService(redisService, firebaseService, vehiclesHashMap) // Call the function to execute cron jobs
+		notificationService(redisService, vehiclesHashMap) // Call the function to execute cron jobs
 	}
 }
 
-func notificationService(RedisService *RedisService, firebaseService *FirebaseService, vehiclesHashMap *map[string][]models.Vehicle) {
+func notificationService(RedisService *RedisService, vehiclesHashMap *map[string][]models.Vehicle) {
 
 	fmt.Println("⤷ Checking for notifications")
 
@@ -79,11 +79,10 @@ func notificationService(RedisService *RedisService, firebaseService *FirebaseSe
 
 					fmt.Printf("Bus %s is within %v %s of Stop %s\n", vehicle.Id, notification.Distance, notification.DistanceUnit, notification.StopName)
 
-					// Send notification to firebase
+					// Send notification to expo
 					title := "Olha o autocarro! 👀 🚌 "
 					body := fmt.Sprintf("O autocarro %s está a chegar à paragem %s", vehicle.LineId, notification.StopName)
-					data := vehicle.Id
-					err := firebaseService.SendToTopic(notification.Id, title, body, data)
+					err := SendToExpoPushToken(notification.PushToken, title, body, map[string]string{"vehicle_id": vehicle.Id})
 					if err != nil {
 						fmt.Printf("Error sending notification for vehicle %s and stop %s: %v\n", vehicle.Id, notification.StopId, err)
 						return
