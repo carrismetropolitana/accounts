@@ -13,11 +13,11 @@ export type DeviceType = z.infer<typeof DeviceTypeSchema>;
 /* * */
 
 export const DeviceSchema = z.object({
-	app_version: z.string(),
+	app_version: z.string().nullable().default(null),
 	device_id: z.string(),
-	name: z.string().nullable(),
+	name: z.string().nullable().default(null),
 	push_token: z.string().nullable().default(null),
-	type: DeviceTypeSchema,
+	type: DeviceTypeSchema.nullable().default(null),
 });
 
 export type Device = z.infer<typeof DeviceSchema>;
