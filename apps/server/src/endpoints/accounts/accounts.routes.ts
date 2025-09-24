@@ -21,9 +21,6 @@ server.register(
 		// GET /accounts/new
 		instance.get('/new', AccountsController.create);
 
-		// GET /accounts/device-id
-		instance.get('/device-id', AccountsController.generateDeviceId);
-
 		// PUT /accounts
 		instance.put('/', { preHandler: authorizationMiddleware }, AccountsController.update);
 

@@ -17,19 +17,21 @@ export class AccountsController {
 	 * @param reply Fastify reply
 	 */
 	static async create(request: FastifyRequest, reply: FastifyReply<Account>) {
-		// Generate a random Account ID
-		let randomAccountId = generateRandomToken();
-		// Check if the generated Account ID already exists
-		while (await accounts.findById(randomAccountId)) {
+		// Generate a random Device ID
+		let randomDeviceId = generateRandomToken();
+		// Check if the generated Device ID already exists
+		while (await accounts.findByDeviceId(randomDeviceId)) {
 			// If it exists, generate a new token and try again
-			randomAccountId = generateRandomToken();
+			randomDeviceId = generateRandomToken();
 		}
-		// Create a new account object with default values and the generated Account ID
-		const newAccount = AccountSchema.parse({
-			_id: randomAccountId,
-			created_at: Dates.now('Europe/Lisbon').unix_timestamp,
-			updated_at: Dates.now('Europe/Lisbon').unix_timestamp,
-		});
+		// Create a new account object with default values and the generated Device ID
+		const newAccount = AccountSchema
+			.omit({ _id: true })
+			.parse({
+				created_at: Dates.now('Europe/Lisbon').unix_timestamp,
+				devices: [{ device_id: randomDeviceId }],
+				updated_at: Dates.now('Europe/Lisbon').unix_timestamp,
+			});
 		// Save the new account to the database
 		const createdAccount = await accounts.insertOne(newAccount);
 		return reply.send({ data: createdAccount, error: null, statusCode: HttpStatus.CREATED });
@@ -43,23 +45,6 @@ export class AccountsController {
 	static async delete(request: FastifyRequest, reply: FastifyReply<void>) {
 		await accounts.deleteById(request.device_id);
 		return reply.send({ data: null, error: null, statusCode: HttpStatus.OK });
-	}
-
-	/**
-	 * Generate a new Device ID that does not exist yet
-	 * @param request Fastify request
-	 * @param reply Fastify reply
-	 */
-	static async generateDeviceId(request: FastifyRequest, reply: FastifyReply<string>) {
-		// Generate a random Device ID
-		let randomDeviceId = generateRandomToken();
-		// Check if the generated Device ID already exists
-		while (await accounts.findByDeviceId(randomDeviceId)) {
-			// If it exists, generate a new token and try again
-			randomDeviceId = generateRandomToken();
-		}
-		// Return the generated Device ID
-		return reply.send({ data: randomDeviceId, error: null, statusCode: HttpStatus.OK });
 	}
 
 	/**
