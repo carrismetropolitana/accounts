@@ -41,7 +41,7 @@ export class AccountsController {
 	 * @param reply Fastify reply
 	 */
 	static async delete(request: FastifyRequest, reply: FastifyReply<void>) {
-		await accounts.deleteById(request.account_id);
+		await accounts.deleteById(request.device_id);
 		return reply.send({ data: null, error: null, statusCode: HttpStatus.OK });
 	}
 
@@ -68,7 +68,7 @@ export class AccountsController {
 	 * @param reply Fastify reply
 	 */
 	static async get(request: FastifyRequest, reply: FastifyReply<Account>) {
-		const foundAccount = await accounts.findById(request.account_id);
+		const foundAccount = await accounts.findByDeviceId(request.device_id);
 		if (!foundAccount) throw new HttpException(HttpStatus.NOT_FOUND, 'Account not found');
 		return reply.send({ data: foundAccount, error: null, statusCode: HttpStatus.OK });
 	}
@@ -80,7 +80,7 @@ export class AccountsController {
 	 */
 	static async update(request: FastifyRequest<{ Body: Account }>, reply: FastifyReply<Account>) {
 		// Find the account by Account ID. If not found, throw 404.
-		const foundAccount = await accounts.findById(request.account_id);
+		const foundAccount = await accounts.findByDeviceId(request.device_id);
 		if (!foundAccount) throw new HttpException(HttpStatus.NOT_FOUND, 'Account not found');
 		// Validate the request body against the Account schema. If invalid, throw 400.
 		const { error, success } = AccountSchema.safeParse(request.body);
@@ -89,7 +89,7 @@ export class AccountsController {
 			throw new HttpException(HttpStatus.BAD_REQUEST, `Invalid Body: ${issues}`);
 		}
 		// Update the account in the database.
-		const updateResult = await accounts.updateById(request.account_id, request.body);
+		const updateResult = await accounts.updateByDeviceId(request.device_id, request.body);
 		return reply.send({ data: updateResult, error: null, statusCode: HttpStatus.OK });
 	}
 

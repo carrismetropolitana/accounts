@@ -7,7 +7,7 @@ import { HttpException, HttpStatus } from '@tmlmobilidade/lib';
 
 declare module 'fastify' {
 	export interface FastifyRequest {
-		account_id: string
+		device_id: string
 	}
 }
 
@@ -24,5 +24,5 @@ export async function authorizationMiddleware(request: FastifyRequest) {
 	// Validate the token (this is a placeholder, implement your own logic)
 	if (!token) throw new HttpException(HttpStatus.UNAUTHORIZED, 'Invalid authorization token');
 	// Attach the token to the request object for downstream handlers
-	request.account_id = token;
+	request.device_id = token;
 }
