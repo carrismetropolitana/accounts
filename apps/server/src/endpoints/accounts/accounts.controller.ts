@@ -1,5 +1,6 @@
 /* * */
 
+import { getRandomPersonaImageId } from '@/services/personas.js';
 import { accounts } from '@carrismetropolitana/accounts-interfaces';
 import { type Account, AccountSchema } from '@carrismetropolitana/accounts-types';
 import { type FastifyReply, type FastifyRequest } from '@tmlmobilidade/connectors';
@@ -30,6 +31,7 @@ export class AccountsController {
 			.parse({
 				created_at: Dates.now('Europe/Lisbon').unix_timestamp,
 				devices: [{ device_id: randomDeviceId }],
+				persona: { image_id: getRandomPersonaImageId() },
 				updated_at: Dates.now('Europe/Lisbon').unix_timestamp,
 			});
 		// Save the new account to the database
