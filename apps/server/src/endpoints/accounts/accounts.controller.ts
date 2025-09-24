@@ -46,6 +46,23 @@ export class AccountsController {
 	}
 
 	/**
+	 * Generate a new Device ID that does not exist yet
+	 * @param request Fastify request
+	 * @param reply Fastify reply
+	 */
+	static async generateDeviceId(request: FastifyRequest, reply: FastifyReply<string>) {
+		// Generate a random Device ID
+		let randomDeviceId = generateRandomToken();
+		// Check if the generated Device ID already exists
+		while (await accounts.findByDeviceId(randomDeviceId)) {
+			// If it exists, generate a new token and try again
+			randomDeviceId = generateRandomToken();
+		}
+		// Return the generated Device ID
+		return reply.send({ data: randomDeviceId, error: null, statusCode: HttpStatus.OK });
+	}
+
+	/**
 	 * Retrieves an account by Account ID.
 	 * @param request Fastify request
 	 * @param reply Fastify reply
