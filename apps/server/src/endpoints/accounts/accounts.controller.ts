@@ -16,7 +16,7 @@ export class AccountsController {
 	 * @param request Fastify request
 	 * @param reply Fastify reply
 	 */
-	static async create(request: FastifyRequest, reply: FastifyReply<Account>) {
+	static async create(request: FastifyRequest, reply: FastifyReply<{ device_id: string }>) {
 		// Generate a random Device ID
 		let randomDeviceId = generateRandomToken();
 		// Check if the generated Device ID already exists
@@ -33,8 +33,9 @@ export class AccountsController {
 				updated_at: Dates.now('Europe/Lisbon').unix_timestamp,
 			});
 		// Save the new account to the database
-		const createdAccount = await accounts.insertOne(newAccount);
-		return reply.send({ data: createdAccount, error: null, statusCode: HttpStatus.CREATED });
+		await accounts.insertOne(newAccount);
+		// And return the generated Device ID
+		return reply.send({ data: { device_id: randomDeviceId }, error: null, statusCode: HttpStatus.CREATED });
 	}
 
 	/**
