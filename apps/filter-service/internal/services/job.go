@@ -261,7 +261,7 @@ func storeProcessedNotification(redisService *RedisService, config *SmartNotific
 	}
 
 	// Generate Redis key
-	key := generateProcessedKey(config, pushToken)
+	key := generateProcessedKey(config)
 
 	// Store in Redis
 	if err := redisService.Set(key, string(dataBytes)); err != nil {
