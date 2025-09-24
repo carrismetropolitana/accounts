@@ -38,17 +38,6 @@ class AccountsClass extends MongoCollectionClass<Account, Account, Account> {
 		return foundAccount;
 	}
 
-	/**
-	 * Updates an account document by its device ID.
-	 * @param deviceId The device ID of the document to find.
-	 * @param updateFields The fields to update in the account
-	 * @returns A promise that resolves to the matching document or null if not found.
-	 */
-	async updateByDeviceId(deviceId: string, updateFields: Partial<Account>): Promise<Account | null> {
-		await this.mongoCollection.updateOne({ 'devices.device_id': { $eq: deviceId } }, { $set: updateFields });
-		return this.findByDeviceId(deviceId);
-	}
-
 	protected getCollectionIndexes(): IndexDescription[] {
 		return [
 			{ background: true, key: { 'profile.email': 1 }, unique: true },

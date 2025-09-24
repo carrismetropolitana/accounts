@@ -76,7 +76,7 @@ export class AccountsController {
 			throw new HttpException(HttpStatus.BAD_REQUEST, `Invalid Body: ${issues}`);
 		}
 		// Update the account in the database.
-		const updateResult = await accounts.updateByDeviceId(request.device_id, request.body);
+		const updateResult = await accounts.updateById(foundAccount._id, request.body);
 		return reply.send({ data: updateResult, error: null, statusCode: HttpStatus.OK });
 	}
 
