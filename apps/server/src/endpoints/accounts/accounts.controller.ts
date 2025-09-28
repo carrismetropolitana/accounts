@@ -67,7 +67,6 @@ export class AccountsController {
 	 * @param reply Fastify reply
 	 */
 	static async update(request: FastifyRequest<{ Body: Account }>, reply: FastifyReply<Account>) {
-		console.log('UPDATE REQUEST', request.device_id);
 		// Find the account by Account ID. If not found, throw 404.
 		const foundAccount = await accounts.findByDeviceId(request.device_id);
 		if (!foundAccount) throw new HttpException(HttpStatus.NOT_FOUND, 'Account not found');
