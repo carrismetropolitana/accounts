@@ -15,23 +15,17 @@ export function calculateGeoFence(stopData: Stop, shapeData: Shape, distance: nu
 	//
 
 	//
-	// Chunk the shape into smaller segments to ensure accuracy
-
-	const chunkedShape = chunkLineByDistance(shapeData.geojson.geometry, 10);
-	const chunkedLineString = turf.feature(chunkedShape);
-
-	//
 	// Detect the nearest point on the shape to the stop
 
 	const stopPoint = turf.point([Number(stopData.lon), Number(stopData.lat)]);
-	const nearestPointOnLine = turf.nearestPointOnLine(chunkedLineString, stopPoint);
+	const nearestPointOnLine = turf.nearestPointOnLine(shapeData.geojson, stopPoint);
 
 	//
 	// Cut the line at the nearest point.
 	// This will create two segments, one before the stop and one after the stop.
 	// We want the segment before the stop as this will be the notification region.
 
-	const splitShape = turf.lineSplit(chunkedLineString, nearestPointOnLine);
+	const splitShape = turf.lineSplit(shapeData.geojson, nearestPointOnLine);
 
 	//
 	// Calculate the total split segment length and the initial distance to start the notification region.
@@ -44,9 +38,9 @@ export function calculateGeoFence(stopData: Stop, shapeData: Shape, distance: nu
 	const notificationRegionSegment = turf.lineSliceAlong(splitShape.features[0], initialDistance, splitSegmentLength, { units: 'meters' });
 
 	//
-	// Create a buffer of 20 meters around the notification region segment.
+	// Create a buffer of 50 meters around the notification region segment.
 
-	return turf.buffer(notificationRegionSegment, 20, { units: 'meters' });
+	return turf.buffer(notificationRegionSegment, 50, { units: 'meters' });
 
 	//
 }
