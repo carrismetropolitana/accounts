@@ -1,7 +1,6 @@
 /* * */
 
 import { type Shape, type Stop } from '@carrismetropolitana/api-types/network';
-import { chunkLineByDistance } from '@tmlmobilidade/utils';
 import * as turf from '@turf/turf';
 import { type Feature, type MultiPolygon, type Polygon } from 'geojson';
 
