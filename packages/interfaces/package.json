@@ -17,15 +17,15 @@
 		"lint:fix": "eslint --fix"
 	},
 	"dependencies": {
-		"@tmlmobilidade/interfaces": "20250917.1446.59",
-		"@tmlmobilidade/utils": "20250917.1446.59"
+		"@tmlmobilidade/interfaces": "20250925.1818.18",
+		"@tmlmobilidade/utils": "20250925.1818.18"
 	},
 	"devDependencies": {
 		"@carrismetropolitana/accounts-types": "*",
-		"@carrismetropolitana/api-types": "20250908.1050.36",
+		"@carrismetropolitana/api-types": "20250921.1534.23",
 		"@carrismetropolitana/eslint": "20250622.1204.50",
-		"@tmlmobilidade/tsconfig": "20250917.1446.59",
-		"@types/node": "24.5.1",
+		"@tmlmobilidade/tsconfig": "20250925.1818.18",
+		"@types/node": "24.5.2",
 		"resolve-tspaths": "0.8.23",
 		"rimraf": "6.0.1",
 		"typescript": "5.9.2"

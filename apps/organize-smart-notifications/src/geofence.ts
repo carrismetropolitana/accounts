@@ -1,6 +1,6 @@
 /* * */
 
-import { type Pattern, type Shape, type Stop } from '@carrismetropolitana/api-types/network';
+import { type Shape, type Stop } from '@carrismetropolitana/api-types/network';
 import { chunkLineByDistance } from '@tmlmobilidade/utils';
 import * as turf from '@turf/turf';
 import { type Feature, type MultiPolygon, type Polygon } from 'geojson';
@@ -11,15 +11,14 @@ import { type Feature, type MultiPolygon, type Polygon } from 'geojson';
  * @param stop The stop to calculate the GeoFence
  * @param notificationDistance The distance to calculate the GeoFence
  */
-export function calculateGeoFence(stopData: Stop, patternData: Pattern, shapeData: Shape, distance: number): Feature<MultiPolygon | Polygon, GeoJSON.GeoJsonProperties> {
+export function calculateGeoFence(stopData: Stop, shapeData: Shape, distance: number): Feature<MultiPolygon | Polygon, GeoJSON.GeoJsonProperties> {
 	//
 
 	//
 	// Chunk the shape into smaller segments to ensure accuracy
 
-	const chunkedLineString = chunkLineByDistance(shapeData.geojson.geometry, 10);
-
-	console.log('chunkedLineString', chunkedLineString);
+	const chunkedShape = chunkLineByDistance(shapeData.geojson.geometry, 10);
+	const chunkedLineString = turf.feature(chunkedShape);
 
 	//
 	// Detect the nearest point on the shape to the stop

@@ -112,7 +112,7 @@ async function organizeSmartNotifications() {
 			//
 			// Calculate the geofence buffer
 
-			const geofenceData = calculateGeoFence(stopData, patternData, shapeData, smartNotification.properties.distance);
+			const geofenceData = calculateGeoFence(stopData, shapeData, smartNotification.properties.distance);
 
 			if (!geofenceData) {
 				Logs.error(`Could not calculate geofence for Stop ${smartNotification.properties.stop_id} in Pattern ${patternData.id} for Account ${accountData._id}. Skipping this smart notification.`);
@@ -145,7 +145,7 @@ async function organizeSmartNotifications() {
 
 		accountData.widgets = Array.from(widgetsMap.values());
 
-		await accounts.updateById(accountData._id, { widgets: accountData.widgets });
+		await accounts.updateById(accountData._id, accountData, { returnResult: false });
 
 		Logs.success(`Account ${accountData._id} updated successfully with organized smart notifications.`);
 
