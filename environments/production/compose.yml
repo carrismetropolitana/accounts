@@ -145,22 +145,6 @@ services:
   # # # # # # # # # # # # # # # # # # # # #
   # # # # # # # # # # # # # # # # # # # # #
 
-  filter-service:
-    image: ghcr.io/carrismetropolitana/accounts-filter-service:production
-    deploy:
-      restart_policy:
-        condition: on-failure
-        delay: 30s
-    env_file:
-      - ./secrets/.env
-    volumes:
-      - ./notifications-service-data:/data
-    depends_on:
-      - redis
-
-  # # # # # # # # # # # # # # # # # # # # #
-  # # # # # # # # # # # # # # # # # # # # #
-
   notifications-service:
     image: ghcr.io/carrismetropolitana/accounts-notifications-service:production
     deploy:
