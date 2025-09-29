@@ -162,7 +162,7 @@ async function organizeSmartNotifications() {
 (async function init() {
 	const runOnInterval = async () => {
 		await organizeSmartNotifications();
-		setTimeout(runOnInterval, 300_000); // 5 minutes in milliseconds
+		setTimeout(runOnInterval, 10_000); // 10 seconds in milliseconds
 	};
 	runOnInterval();
 })();
