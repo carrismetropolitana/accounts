@@ -9,6 +9,7 @@ import (
 )
 
 func SendToExpoPushToken(expoPushToken string, title string, body string, data map[string]string) error {
+	fmt.Println("Sending notification to expo push token:", expoPushToken)
 	ctx := context.Background()
 
 	message := map[string]interface{}{
@@ -25,6 +26,7 @@ func SendToExpoPushToken(expoPushToken string, title string, body string, data m
 
 	req, err := http.NewRequestWithContext(ctx, "POST", "https://exp.host/--/api/v2/push/send", bytes.NewBuffer(messageBytes))
 	if err != nil {
+		fmt.Println("Error creating request:", err)
 		return err
 	}
 
@@ -33,13 +35,17 @@ func SendToExpoPushToken(expoPushToken string, title string, body string, data m
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
+		fmt.Println("Error sending request:", err)
 		return err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
+		fmt.Println("Failed to send notification, status code:", resp.StatusCode)
 		return fmt.Errorf("failed to send notification, status code: %d", resp.StatusCode)
 	}
+
+	fmt.Println("Notification sent successfully")
 
 	return nil
 }

@@ -1,4 +1,4 @@
-package models
+package types
 
 type Stop struct {
 	Id          string `json:"id"`
