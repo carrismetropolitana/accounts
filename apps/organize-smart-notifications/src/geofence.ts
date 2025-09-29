@@ -19,6 +19,8 @@ export function calculateGeoFence(stopData: Stop, patternData: Pattern, shapeDat
 
 	const chunkedLineString = chunkLineByDistance(shapeData.geojson.geometry, 10);
 
+	console.log('chunkedLineString', chunkedLineString);
+
 	//
 	// Detect the nearest point on the shape to the stop
 
