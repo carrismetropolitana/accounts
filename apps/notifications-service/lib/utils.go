@@ -52,7 +52,7 @@ func PointInPolygon(point types.Point, polygon []types.Point) bool {
 	inside := false
 	j := n - 1 // Last vertex of the polygon
 
-	for i := 0; i < n; i++ {
+	for i := range n {
 		// Check if the point is within the y-bounds of the edge and to the left of the x-bound
 		if (polygon[i].Y > point.Y) != (polygon[j].Y > point.Y) &&
 			point.X < (polygon[j].X-polygon[i].X)*(point.Y-polygon[i].Y)/(polygon[j].Y-polygon[i].Y)+polygon[i].X {
