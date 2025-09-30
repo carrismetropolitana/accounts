@@ -10,7 +10,7 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o /app/bin/file  /app/cmd/notifications-service
+RUN go build -o /app/bin/file  /app/notifications-service
 
 
 # ==== RUNNER ====
