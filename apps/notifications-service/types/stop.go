@@ -7,8 +7,8 @@ type Stop struct {
 	LongName    string `json:"long_name"`
 	Operator    string `json:"operator"`
 	Address     string `json:"address"`
-	Lat         string `json:"lat"`
-	Lon         string `json:"lon"`
+	Lat         float32 `json:"lat"`
+	Lon         float32 `json:"lon"`
 	Entrances   string `json:"entrances"`
 	RegionId    string `json:"region_id"`
 	RegionName  string `json:"region_name"`
@@ -17,5 +17,5 @@ type Stop struct {
 	Facilities  []string `json:"facilities"`
 	Lines       []string `json:"lines"`
 	TTS         string `json:"tts_name"`
-	WheelchairBoarding string `json:"wheelchair_boarding"`
+	WheelchairBoarding bool `json:"wheelchair_boarding"`
 }
