@@ -8,14 +8,12 @@ import (
 )
 
 func GetEnv(key string) string {
-	envPath := ""
+	// Load environment variables from .env file if specified
 	if len(os.Args) > 1 {
-		envPath = os.Args[1]
-	}
-
-	// Load environment variables from .env file
-	if err := godotenv.Load(envPath); err != nil {
-		log.Printf("Warning: Error loading .env file: %v\n", err)
+		envPath := os.Args[1]
+		if err := godotenv.Load(envPath); err != nil {
+			log.Printf("Warning: Error loading .env file: %v\n", err)
+		}
 	}
 
 	// Get required environment variables

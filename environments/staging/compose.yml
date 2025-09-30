@@ -149,21 +149,6 @@ services:
   # # # # # # # # # # # # # # # # # # # # #
   # # # # # # # # # # # # # # # # # # # # #
 
-  redis:
-    image: redis:latest
-    deploy:
-      restart_policy:
-        condition: on-failure
-        delay: 30s
-    ports:
-      - 6379:6379
-    volumes:
-      - ./redis-data:/data
-    command: redis-server --appendonly yes
-
-  # # # # # # # # # # # # # # # # # # # # #
-  # # # # # # # # # # # # # # # # # # # # #
-
   notifications-service:
     image: ghcr.io/carrismetropolitana/accounts-notifications-service:staging
     deploy:
@@ -176,5 +161,4 @@ services:
       - ./secrets/firebase.json:/app/firebase.json
       - ./notifications-service-data:/data
     depends_on:
-      - redis
-      - filter-service
+      - accounts-db
