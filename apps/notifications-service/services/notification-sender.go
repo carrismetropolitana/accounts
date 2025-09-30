@@ -55,6 +55,7 @@ func notificationSenderService(notificationWidgets *[]types.NotificationWidget, 
 			}
 
 			for _, vehicle := range vehicles {
+				notificationKey := vehicle.Id + "|" + widget.Id
 				point := types.Point{X: vehicle.Lon, Y: vehicle.Lat}
 				polygon := []types.Point{}
 
@@ -75,16 +76,15 @@ func notificationSenderService(notificationWidgets *[]types.NotificationWidget, 
 
 				if inPolygon {
 					// check in sync.Map for sent notifications
-					_, sent := sentNotifications.Load(widget.Id)
+					_, sent := sentNotifications.Load(notificationKey)
 					if sent {
 						continue
 					}
 
-					fmt.Printf("Bus %s is within %v %s of Stop %s\n", vehicle.Id, widget.Distance, "m", widget.StopId)
+					fmt.Printf("Bus %s is within %v %s of Stop %s (%s)\n", vehicle.Id, widget.Distance, "m", (*stopsHashMap)[widget.StopId].ShortName, widget.StopId)
 
 					title := "Olha o autocarro! 👀 🚌 "
 					body := fmt.Sprintf("O autocarro %s está a chegar à paragem %s", vehicle.LineId, (*stopsHashMap)[widget.StopId].ShortName)
-					fmt.Println("Sending notification to expo push token:", widget.PushTokens)
 					for _, pushToken := range widget.PushTokens {
 						err := SendToExpoPushToken(pushToken, title, body, map[string]string{"vehicle_id": vehicle.Id})
 						if err != nil {
@@ -94,11 +94,11 @@ func notificationSenderService(notificationWidgets *[]types.NotificationWidget, 
 					}
 
 					// Mark notification as sent
-					sentNotifications.Store(widget.Id, true)
+					sentNotifications.Store(notificationKey, true)
 				}
 
 				if !inPolygon {
-					sentNotifications.Delete(widget.Id)
+					sentNotifications.Delete(notificationKey)
 				}
 			}
 		}(widget)
