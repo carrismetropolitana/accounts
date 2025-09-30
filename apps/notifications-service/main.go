@@ -8,7 +8,11 @@ import (
 
 func main() {
 	fmt.Println("Starting Notifications Service")
-	
+
+	// Get Stops Data
+	var stopsHashMap = make(map[string]types.Stop)
+	go services.GetStopsHashMap(&stopsHashMap)
+
 	// Get Vehicles HashMap
 	var vehiclesHashMap = make(map[string][]types.Vehicle)
    	go services.GetVehiclesHashMap(&vehiclesHashMap)
@@ -18,5 +22,5 @@ func main() {
 	go services.GetActiveNotifications(&activeNotifications)
 
 	// Send Notifications
-	services.NotificationSenderService(&activeNotifications, &vehiclesHashMap)
+	services.NotificationSenderService(&activeNotifications, &vehiclesHashMap, &stopsHashMap)
 }

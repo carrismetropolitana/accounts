@@ -8,20 +8,20 @@ import (
 	"time"
 )
 
-var seenVehicles sync.Map // thread-safe global map
+var sentNotifications sync.Map // thread-safe global map to track sent notifications
 
-func NotificationSenderService(notificationWidgets *[]types.NotificationWidget, vehiclesHashMap *map[string][]types.Vehicle) {
+func NotificationSenderService(notificationWidgets *[]types.NotificationWidget, vehiclesHashMap *map[string][]types.Vehicle, stopsHashMap *map[string]types.Stop) {
 	ticker := time.NewTicker(3 * time.Second)
 	defer ticker.Stop()
 
-	notificationSenderService(notificationWidgets, vehiclesHashMap)
+	notificationSenderService(notificationWidgets, vehiclesHashMap, stopsHashMap)
 
 	for range ticker.C {
-		notificationSenderService(notificationWidgets, vehiclesHashMap)
+		notificationSenderService(notificationWidgets, vehiclesHashMap, stopsHashMap)
 	}
 }
 
-func notificationSenderService(notificationWidgets *[]types.NotificationWidget, vehiclesHashMap *map[string][]types.Vehicle) {
+func notificationSenderService(notificationWidgets *[]types.NotificationWidget, vehiclesHashMap *map[string][]types.Vehicle, stopsHashMap *map[string]types.Stop) {
 	fmt.Println("⤷ Checking for notifications")
 
 	if len(*vehiclesHashMap) == 0 {
@@ -31,6 +31,11 @@ func notificationSenderService(notificationWidgets *[]types.NotificationWidget, 
 
 	if len(*notificationWidgets) == 0 {
 		fmt.Println("Notification widgets is empty")
+		return
+	}
+
+	if len(*stopsHashMap) == 0 {
+		fmt.Println("Stops hashmap is empty")
 		return
 	}
 
@@ -69,18 +74,16 @@ func notificationSenderService(notificationWidgets *[]types.NotificationWidget, 
 				}
 
 				if inPolygon {
-					// check in sync.Map
-					_, exists := seenVehicles.Load(vehicle.Id)
-					if exists {
+					// check in sync.Map for sent notifications
+					_, sent := sentNotifications.Load(widget.Id)
+					if sent {
 						continue
 					}
-
-					seenVehicles.Store(vehicle.Id, true)
 
 					fmt.Printf("Bus %s is within %v %s of Stop %s\n", vehicle.Id, widget.Distance, "m", widget.StopId)
 
 					title := "Olha o autocarro! 👀 🚌 "
-					body := fmt.Sprintf("O autocarro %s está a chegar à paragem %s", vehicle.LineId, widget.StopId)
+					body := fmt.Sprintf("O autocarro %s está a chegar à paragem %s", vehicle.LineId, (*stopsHashMap)[widget.StopId].ShortName)
 					fmt.Println("Sending notification to expo push token:", widget.PushTokens)
 					for _, pushToken := range widget.PushTokens {
 						err := SendToExpoPushToken(pushToken, title, body, map[string]string{"vehicle_id": vehicle.Id})
@@ -89,10 +92,13 @@ func notificationSenderService(notificationWidgets *[]types.NotificationWidget, 
 							return
 						}
 					}
+
+					// Mark notification as sent
+					sentNotifications.Store(widget.Id, true)
 				}
 
 				if !inPolygon {
-					seenVehicles.Delete(vehicle.Id) // reset when bus leaves
+					sentNotifications.Delete(widget.Id)
 				}
 			}
 		}(widget)
