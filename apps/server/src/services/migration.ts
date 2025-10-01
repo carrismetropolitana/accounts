@@ -19,8 +19,8 @@ export function migrateAccountToLatestVersion(oldAccount: any, deviceId: string)
 	// Initiate an empty account object with default values
 
 	const newAccount = AccountSchema
-		.omit({ _id: true })
 		.parse({
+			_id: oldAccount._id,
 			created_at: oldAccount.created_at ? oldAccount.created_at : Dates.now('Europe/Lisbon').unix_timestamp,
 			devices: [{ device_id: deviceId }],
 			persona: { image_id: personaImageId },
