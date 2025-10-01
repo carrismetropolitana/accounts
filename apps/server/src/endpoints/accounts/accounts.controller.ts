@@ -31,8 +31,7 @@ export class AccountsController {
 			.parse({
 				created_at: Dates.now('Europe/Lisbon').unix_timestamp,
 				devices: [{ device_id: randomDeviceId }],
-				// persona: { image_id: getRandomPersonaImageId() },
-				persona: { image_id: '1' },
+				persona: { image_id: getRandomPersonaImageId() },
 				updated_at: Dates.now('Europe/Lisbon').unix_timestamp,
 			});
 		// Save the new account to the database
