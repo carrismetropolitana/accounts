@@ -234,10 +234,10 @@ export const categories: Category[] = [
 		_id: 'beards',
 		allow_empty: true,
 		items: [
-			{
-				_id: 'unshaved',
-				images: [{ filename: 'unshaved.png', order: 6 }],
-			},
+			// {
+			// 	_id: 'unshaved',
+			// 	images: [{ filename: 'unshaved.png', order: 6 }],
+			// },
 			{
 				_id: 'long',
 				forbidden_combinations: [
