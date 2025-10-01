@@ -2,11 +2,13 @@
 
 import { getRandomPersonaImageId } from '@/services/personas.js';
 import { type Account, AccountSchema, WidgetSchema } from '@carrismetropolitana/accounts-types';
-import { Dates, generateRandomString } from '@tmlmobilidade/utils';
+import { Dates, generateRandomString, Logs } from '@tmlmobilidade/utils';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function migrateAccountToLatestVersion(oldAccount: any, deviceId: string): Account {
 	//
+
+	Logs.info(`Migrating account ${oldAccount._id} to latest version.`);
 
 	//
 	// Generate a random persona image
@@ -78,7 +80,7 @@ export function migrateAccountToLatestVersion(oldAccount: any, deviceId: string)
 				newAccount.widgets.push(newWidget);
 			}
 
-			if (originalWidget.data?.type === 'smart_notification') {
+			if (originalWidget.data?.type === 'smart_notifications') {
 				// Validate necessary data exists
 				if (!originalWidget.data) return;
 				if (!originalWidget.data?.distance) return;
