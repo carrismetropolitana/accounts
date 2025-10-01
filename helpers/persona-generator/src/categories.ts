@@ -41,22 +41,10 @@ export const categories: Category[] = [
 				_id: 'default',
 				images: [{ filename: 'default.png', order: 2 }],
 			},
-			// {
-			// 	_id: 'earing',
-			// 	images: [{ filename: 'earing.png', order: 2 }],
-			// },
-			// {
-			// 	_id: 'ring-md',
-			// 	images: [{ filename: 'ring-md.png', order: 2 }],
-			// },
 			{
 				_id: 'ring-xl',
 				images: [{ filename: 'ring-xl.png', order: 2 }],
 			},
-			// {
-			// 	_id: 'plug-md',
-			// 	images: [{ filename: 'plug-md.png', order: 2 }],
-			// },
 			{
 				_id: 'plug-xl',
 				images: [{ filename: 'plug-xl.png', order: 2 }],
@@ -147,16 +135,11 @@ export const categories: Category[] = [
 					{ category_id: 'ears' },
 					{ category_id: 'beards', item_id: 'long' },
 				],
-				images: [{ filename: 'afro-background.png', order: 0 }, { filename: 'mini-afro.png', order: 5 }],
+				images: [
+					{ filename: 'afro-background.png', order: 0 },
+					{ filename: 'mini-afro.png', order: 5 },
+				],
 			},
-			// {
-			// 	_id: 'mini-afro',
-			// 	forbidden_combinations: [
-			// 		{ category_id: 'ears' },
-			// 		{ category_id: 'beards', item_id: 'long' },
-			// 	],
-			// 	images: [{ filename: 'mini-afro.png', order: 5 }],
-			// },
 			{
 				_id: 'mullet',
 				forbidden_combinations: [
@@ -196,24 +179,20 @@ export const categories: Category[] = [
 				],
 				images: [{ filename: 'liso.png', order: 5 }],
 			},
-			// {
-			// 	_id: 'careca',
-			// 	images: [{ filename: 'careca.png', order: 5 }],
-			// },
 			{
 				_id: 'rapado',
 				images: [{ filename: 'rapado.png', order: 5 }],
 			},
-			// {
-			// 	_id: 'curly',
-			// 	forbidden_combinations: [
-			// 		{ category_id: 'ears', item_id: 'ring-md' },
-			// 		{ category_id: 'ears', item_id: 'ring-xl' },
-			// 		{ category_id: 'beards', item_id: 'comprida' },
-			// 		{ category_id: 'clothes', item_id: 'sleeveless' },
-			// 	],
-			// 	images: [{ filename: 'curly.png', order: 5 }],
-			// },
+			{
+				_id: 'curly',
+				forbidden_combinations: [
+					{ category_id: 'beards' },
+					{ category_id: 'ears', item_id: 'plug-xl' },
+					{ category_id: 'ears', item_id: 'ring-xl' },
+					{ category_id: 'clothes', item_id: 'sleeveless' },
+				],
+				images: [{ filename: 'curly.png', order: 5 }],
+			},
 			{
 				_id: 'buzzcut',
 				images: [{ filename: 'buzzcut.png', order: 5 }],
@@ -222,8 +201,9 @@ export const categories: Category[] = [
 				_id: 'daenerys',
 				forbidden_combinations: [
 					{ category_id: 'beards' },
-					{ category_id: 'clothes', item_id: 'sleeveless' },
+					{ category_id: 'ears', item_id: 'plug-xl' },
 					{ category_id: 'ears', item_id: 'ring-xl' },
+					{ category_id: 'clothes', item_id: 'sleeveless' },
 				],
 				images: [{ filename: 'daenerys.png', order: 5 }],
 			},
@@ -234,10 +214,6 @@ export const categories: Category[] = [
 		_id: 'beards',
 		allow_empty: true,
 		items: [
-			// {
-			// 	_id: 'unshaved',
-			// 	images: [{ filename: 'unshaved.png', order: 6 }],
-			// },
 			{
 				_id: 'long',
 				forbidden_combinations: [
@@ -250,10 +226,6 @@ export const categories: Category[] = [
 				_id: 'moustache',
 				images: [{ filename: 'moustache.png', order: 6 }],
 			},
-			// {
-			// 	_id: 'pera',
-			// 	images: [{ filename: 'pera.png', order: 6 }],
-			// },
 		],
 	},
 	{
@@ -272,10 +244,6 @@ export const categories: Category[] = [
 				_id: 'glasses',
 				images: [{ filename: 'glasses.png', order: 7 }],
 			},
-			// {
-			// 	_id: 'lip-piercing',
-			// 	images: [{ filename: 'lip-piercing.png', order: 7 }],
-			// },
 		],
 	},
 ];
