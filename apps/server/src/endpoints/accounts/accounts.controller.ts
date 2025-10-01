@@ -1,5 +1,6 @@
 /* * */
 
+import { migrateAccountToLatestVersion } from '@/services/migration.js';
 import { getRandomPersonaImageId } from '@/services/personas.js';
 import { accounts } from '@carrismetropolitana/accounts-interfaces';
 import { type Account, AccountSchema } from '@carrismetropolitana/accounts-types';
@@ -68,8 +69,13 @@ export class AccountsController {
 	 */
 	static async update(request: FastifyRequest<{ Body: Account }>, reply: FastifyReply<Account>) {
 		// Find the account by Device ID. If not found, throw 404.
-		const foundAccount = await accounts.findByDeviceId(request.device_id);
+		let foundAccount = await accounts.findByDeviceId(request.device_id);
 		if (!foundAccount) throw new HttpException(HttpStatus.NOT_FOUND, 'Account not found');
+		// Verify the schema version of the account document.
+		// If necessary, migrate the document to the latest schema version.
+		if (foundAccount._version !== '1.0') {
+			foundAccount = migrateAccountToLatestVersion(foundAccount);
+		}
 		// Validate the request body against the Account schema. If invalid, throw 400.
 		const { error, success } = AccountSchema.safeParse(request.body);
 		if (!success) {
