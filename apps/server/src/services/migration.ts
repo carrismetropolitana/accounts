@@ -1,22 +1,34 @@
 /* * */
 
-import { type Account, AccountSchema, DeviceSchema, WidgetSchema } from '@carrismetropolitana/accounts-types';
-import { generateRandomString } from '@tmlmobilidade/utils';
+import { getRandomPersonaImageId } from '@/services/personas.js';
+import { type Account, AccountSchema, WidgetSchema } from '@carrismetropolitana/accounts-types';
+import { Dates, generateRandomString } from '@tmlmobilidade/utils';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function migrateAccountToLatestVersion(oldAccount: any): Account {
+export function migrateAccountToLatestVersion(oldAccount: any, deviceId: string): Account {
 	//
+
+	//
+	// Generate a random persona image
+
+	const personaImageId = oldAccount.profile.profile_image
+		? oldAccount.profile.profile_image.replace('.png', '')
+		: getRandomPersonaImageId();
 
 	//
 	// Initiate an empty account object with default values
 
-	const newAccount = AccountSchema.omit({ _id: true }).parse({});
+	const newAccount = AccountSchema
+		.omit({ _id: true })
+		.parse({
+			created_at: oldAccount.created_at ? oldAccount.created_at : Dates.now('Europe/Lisbon').unix_timestamp,
+			devices: [{ device_id: deviceId }],
+			persona: { image_id: personaImageId },
+			updated_at: Dates.now('Europe/Lisbon').unix_timestamp,
+		});
 
 	//
 	// Migrate properties from the old account to the new account
-
-	if (oldAccount.created_at) newAccount.created_at = oldAccount.created_at;
-	if (oldAccount.updated_at) newAccount.updated_at = oldAccount.updated_at;
 
 	if (oldAccount.favorites?.lines?.length) newAccount.favorites.line_ids = oldAccount.favorites.lines;
 	if (oldAccount.favorites?.stops?.length) newAccount.favorites.stop_ids = oldAccount.favorites.stops;
@@ -27,14 +39,6 @@ export function migrateAccountToLatestVersion(oldAccount: any): Account {
 	if (oldAccount.profile?.last_name) newAccount.profile.last_name = oldAccount.profile.last_name;
 	if (oldAccount.profile?.activity) newAccount.profile.activity = oldAccount.profile.activity;
 	if (oldAccount.profile?.utilization_type) newAccount.profile.utilization_type = oldAccount.profile.utilization_type;
-
-	if (oldAccount.profile?.profile_image) newAccount.persona.image_id = oldAccount.profile.profile_image.replace('.png', '');
-
-	if (oldAccount.devices?.length) {
-		newAccount.devices = oldAccount.devices.map((originalDevice) => {
-			return DeviceSchema.parse({ device_id: originalDevice.device_id });
-		});
-	}
 
 	if (oldAccount.widgets?.length) {
 		oldAccount.widgets.forEach((originalWidget) => {

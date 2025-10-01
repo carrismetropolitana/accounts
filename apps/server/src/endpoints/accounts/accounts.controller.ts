@@ -62,7 +62,7 @@ export class AccountsController {
 		// Verify the schema version of the account document.
 		// If necessary, migrate the document to the latest schema version.
 		if (foundAccount._version !== '1.0') {
-			foundAccount = migrateAccountToLatestVersion(foundAccount);
+			foundAccount = migrateAccountToLatestVersion(foundAccount, request.device_id);
 			// Update the migrated document in the database.
 			await accounts.deleteById(foundAccount._id);
 			await accounts.updateById(foundAccount._id, foundAccount, { upsert: true });
@@ -82,7 +82,7 @@ export class AccountsController {
 		// Verify the schema version of the account document.
 		// If necessary, migrate the document to the latest schema version.
 		if (foundAccount._version !== '1.0') {
-			foundAccount = migrateAccountToLatestVersion(foundAccount);
+			foundAccount = migrateAccountToLatestVersion(foundAccount, request.device_id);
 			// Update the migrated document in the database.
 			await accounts.deleteById(foundAccount._id);
 			await accounts.updateById(foundAccount._id, foundAccount, { upsert: true });
