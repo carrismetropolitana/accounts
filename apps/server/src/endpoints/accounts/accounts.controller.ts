@@ -57,8 +57,16 @@ export class AccountsController {
 	 * @param reply Fastify reply
 	 */
 	static async get(request: FastifyRequest, reply: FastifyReply<Account>) {
-		const foundAccount = await accounts.findByDeviceId(request.device_id);
+		let foundAccount = await accounts.findByDeviceId(request.device_id);
 		if (!foundAccount) throw new HttpException(HttpStatus.NOT_FOUND, 'Account not found');
+		// Verify the schema version of the account document.
+		// If necessary, migrate the document to the latest schema version.
+		if (foundAccount._version !== '1.0') {
+			foundAccount = migrateAccountToLatestVersion(foundAccount);
+			// Update the migrated document in the database.
+			await accounts.deleteById(foundAccount._id);
+			await accounts.updateById(foundAccount._id, foundAccount, { upsert: true });
+		}
 		return reply.send({ data: foundAccount, error: null, statusCode: HttpStatus.OK });
 	}
 
@@ -75,6 +83,9 @@ export class AccountsController {
 		// If necessary, migrate the document to the latest schema version.
 		if (foundAccount._version !== '1.0') {
 			foundAccount = migrateAccountToLatestVersion(foundAccount);
+			// Update the migrated document in the database.
+			await accounts.deleteById(foundAccount._id);
+			await accounts.updateById(foundAccount._id, foundAccount, { upsert: true });
 		}
 		// Validate the request body against the Account schema. If invalid, throw 400.
 		const { error, success } = AccountSchema.safeParse(request.body);
