@@ -81,10 +81,10 @@ func notificationSenderService(notificationWidgets *[]types.NotificationWidget, 
 						continue
 					}
 
-					fmt.Printf("Bus %s is within %v %s of Stop %s (%s)\n", vehicle.Id, widget.Distance, "m", (*stopsHashMap)[widget.StopId].ShortName, widget.StopId)
+					fmt.Printf("Bus %s is within %v %s of Stop %s (%s)\n", vehicle.Id, widget.Distance, "m", (*stopsHashMap)[widget.StopId].LongName, widget.StopId)
 
 					title := "Olha o autocarro! 👀 🚌 "
-					body := fmt.Sprintf("O autocarro %s está a chegar à paragem %s", vehicle.LineId, (*stopsHashMap)[widget.StopId].ShortName)
+					body := fmt.Sprintf("O autocarro %s está a chegar à paragem %s", vehicle.LineId, (*stopsHashMap)[widget.StopId].LongName)
 					for _, pushToken := range widget.PushTokens {
 						err := SendToExpoPushToken(pushToken, title, body, map[string]string{"vehicle_id": vehicle.Id})
 						if err != nil {
