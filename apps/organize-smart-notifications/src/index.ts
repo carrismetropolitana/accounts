@@ -95,7 +95,8 @@ async function organizeSmartNotifications() {
 			// Validate that stop is in pattern and is not the first stop
 
 			const sortedPath = patternData.path.sort((a, b) => a.stop_sequence - b.stop_sequence);
-			const stopIndexInPattern = sortedPath.findIndex(path => path.stop_id === smartNotification.properties.stop_id && path.stop_sequence === smartNotification.properties.stop_sequence);
+			const firstWaypointInPath = sortedPath[0];
+			const stopIndexInPattern = sortedPath.findIndex(path => path.stop_id === smartNotification.properties.stop_id && path.stop_sequence > firstWaypointInPath.stop_sequence);
 
 			if (stopIndexInPattern < 0) {
 				Logs.error(`Stop ${smartNotification.properties.stop_id} is not in Pattern ${patternData.id} for Account ${accountData._id}. Skipping this smart notification.`);
