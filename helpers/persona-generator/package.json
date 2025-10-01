@@ -13,8 +13,8 @@
 		"start": "tsx watch ./src/index.ts"
 	},
 	"dependencies": {
-		"@helperkits/logger": "20250628.901.58",
 		"@helperkits/timer": "20240627.34.23",
+		"@tmlmobilidade/utils": "20251001.1708.10",
 		"sharp": "0.34.4"
 	},
 	"devDependencies": {

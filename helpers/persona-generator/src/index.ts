@@ -3,35 +3,35 @@
 import { categories } from '@/categories.js';
 import { generateCombinations } from '@/utils/generate-cartesian-product.js';
 import { isValidOutfit } from '@/utils/is-valid-outfit.js';
-import LOGGER from '@helperkits/logger';
+import { Logs } from '@tmlmobilidade/utils';
 import fs from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
 
 /* * */
 
-const outputDir = './output';
-const imagesBaseDir = './assets';
+const OUTPUT_DIR = './output';
+const ASSETS_DIR = './assets';
 
 /* * */
 
 (async () => {
 	//
 
-	LOGGER.init();
+	Logs.init();
 
-	LOGGER.info(`Starting persona generation...`);
+	Logs.info(`Starting persona generation...`);
 
 	//
 	// Ensure output dir exists
 
-	if (fs.existsSync(outputDir)) {
-		// LOGGER.error(`Output directory already exists. Please clear it first: ${outputDir}`);
+	if (fs.existsSync(OUTPUT_DIR)) {
+		// Logs.error(`Output directory already exists. Please clear it first: ${OUTPUT_DIR}`);
 		// process.exit(1);
-		fs.rmSync(outputDir, { recursive: true });
+		fs.rmSync(OUTPUT_DIR, { recursive: true });
 	}
 
-	fs.mkdirSync(outputDir, { recursive: true });
+	fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
 	//
 	// Generate all the possible combinations for the existing categories.
@@ -46,11 +46,13 @@ const imagesBaseDir = './assets';
 		.map(item => ({ data: item.filter(i => i.item), outfit_id: item.map(i => i.item ? `${i.category_id}-${i.item._id}` : null).filter(Boolean).join('|') }))
 		.sort((a, b) => a.outfit_id.localeCompare(b.outfit_id));
 
-	LOGGER.title(`Generating ${validOutfitCombinations.length} outfit combinations...`);
+	Logs.title(`Generating ${validOutfitCombinations.length} outfit combinations...`);
 
 	//
 	// For each combination, build the layers
 	// and export the image using the sharp package
+
+	const finalOutfitIds = new Set<string>();
 
 	for (const [index, outfitData] of validOutfitCombinations.entries()) {
 		//
@@ -58,19 +60,15 @@ const imagesBaseDir = './assets';
 		//
 		// Build the actual layers
 
-		// let outfitId: string;
-
 		const compositeLayers: { input: Buffer, order: number }[] = [];
 
 		for (const layerData of outfitData.data) {
 			// Skip if no item is selected
 			if (!layerData.item) continue;
-			// Add this layer ID to the outfit ID string
-			// outfitId = outfitId ? `${outfitId}|${layerData.category_id}-${layerData.item._id}` : `${layerData.category_id}-${layerData.item._id}`;
 			// Process each image for the selected item
 			for (const imageData of layerData.item.images) {
 				// Build the asset path
-				const imagePath = path.join(imagesBaseDir, layerData.category_id, imageData.filename);
+				const imagePath = path.join(ASSETS_DIR, layerData.category_id, imageData.filename);
 				// Process this image with sharp
 				const layerBuffer = await sharp(imagePath)
 					.resize(1000, 1000, { fit: 'contain' })
@@ -102,13 +100,23 @@ const imagesBaseDir = './assets';
 
 		const outputComposite = transparentCanvas.composite(sortedLayers);
 
-		const outputFilePath = path.join(outputDir, `${outfitData.outfit_id}.png`);
+		const outputFilePath = path.join(OUTPUT_DIR, `${outfitData.outfit_id}.png`);
 		await outputComposite.png().toFile(outputFilePath);
 
-		LOGGER.info(`[${index + 1}/${validOutfitCombinations.length}] ${outfitData.outfit_id}`);
+		finalOutfitIds.add(outfitData.outfit_id);
+
+		Logs.info(`[${index + 1}/${validOutfitCombinations.length}] ${outfitData.outfit_id}`);
 
 		//
 	}
+
+	// Output the set of IDs to a JSON file
+
+	const outfitIdsArray = Array.from(finalOutfitIds);
+	const outfitIdsJsonPath = path.join(OUTPUT_DIR, '_ids.json');
+	fs.writeFileSync(outfitIdsJsonPath, JSON.stringify(outfitIdsArray, null, 2), 'utf-8');
+
+	Logs.title(`Generated ${finalOutfitIds.size} unique outfits in total.`);
 
 	//
 })();
