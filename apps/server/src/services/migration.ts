@@ -8,7 +8,7 @@ import { Dates, generateRandomString, Logs } from '@tmlmobilidade/utils';
 export function migrateAccountToLatestVersion(oldAccount: any, deviceId: string): Account {
 	//
 
-	Logs.info(`Migrating account ${oldAccount._id} to latest version.`);
+	Logs.info(`[MIGRATION] Migrating account ${oldAccount._id} to latest version.`);
 
 	//
 	// Generate a random persona image

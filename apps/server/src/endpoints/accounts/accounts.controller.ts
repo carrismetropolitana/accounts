@@ -4,8 +4,10 @@ import { migrateAccountToLatestVersion } from '@/services/migration.js';
 import { getRandomPersonaImageId } from '@/services/personas.js';
 import { accounts } from '@carrismetropolitana/accounts-interfaces';
 import { type Account, AccountSchema } from '@carrismetropolitana/accounts-types';
+import TIMETRACKER from '@helperkits/timer';
 import { type FastifyReply, type FastifyRequest } from '@tmlmobilidade/connectors';
 import { HttpException, HttpStatus } from '@tmlmobilidade/lib';
+import { Logs } from '@tmlmobilidade/utils';
 import { Dates, generateRandomToken } from '@tmlmobilidade/utils';
 
 /* * */
@@ -19,6 +21,9 @@ export class AccountsController {
 	 * @param reply Fastify reply
 	 */
 	static async create(request: FastifyRequest, reply: FastifyReply<{ device_id: string }>) {
+		// Setup logging
+		const timer = new TIMETRACKER();
+		Logs.info(`[${request.id}] [AccountsController] [create] Creating a new account...`);
 		// Generate a random Device ID
 		let randomDeviceId = generateRandomToken();
 		// Check if the generated Device ID already exists
@@ -38,11 +43,12 @@ export class AccountsController {
 		// Save the new account to the database
 		await accounts.insertOne(newAccount);
 		// And return the generated Device ID
+		Logs.info(`[${request.id}] [AccountsController] [create] Random Device ID ${randomDeviceId} created successfully in ${timer.get()}.`);
 		return reply.send({ data: { device_id: randomDeviceId }, error: null, statusCode: HttpStatus.CREATED });
 	}
 
 	/**
-	 * Deletes an account by Account ID.
+	 * Deletes an account by Device ID.
 	 * @param request Fastify request
 	 * @param reply Fastify reply
 	 */
@@ -52,11 +58,15 @@ export class AccountsController {
 	}
 
 	/**
-	 * Retrieves an account by Account ID.
+	 * Retrieves an account by Device ID.
 	 * @param request Fastify request
 	 * @param reply Fastify reply
 	 */
 	static async get(request: FastifyRequest, reply: FastifyReply<Account>) {
+		// Setup logging
+		const timer = new TIMETRACKER();
+		Logs.info(`[${request.id}] [AccountsController] [get] Retrieving account...`);
+		// Find the account by Device ID. If not found, throw 404.
 		let foundAccount = await accounts.findByDeviceId(request.device_id);
 		if (!foundAccount) throw new HttpException(HttpStatus.NOT_FOUND, 'Account not found');
 		// Verify the schema version of the account document.
@@ -67,6 +77,7 @@ export class AccountsController {
 			await accounts.deleteById(foundAccount._id);
 			await accounts.updateById(foundAccount._id, foundAccount, { upsert: true });
 		}
+		Logs.info(`[${request.id}] [AccountsController] [get] Account ${foundAccount._id} retrieved successfully in ${timer.get()}.`);
 		return reply.send({ data: foundAccount, error: null, statusCode: HttpStatus.OK });
 	}
 
@@ -76,6 +87,9 @@ export class AccountsController {
 	 * @param reply Fastify reply
 	 */
 	static async update(request: FastifyRequest<{ Body: Account }>, reply: FastifyReply<Account>) {
+		// Setup logging
+		const timer = new TIMETRACKER();
+		Logs.info(`[${request.id}] [AccountsController] [update] Updating account...`);
 		// Find the account by Device ID. If not found, throw 404.
 		let foundAccount = await accounts.findByDeviceId(request.device_id);
 		if (!foundAccount) throw new HttpException(HttpStatus.NOT_FOUND, 'Account not found');
@@ -95,6 +109,7 @@ export class AccountsController {
 		}
 		// Update the account in the database.
 		const updateResult = await accounts.updateById(foundAccount._id, request.body);
+		Logs.info(`[${request.id}] [AccountsController] [update] Account ${foundAccount._id} updated successfully in ${timer.get()}.`);
 		return reply.send({ data: updateResult, error: null, statusCode: HttpStatus.OK });
 	}
 
