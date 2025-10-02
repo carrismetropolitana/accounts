@@ -8,7 +8,7 @@ import { Dates, generateRandomString, Logs } from '@tmlmobilidade/utils';
 export function migrateAccountToLatestVersion(oldAccount: any, deviceId: string): Account {
 	//
 
-	Logs.info(`[MIGRATION] Migrating account ${oldAccount._id} to latest version.`);
+	Logs.info(`[MIGRATION] [${oldAccount._id}] Migrating account to latest version...`);
 
 	//
 	// Generate a random persona image
@@ -48,8 +48,8 @@ export function migrateAccountToLatestVersion(oldAccount: any, deviceId: string)
 
 			if (originalWidget.data?.type === 'lines') {
 				// Validate necessary data exists
-				if (!originalWidget.data) return;
-				if (!originalWidget.data?.pattern_id) return;
+				if (!originalWidget.data) return Logs.error(`[MIGRATION] [${oldAccount._id}] Widget data is missing.`);
+				if (!originalWidget.data?.pattern_id) return Logs.error(`[MIGRATION] [${oldAccount._id}] Widget pattern_id is missing.`);
 				// Create new widget
 				const newWidget = WidgetSchema.parse({
 					_id: generateRandomString(),
@@ -64,9 +64,9 @@ export function migrateAccountToLatestVersion(oldAccount: any, deviceId: string)
 
 			if (originalWidget.data?.type === 'stops') {
 				// Validate necessary data exists
-				if (!originalWidget.data) return;
-				if (!originalWidget.data?.stop_id) return;
-				if (!originalWidget.data?.pattern_ids?.length) return;
+				if (!originalWidget.data) return Logs.error(`[MIGRATION] [${oldAccount._id}] Widget data is missing.`);
+				if (!originalWidget.data?.stop_id) return Logs.error(`[MIGRATION] [${oldAccount._id}] Widget stop_id is missing.`);
+				if (!originalWidget.data?.pattern_ids?.length) return Logs.error(`[MIGRATION] [${oldAccount._id}] Widget pattern_ids are missing.`);
 				// Create new widget
 				const newWidget = WidgetSchema.parse({
 					_id: generateRandomString(),
@@ -82,13 +82,13 @@ export function migrateAccountToLatestVersion(oldAccount: any, deviceId: string)
 
 			if (originalWidget.data?.type === 'smart_notifications') {
 				// Validate necessary data exists
-				if (!originalWidget.data) return;
-				if (!originalWidget.data?.distance) return;
-				if (!originalWidget.data?.start_time) return;
-				if (!originalWidget.data?.end_time) return;
-				if (!originalWidget.data?.pattern_id) return;
-				if (!originalWidget.data?.stop_id) return;
-				if (!originalWidget.data?.week_days?.length) return;
+				if (!originalWidget.data) return Logs.error(`[MIGRATION] [${oldAccount._id}] Widget data is missing.`);
+				if (!originalWidget.data?.distance) return Logs.error(`[MIGRATION] [${oldAccount._id}] Widget distance is missing.`);
+				if (!originalWidget.data?.start_time) return Logs.error(`[MIGRATION] [${oldAccount._id}] Widget start_time is missing.`);
+				if (!originalWidget.data?.end_time) return Logs.error(`[MIGRATION] [${oldAccount._id}] Widget end_time is missing.`);
+				if (!originalWidget.data?.pattern_id) return Logs.error(`[MIGRATION] [${oldAccount._id}] Widget pattern_id is missing.`);
+				if (!originalWidget.data?.stop_id) return Logs.error(`[MIGRATION] [${oldAccount._id}] Widget stop_id is missing.`);
+				if (!originalWidget.data?.week_days?.length) return Logs.error(`[MIGRATION] [${oldAccount._id}] Widget week_days are missing.`);
 				// Parse time ranges
 				let parsedStartTime = 0;
 				if (originalWidget.data.start_time >= 0 && originalWidget.data.start_time < 86400) parsedStartTime = originalWidget.data.start_time;
