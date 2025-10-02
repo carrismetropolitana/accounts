@@ -27,7 +27,7 @@ async function organizeSmartNotifications() {
 	// Stream all Account documents
 
 	const accountsCollection = await accounts.getCollection();
-	const accountsStream = accountsCollection.find().stream();
+	const accountsStream = accountsCollection.find({ _version: '1.0' }).stream();
 
 	//
 	// Loop through all Account documents
