@@ -43,7 +43,7 @@ export class AccountsController {
 		// Save the new account to the database
 		await accounts.insertOne(newAccount);
 		// And return the generated Device ID
-		Logs.info(`[${request.id}] [AccountsController] [create] Random Device ID ${randomDeviceId} created successfully in ${timer.get()}.`);
+		Logs.success(`[${request.id}] [AccountsController] [create] Random Device ID ${randomDeviceId} created successfully in ${timer.get()}.`, 1);
 		return reply.send({ data: { device_id: randomDeviceId }, error: null, statusCode: HttpStatus.CREATED });
 	}
 
@@ -77,7 +77,7 @@ export class AccountsController {
 			await accounts.deleteById(foundAccount._id);
 			await accounts.updateById(foundAccount._id, foundAccount, { upsert: true });
 		}
-		Logs.info(`[${request.id}] [AccountsController] [get] Account ${foundAccount._id} retrieved successfully in ${timer.get()}.`);
+		Logs.success(`[${request.id}] [AccountsController] [get] Account ${foundAccount._id} retrieved successfully in ${timer.get()}.`, 1);
 		return reply.send({ data: foundAccount, error: null, statusCode: HttpStatus.OK });
 	}
 
@@ -109,7 +109,7 @@ export class AccountsController {
 		}
 		// Update the account in the database.
 		const updateResult = await accounts.updateById(foundAccount._id, request.body);
-		Logs.info(`[${request.id}] [AccountsController] [update] Account ${foundAccount._id} updated successfully in ${timer.get()}.`);
+		Logs.success(`[${request.id}] [AccountsController] [update] Account ${foundAccount._id} updated successfully in ${timer.get()}.`, 1);
 		return reply.send({ data: updateResult, error: null, statusCode: HttpStatus.OK });
 	}
 
