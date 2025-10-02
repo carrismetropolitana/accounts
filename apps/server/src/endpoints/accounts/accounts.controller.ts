@@ -68,7 +68,7 @@ export class AccountsController {
 		Logs.info(`[${request.id}] [AccountsController] [get] Retrieving account...`);
 		// Find the account by Device ID. If not found, throw 404.
 		let foundAccount = await accounts.findByDeviceId(request.device_id);
-		if (!foundAccount) throw new HttpException(HttpStatus.NOT_FOUND, 'Account not found');
+		if (!foundAccount) return reply.send({ data: null, error: 'ACCOUNT_NOT_FOUND', statusCode: HttpStatus.OK });
 		// Verify the schema version of the account document.
 		// If necessary, migrate the document to the latest schema version.
 		if (foundAccount._version !== '1.0') {
