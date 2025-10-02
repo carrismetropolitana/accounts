@@ -17,9 +17,6 @@ server.register(
 		// GET /
 		instance.get('/', PersonasController.getRandomImage);
 
-		// GET /:id
-		instance.get('/:id', PersonasController.getImageById);
-
 		next();
 	},
 	{ prefix: namespace },
