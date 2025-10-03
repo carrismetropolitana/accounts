@@ -166,8 +166,8 @@ services:
   # # # # # # # # # # # # # # # # # # # # #
   # # # # # # # # # # # # # # # # # # # # #
 
-  organize-smart-notifications:
-    image: ghcr.io/carrismetropolitana/accounts-organize-smart-notifications:staging
+  organize-widgets:
+    image: ghcr.io/carrismetropolitana/accounts-organize-widgets:staging
     deploy:
       restart_policy:
         condition: on-failure

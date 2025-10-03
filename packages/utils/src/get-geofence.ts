@@ -10,7 +10,7 @@ import { type Feature, type MultiPolygon, type Polygon } from 'geojson';
  * @param stop The stop to calculate the GeoFence
  * @param notificationDistance The distance to calculate the GeoFence
  */
-export function calculateGeoFence(stopData: Stop, shapeData: Shape, distance: number): Feature<MultiPolygon | Polygon, GeoJSON.GeoJsonProperties> {
+export function getGeofence(stopData: Stop, shapeData: Shape, distance: number): Feature<MultiPolygon | Polygon, GeoJSON.GeoJsonProperties> {
 	//
 
 	//

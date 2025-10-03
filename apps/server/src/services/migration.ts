@@ -1,7 +1,7 @@
 /* * */
 
 import { getRandomPersonaImageId } from '@/services/personas.js';
-import { type Account, AccountSchema, WidgetSchema } from '@carrismetropolitana/accounts-types';
+import { type Account, AccountSchema, WidgetSchema } from '@carrismetropolitana/accounts-pckg-types';
 import { Dates, generateRandomString, Logs } from '@tmlmobilidade/utils';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

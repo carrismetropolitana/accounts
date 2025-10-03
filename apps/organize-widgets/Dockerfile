@@ -3,7 +3,7 @@
 
 FROM node:alpine AS base
 
-ENV MODULE=organize-smart-notifications
+ENV MODULE=organize-widgets
 
 RUN npm install -g turbo@^2
 

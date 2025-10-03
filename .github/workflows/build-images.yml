@@ -51,7 +51,7 @@ jobs:
   # # # # # # # # # # # # # # # # # # # # #
   # # # # # # # # # # # # # # # # # # # # #
 
-  organize-smart-notifications:
+  organize-widgets:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -82,8 +82,8 @@ jobs:
         with:
           push: true
           context: .
-          file: ./apps/organize-smart-notifications/Dockerfile
-          tags: ghcr.io/carrismetropolitana/accounts-organize-smart-notifications:${{ github.ref_name }}
+          file: ./apps/organize-widgets/Dockerfile
+          tags: ghcr.io/carrismetropolitana/accounts-organize-widgets:${{ github.ref_name }}
 
   # # # # # # # # # # # # # # # # # # # #
   # # # # # # # # # # # # # # # # # # # #

@@ -1,5 +1,5 @@
 {
-	"name": "@carrismetropolitana/accounts-organize-smart-notifications",
+	"name": "@carrismetropolitana/accounts-organize-widgets",
 	"version": "1.0.0",
 	"type": "module",
 	"files": ["dist"],
@@ -14,16 +14,14 @@
 		"start": "node dist/index.js"
 	},
 	"dependencies": {
-		"@carrismetropolitana/accounts-interfaces": "*",
+		"@carrismetropolitana/accounts-pckg-interfaces": "*",
+		"@carrismetropolitana/accounts-pckg-utils": "*",
 		"@helperkits/timer": "20240627.34.23",
-		"@tmlmobilidade/interfaces": "20251001.1708.10",
-		"@tmlmobilidade/lib": "20251001.1708.10",
 		"@tmlmobilidade/utils": "20251001.1708.10"
 	},
 	"devDependencies": {
-		"@carrismetropolitana/accounts-types": "*",
+		"@carrismetropolitana/accounts-pckg-types": "*",
 		"@tmlmobilidade/tsconfig": "20251001.1708.10",
-		"@tmlmobilidade/types": "20251001.1708.10",
 		"@types/node": "24.6.1",
 		"resolve-tspaths": "0.8.23",
 		"tsx": "4.20.6",

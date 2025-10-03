@@ -1,5 +1,5 @@
 {
-	"name": "@carrismetropolitana/accounts-interfaces",
+	"name": "@carrismetropolitana/accounts-pckg-interfaces",
 	"private": true,
 	"type": "module",
 	"files": [
@@ -21,7 +21,7 @@
 		"@tmlmobilidade/utils": "20251001.1708.10"
 	},
 	"devDependencies": {
-		"@carrismetropolitana/accounts-types": "*",
+		"@carrismetropolitana/accounts-pckg-types": "*",
 		"@carrismetropolitana/api-types": "20251001.1707.13",
 		"@carrismetropolitana/eslint": "20250622.1204.50",
 		"@tmlmobilidade/tsconfig": "20251001.1708.10",

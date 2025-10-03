@@ -1,5 +1,5 @@
 {
-	"name": "@carrismetropolitana/accounts-pckg-types",
+	"name": "@carrismetropolitana/accounts-pckg-utils",
 	"private": true,
 	"type": "module",
 	"files": [
@@ -17,15 +17,19 @@
 		"lint:fix": "eslint --fix"
 	},
 	"dependencies": {
-		"@tmlmobilidade/types": "20251001.1708.10",
-		"zod": "3.25.76"
+		"@carrismetropolitana/accounts-pckg-interfaces": "*",
+		"@helperkits/timer": "20240627.34.23",
+		"@tmlmobilidade/interfaces": "20251001.1708.10",
+		"@tmlmobilidade/lib": "20251001.1708.10",
+		"@tmlmobilidade/utils": "20251001.1708.10"
 	},
 	"devDependencies": {
-		"@carrismetropolitana/eslint": "20250622.1204.50",
+		"@carrismetropolitana/accounts-pckg-types": "*",
 		"@tmlmobilidade/tsconfig": "20251001.1708.10",
+		"@tmlmobilidade/types": "20251001.1708.10",
 		"@types/node": "24.6.1",
 		"resolve-tspaths": "0.8.23",
-		"rimraf": "6.0.1",
+		"tsx": "4.20.6",
 		"typescript": "5.9.3"
 	}
 }

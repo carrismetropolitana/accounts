@@ -2,8 +2,8 @@
 
 import { migrateAccountToLatestVersion } from '@/services/migration.js';
 import { getRandomPersonaImageId } from '@/services/personas.js';
-import { accounts } from '@carrismetropolitana/accounts-interfaces';
-import { type Account, AccountSchema } from '@carrismetropolitana/accounts-types';
+import { accounts } from '@carrismetropolitana/accounts-pckg-interfaces';
+import { type Account, AccountSchema } from '@carrismetropolitana/accounts-pckg-types';
 import TIMETRACKER from '@helperkits/timer';
 import { type FastifyReply, type FastifyRequest } from '@tmlmobilidade/connectors';
 import { HttpException, HttpStatus } from '@tmlmobilidade/lib';

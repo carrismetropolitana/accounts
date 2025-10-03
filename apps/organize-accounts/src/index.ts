@@ -1,7 +1,7 @@
 /* * */
 
-import { accounts } from '@carrismetropolitana/accounts-interfaces';
-import { type Account } from '@carrismetropolitana/accounts-types';
+import { accounts } from '@carrismetropolitana/accounts-pckg-interfaces';
+import { type Account } from '@carrismetropolitana/accounts-pckg-types';
 import TIMETRACKER from '@helperkits/timer';
 import { Dates, Logs } from '@tmlmobilidade/utils';
 
