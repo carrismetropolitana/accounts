@@ -89,29 +89,56 @@ export class AccountsController {
 	 * @param reply Fastify reply
 	 */
 	static async update(request: FastifyRequest<{ Body: Account }>, reply: FastifyReply<Account>) {
+		//
+
+		//
+		// Skip if device ID is invalid (temporary check)
+
+		if (request.device_id === 'newDeviceId') throw new HttpException(HttpStatus.BAD_REQUEST, 'INVALID_DEVICE_ID');
+
+		//
 		// Setup logging
+
 		const timer = new TIMETRACKER();
 		Logs.info(`[${request.id}] [AccountsController] [update] Updating account...`);
+
+		//
 		// Find the account by Device ID. If not found, throw 404.
+
 		let foundAccount = await accounts.findByDeviceId(request.device_id);
 		if (!foundAccount) throw new HttpException(HttpStatus.NOT_FOUND, 'Account not found');
+
+		//
 		// Verify the schema version of the account document.
 		// If necessary, migrate the document to the latest schema version.
+
 		if (foundAccount._version !== '1.0') {
 			foundAccount = migrateAccountToLatestVersion(foundAccount, request.device_id);
 			// Update the migrated document in the database.
 			await accounts.deleteById(foundAccount._id);
 			await accounts.updateById(foundAccount._id, foundAccount, { upsert: true });
 		}
+
+		//
 		// Validate the request body against the Account schema. If invalid, throw 400.
+
 		const { error, success } = AccountSchema.safeParse(request.body);
+
 		if (!success) {
 			const issues = error.issues.map(i => `${i.path.join('.')} - ${i.message}`).join('; ');
 			throw new HttpException(HttpStatus.BAD_REQUEST, `Invalid Body: ${issues}`);
 		}
+
+		//
 		// Update the account in the database.
+
 		const updateResult = await accounts.updateById(foundAccount._id, request.body);
+
+		//
+		// Return the updated account.
+
 		Logs.success(`[${request.id}] [AccountsController] [update] Account ${foundAccount._id} updated successfully in ${timer.get()}.`, 1);
+
 		return reply.send({ data: updateResult, error: null, statusCode: HttpStatus.OK });
 	}
 
