@@ -39,6 +39,9 @@ async function organizeWidgets() {
 
 		const accountData: Account = accountItem;
 
+		Logs.divider();
+		Logs.info(`Processing Account ${accountData._id}...`);
+
 		//
 		// Check that this account has any smart_notification widget
 
@@ -58,7 +61,7 @@ async function organizeWidgets() {
 
 		await accounts.updateById(accountData._id, { widgets: updatedWidgets });
 
-		Logs.success(`Updated widgets for Account ${accountData._id} in ${timer.get()}.`);
+		Logs.success(`Updated widgets for Account ${accountData._id} in ${timer.get()}.`, 1);
 
 		processedAccountsCounter++;
 

@@ -90,13 +90,13 @@ export async function getUpdatedWidgets(widgetsData: Widget[]): Promise<Widget[]
 		const stopIndexInPattern = sortedPath.findIndex(path => path.stop_id === smartNotification.properties.stop_id && path.stop_sequence > firstWaypointInPath.stop_sequence);
 
 		if (stopIndexInPattern < 0) {
-			Logs.error(`[getUpdatedWidgets] Stop ${smartNotification.properties.stop_id} is not in Pattern ${patternData.id}. Skipping...`, null, 1);
+			Logs.error(`[getUpdatedWidgets] Stop ${smartNotification.properties.stop_id} is not in Pattern ${patternData.id}. Skipping...`);
 			widgetsMap.set(smartNotification._id, { ...smartNotification, status: { code: 'error', message: `STOP_NOT_IN_PATTERN` } });
 			continue;
 		}
 
 		if (stopIndexInPattern === 0) {
-			Logs.error(`[getUpdatedWidgets] Stop ${smartNotification.properties.stop_id} is the first stop in Pattern ${patternData.id}. Skipping...`, null, 1);
+			Logs.error(`[getUpdatedWidgets] Stop ${smartNotification.properties.stop_id} is the first stop in Pattern ${patternData.id}. Skipping...`);
 			widgetsMap.set(smartNotification._id, { ...smartNotification, status: { code: 'error', message: `STOP_IS_FIRST_WAYPOINT` } });
 			continue;
 		}
@@ -107,7 +107,7 @@ export async function getUpdatedWidgets(widgetsData: Widget[]): Promise<Widget[]
 		const geofenceData = getGeofence(stopData, shapeData, smartNotification.properties.distance);
 
 		if (!geofenceData) {
-			Logs.error(`[getUpdatedWidgets] Could not calculate geofence for Stop ${smartNotification.properties.stop_id} in Pattern ${patternData.id}. Skipping...`, null, 1);
+			Logs.error(`[getUpdatedWidgets] Could not calculate geofence for Stop ${smartNotification.properties.stop_id} in Pattern ${patternData.id}. Skipping...`);
 			widgetsMap.set(smartNotification._id, { ...smartNotification, status: { code: 'error', message: `GEOFENCE_UNAVAILABLE` } });
 			continue;
 		}
@@ -120,7 +120,7 @@ export async function getUpdatedWidgets(widgetsData: Widget[]): Promise<Widget[]
 
 		widgetsMap.set(smartNotification._id, smartNotification);
 
-		Logs.success(`[getUpdatedWidgets] Smart notification ${smartNotification._id} processed successfully in ${timer.get()}.`, 1);
+		Logs.success(`[getUpdatedWidgets] Smart notification ${smartNotification._id} processed successfully in ${timer.get()}.`);
 
 		//
 	}
