@@ -40,9 +40,10 @@ export class AccountsController {
 				updated_at: Dates.now('Europe/Lisbon').unix_timestamp,
 			});
 		// Save the new account to the database
-		const insertResult = await accounts.insertOne(newAccount);
+		const accountsCollection = await accounts.getCollection();
+		await accountsCollection.insertOne(newAccount);
 		// And return the generated Device ID
-		Logs.success(`[${request.id}] [AccountsController] [create] Account ID ${insertResult._id} with random Device ID ${randomDeviceId} created successfully in ${timer.get()}.`, 1);
+		Logs.success(`[${request.id}] [AccountsController] [create] Account ID with random Device ID ${randomDeviceId} created successfully in ${timer.get()}.`, 1);
 		return reply.send({ data: { device_id: randomDeviceId }, error: null, statusCode: HttpStatus.CREATED });
 	}
 
