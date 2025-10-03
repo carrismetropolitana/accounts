@@ -15,12 +15,11 @@
 	},
 	"dependencies": {
 		"@carrismetropolitana/accounts-pckg-interfaces": "*",
+		"@carrismetropolitana/accounts-pckg-utils": "*",
 		"@helperkits/timer": "20240627.34.23",
 		"@tmlmobilidade/connectors": "20251001.1708.10",
 		"@tmlmobilidade/lib": "20251001.1708.10",
-		"@tmlmobilidade/utils": "20251001.1708.10",
-		"firebase-admin": "13.5.0",
-		"pino-pretty": "13.1.1"
+		"@tmlmobilidade/utils": "20251001.1708.10"
 	},
 	"devDependencies": {
 		"@carrismetropolitana/accounts-pckg-types": "*",
