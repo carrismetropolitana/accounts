@@ -73,10 +73,11 @@ export class AccountsController {
 		// Verify the schema version of the account document.
 		// If necessary, migrate the document to the latest schema version.
 		if (foundAccount._version !== '1.0') {
+			const accountId = foundAccount._id;
 			foundAccount = migrateAccountToLatestVersion(foundAccount, request.device_id);
 			// Update the migrated document in the database.
-			await accounts.deleteById(foundAccount._id);
-			await accounts.updateById(foundAccount._id, foundAccount, { upsert: true });
+			await accounts.deleteById(accountId);
+			await accounts.insertOne(foundAccount);
 		}
 		Logs.success(`[${request.id}] [AccountsController] [get] Account ${foundAccount._id} retrieved successfully in ${timer.get()}.`, 1);
 		return reply.send({ data: foundAccount, error: null, statusCode: HttpStatus.OK });
@@ -112,10 +113,11 @@ export class AccountsController {
 		// If necessary, migrate the document to the latest schema version.
 
 		if (foundAccount._version !== '1.0') {
+			const accountId = foundAccount._id;
 			foundAccount = migrateAccountToLatestVersion(foundAccount, request.device_id);
 			// Update the migrated document in the database.
-			await accounts.deleteById(foundAccount._id);
-			await accounts.updateById(foundAccount._id, foundAccount, { upsert: true });
+			await accounts.deleteById(accountId);
+			await accounts.insertOne(foundAccount);
 		}
 
 		//

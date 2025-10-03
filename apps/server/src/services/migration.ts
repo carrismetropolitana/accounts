@@ -1,11 +1,11 @@
 /* * */
 
 import { getRandomPersonaImageId } from '@/services/personas.js';
-import { type Account, AccountSchema, WidgetSchema } from '@carrismetropolitana/accounts-pckg-types';
+import { type AccountCreateDto, AccountCreateDtoSchema, WidgetSchema } from '@carrismetropolitana/accounts-pckg-types';
 import { Dates, generateRandomString, Logs } from '@tmlmobilidade/utils';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function migrateAccountToLatestVersion(oldAccount: any, deviceId: string): Account {
+export function migrateAccountToLatestVersion(oldAccount: any, deviceId: string): AccountCreateDto {
 	//
 
 	Logs.info(`[MIGRATION] [${oldAccount._id}] Migrating account to latest version...`);
@@ -20,9 +20,8 @@ export function migrateAccountToLatestVersion(oldAccount: any, deviceId: string)
 	//
 	// Initiate an empty account object with default values
 
-	const newAccount = AccountSchema
+	const newAccount = AccountCreateDtoSchema
 		.parse({
-			_id: oldAccount._id,
 			created_at: oldAccount.created_at ? oldAccount.created_at : Dates.now('Europe/Lisbon').unix_timestamp,
 			devices: [{ device_id: deviceId }],
 			persona: { image_id: personaImageId },

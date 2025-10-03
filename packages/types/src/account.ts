@@ -32,7 +32,7 @@ export const AccountSchema = DocumentSchema.extend({
 	widgets: z.array(WidgetSchema).default([]),
 });
 
-export const AccountCreateDtoSchema = AccountSchema.omit({ _id: true });
+export const AccountCreateDtoSchema = AccountSchema.omit({ _id: true }).strip();
 
 export const AccountUpdateDtoSchema = AccountSchema.omit({
 	_id: true,
