@@ -120,15 +120,6 @@ export class AccountsController {
 		}
 
 		//
-		// Strip out non-updatable fields from the request body.
-
-		delete request.body._id;
-		delete request.body._version;
-		delete request.body.created_at;
-		delete request.body.updated_at;
-		delete request.body.role;
-
-		//
 		// Ensure there is only one Expo notification token per account in the database.
 		// Keep only the device with the most recent updated_at timestamp.
 
@@ -169,6 +160,15 @@ export class AccountsController {
 			const issues = error.issues.map(i => `${i.path.join('.')} - ${i.message}`).join('; ');
 			throw new HttpException(HttpStatus.BAD_REQUEST, `Invalid Body: ${issues}`);
 		}
+
+		//
+		// Strip out non-updatable fields from the request body.
+
+		delete request.body._id;
+		delete request.body._version;
+		delete request.body.created_at;
+		delete request.body.updated_at;
+		delete request.body.role;
 
 		//
 		// Update the account widgets (smart notification geofences, etc.)
