@@ -39,10 +39,12 @@ export class AccountsController {
 				persona: { image_id: getRandomPersonaImageId() },
 				updated_at: Dates.now('Europe/Lisbon').unix_timestamp,
 			});
+
+		console.log('newAccount', newAccount);
 		// Save the new account to the database
-		await accounts.insertOne(newAccount);
+		const insertResult = await accounts.insertOne(newAccount);
 		// And return the generated Device ID
-		Logs.success(`[${request.id}] [AccountsController] [create] Random Device ID ${randomDeviceId} created successfully in ${timer.get()}.`, 1);
+		Logs.success(`[${request.id}] [AccountsController] [create] Account ID ${insertResult._id} with random Device ID ${randomDeviceId} created successfully in ${timer.get()}.`, 1);
 		return reply.send({ data: { device_id: randomDeviceId }, error: null, statusCode: HttpStatus.CREATED });
 	}
 
