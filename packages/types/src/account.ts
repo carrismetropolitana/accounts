@@ -42,7 +42,7 @@ export const UpdateAccountSchema = AccountSchema.omit({
 	role: true,
 	updated_at: true,
 	updated_by: true,
-}).strip();
+}).strip().partial();
 
 export type Account = z.infer<typeof AccountSchema>;
 export type AccountCreateDto = z.infer<typeof CreateAccountSchema>;

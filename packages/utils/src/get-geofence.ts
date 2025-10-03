@@ -14,17 +14,34 @@ export function getGeofence(stopData: Stop, shapeData: Shape, distance: number):
 	//
 
 	//
-	// Detect the nearest point on the shape to the stop
+	// Chunk the shape into segments of 10 meters each,
+	// then unify all segments into a single LineString.
+	// Chunking allows greater precision when calculating the nearest point on line.
+
+	const lineChunks = turf.lineChunk(shapeData.geojson, 10, { units: 'meters' });
+	const unifiedChunks = lineChunks.features.flatMap(chunk => chunk.geometry.coordinates);
+
+	const lineString = turf.lineString(unifiedChunks);
+
+	//
+	// For some unknown reason, cleanCoords is required
+	// to avoid issues with nearestPointOnLine.
+
+	const cleanedLineString = turf.cleanCoords(lineString);
+
+	//
+	// Detect the nearest point on the line from the stop
 
 	const stopPoint = turf.point([Number(stopData.lon), Number(stopData.lat)]);
-	const nearestPointOnLine = turf.nearestPointOnLine(shapeData.geojson, stopPoint);
+
+	const nearestPointOnLine = turf.nearestPointOnLine(cleanedLineString, stopPoint);
 
 	//
 	// Cut the line at the nearest point.
 	// This will create two segments, one before the stop and one after the stop.
 	// We want the segment before the stop as this will be the notification region.
 
-	const splitShape = turf.lineSplit(shapeData.geojson, nearestPointOnLine);
+	const splitShape = turf.lineSplit(lineString, nearestPointOnLine);
 
 	//
 	// Calculate the total split segment length and the initial distance to start the notification region.

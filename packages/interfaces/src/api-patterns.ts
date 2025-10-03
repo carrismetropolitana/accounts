@@ -36,10 +36,27 @@ class ApiPatternsClass {
 			.now('Europe/Lisbon')
 			.set({ hour: 12 })
 			.operational_date;
-		// Filter patterns by current operational date
-		const validPattern = foundEntity.find(p => p.valid_on.includes(todayAsOperationalDate));
-		// Return requested entity to the caller
-		return validPattern ?? null;
+		const activePatterns: Pattern[] = [];
+		let closestDateSoFar: null | string = null;
+		let patternGroupWithClosestDate: null | Pattern = null;
+		for (const patternGroup of foundEntity) {
+			const selectedDate = todayAsOperationalDate;
+			if (!selectedDate) return;
+			// Find the closest valid date
+			const closestDate = patternGroup.valid_on.reduce((acc, curr) => {
+				if (selectedDate <= curr && (acc === '' || curr < acc)) return curr;
+				return acc;
+			}, '');
+			if (!closestDateSoFar) closestDateSoFar = closestDate;
+			if (closestDate && closestDate <= closestDateSoFar) {
+				patternGroupWithClosestDate = patternGroup;
+				closestDateSoFar = closestDate;
+			}
+		}
+		// If the closest date is valid, add the pattern group to the list
+		if (patternGroupWithClosestDate && !activePatterns.find(activePattern => activePattern.id === patternGroupWithClosestDate.id)) {
+			return patternGroupWithClosestDate;
+		}
 	}
 
 	/**

@@ -2,27 +2,28 @@
 
 import { getGeofence } from '@/get-geofence.js';
 import { apiPatterns, apiShapes, apiStops } from '@carrismetropolitana/accounts-pckg-interfaces';
-import { type Account, type Widget } from '@carrismetropolitana/accounts-pckg-types';
+import { type Widget } from '@carrismetropolitana/accounts-pckg-types';
+import TIMETRACKER from '@helperkits/timer';
 import { Logs } from '@tmlmobilidade/utils';
 
 /**
  * Organizes Smart Notifications for all accounts.
  * This function will:
- * - Stream all accounts
- * - For each account, check if it has any smart_notification widgets
- * - For each smart_notification widget, validate the stop, pattern, and shape
- * - Calculate the geofence for the smart_notification
- * - Update the smart_notification widget with the new geofence
- * - Save the updated account back to the database
+ * - Validate that the referenced stop, pattern, and shape exist.
+ * - Ensure the stop is part of the pattern and is not the first stop.
+ * - Calculate a geofence around the stop based on the pattern's shape and the specified distance.
+ * - Update the widget's status to 'complete' or 'error' based on the processing outcome.
+ * @param widgetsData An array of Widget objects to be processed.
+ * @returns An array of updated Widget objects.
  */
-export async function getUpdatedWidgets(widgetsData: Account['widgets']): Promise<Account['widgets']> {
+export async function getUpdatedWidgets(widgetsData: Widget[]): Promise<Widget[]> {
 	//
 
 	//
 	// Skip processing if there are no widgets
 
 	if (!widgetsData?.length) {
-		Logs.info('No widgets received. Skipping processing.');
+		Logs.info('[getUpdatedWidgets] No widgets received. Skipping...');
 		return widgetsData;
 	}
 
@@ -32,7 +33,7 @@ export async function getUpdatedWidgets(widgetsData: Account['widgets']): Promis
 	const smartNotificationWidgets = widgetsData?.filter(item => item.type === 'smart_notification');
 
 	if (!smartNotificationWidgets?.length) {
-		Logs.error(`No smart_notification widgets found. Skipping.`);
+		Logs.info('[getUpdatedWidgets] No smart_notification widgets found. Skipping...');
 		return widgetsData;
 	}
 
@@ -46,10 +47,12 @@ export async function getUpdatedWidgets(widgetsData: Account['widgets']): Promis
 	//
 	// Process smart notifications
 
-	Logs.info(`Processing ${smartNotificationWidgets.length} smart_notification widgets...`);
+	Logs.info(`[getUpdatedWidgets] Processing ${smartNotificationWidgets.length} smart_notification widgets...`);
 
 	for (const smartNotification of smartNotificationWidgets) {
 		//
+
+		const timer = new TIMETRACKER();
 
 		//
 		// Get entities needed to calculate geofence
@@ -62,19 +65,19 @@ export async function getUpdatedWidgets(widgetsData: Account['widgets']): Promis
 		// Validate that entities are available
 
 		if (!stopData) {
-			Logs.error(`Stop ${smartNotification.properties.stop_id} not found. Skipping this smart notification.`);
+			Logs.error(`[getUpdatedWidgets] Stop ${smartNotification.properties.stop_id} not found. Skipping this smart notification.`);
 			widgetsMap.set(smartNotification._id, { ...smartNotification, status: { code: 'error', message: `STOP_NOT_FOUND` } });
 			continue;
 		}
 
 		if (!patternData) {
-			Logs.error(`Pattern ${smartNotification.properties.pattern_id} not found. Skipping this smart notification.`);
+			Logs.error(`[getUpdatedWidgets] Pattern ${smartNotification.properties.pattern_id} not found. Skipping this smart notification.`);
 			widgetsMap.set(smartNotification._id, { ...smartNotification, status: { code: 'error', message: `PATTERN_NOT_FOUND` } });
 			continue;
 		}
 
 		if (!shapeData) {
-			Logs.error(`Shape ${patternData.shape_id} not found. Skipping this smart notification.`);
+			Logs.error(`[getUpdatedWidgets] Shape ${patternData.shape_id} not found. Skipping this smart notification.`);
 			widgetsMap.set(smartNotification._id, { ...smartNotification, status: { code: 'error', message: `SHAPE_NOT_FOUND` } });
 			continue;
 		}
@@ -87,14 +90,14 @@ export async function getUpdatedWidgets(widgetsData: Account['widgets']): Promis
 		const stopIndexInPattern = sortedPath.findIndex(path => path.stop_id === smartNotification.properties.stop_id && path.stop_sequence > firstWaypointInPath.stop_sequence);
 
 		if (stopIndexInPattern < 0) {
-			Logs.error(`Stop ${smartNotification.properties.stop_id} is not in Pattern ${patternData.id}. Skipping this smart notification.`);
+			Logs.error(`[getUpdatedWidgets] Stop ${smartNotification.properties.stop_id} is not in Pattern ${patternData.id}. Skipping...`, null, 1);
 			widgetsMap.set(smartNotification._id, { ...smartNotification, status: { code: 'error', message: `STOP_NOT_IN_PATTERN` } });
 			continue;
 		}
 
 		if (stopIndexInPattern === 0) {
-			Logs.error(`Stop ${smartNotification.properties.stop_id} is the first stop in Pattern ${patternData.id}. Skipping this smart notification.`);
-			widgetsMap.set(smartNotification._id, { ...smartNotification, status: { code: 'error', message: `STOP_IS_FIRST` } });
+			Logs.error(`[getUpdatedWidgets] Stop ${smartNotification.properties.stop_id} is the first stop in Pattern ${patternData.id}. Skipping...`, null, 1);
+			widgetsMap.set(smartNotification._id, { ...smartNotification, status: { code: 'error', message: `STOP_IS_FIRST_WAYPOINT` } });
 			continue;
 		}
 
@@ -104,27 +107,20 @@ export async function getUpdatedWidgets(widgetsData: Account['widgets']): Promis
 		const geofenceData = getGeofence(stopData, shapeData, smartNotification.properties.distance);
 
 		if (!geofenceData) {
-			Logs.error(`Could not calculate geofence for Stop ${smartNotification.properties.stop_id} in Pattern ${patternData.id}. Skipping this smart notification.`);
-			widgetsMap.set(smartNotification._id, { ...smartNotification, status: { code: 'error', message: `GEOFENCE_NOT_FOUND` } });
+			Logs.error(`[getUpdatedWidgets] Could not calculate geofence for Stop ${smartNotification.properties.stop_id} in Pattern ${patternData.id}. Skipping...`, null, 1);
+			widgetsMap.set(smartNotification._id, { ...smartNotification, status: { code: 'error', message: `GEOFENCE_UNAVAILABLE` } });
 			continue;
 		}
 
 		//
 		// Save the updated smart notification
 
-		widgetsMap.set(smartNotification._id, {
-			...smartNotification,
-			properties: {
-				...smartNotification.properties,
-				geojson: geofenceData,
-			},
-			status: {
-				code: 'complete',
-				message: null,
-			},
-		});
+		smartNotification.properties.geojson = geofenceData;
+		smartNotification.status = { code: 'complete', message: null };
 
-		Logs.success(`Smart notification ${smartNotification._id} processed successfully.`);
+		widgetsMap.set(smartNotification._id, smartNotification);
+
+		Logs.success(`[getUpdatedWidgets] Smart notification ${smartNotification._id} processed successfully in ${timer.get()}.`, 1);
 
 		//
 	}

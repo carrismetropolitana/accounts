@@ -20,33 +20,24 @@ async function organizeWidgets() {
 	// Stream all Account documents
 
 	const accountsCollection = await accounts.getCollection();
-	const accountsStream = accountsCollection.find({ _version: '1.0' }).stream();
+	const accountsStream = accountsCollection.find({ _id: 'DDAC0', _version: '1.0' }).stream();
 
 	//
 	// Loop through all Account documents
 	// and ensure their smart notifications are organized
 
+	let totalAccountsCounter = 0;
+	let processedAccountsCounter = 0;
+
 	for await (const accountItem of accountsStream) {
 		//
 
+		totalAccountsCounter++;
+
 		//
-		// Enforce type
+		// Enforce correct type
 
 		const accountData: Account = accountItem;
-
-		//
-		// Skip if account is not available
-		// or does not have the correct version
-
-		if (!accountData) {
-			Logs.error(`Account ${accountData._id} not found. Skipping.`);
-			return;
-		}
-
-		if (accountData._version !== '1.0') {
-			Logs.error(`Account ${accountData._id} has unsupported version ${accountData._version}. Skipping.`);
-			return;
-		}
 
 		//
 		// Check that this account has any smart_notification widget
@@ -54,8 +45,8 @@ async function organizeWidgets() {
 		const smartNotificationWidgets = accountData.widgets?.filter(item => item.type === 'smart_notification');
 
 		if (!smartNotificationWidgets?.length) {
-			Logs.error(`Account ${accountData._id} does not have any smart_notification widgets. Skipping.`);
-			return;
+			Logs.info(`Account ${accountData._id} does not have any smart_notification widgets. Skipping...`);
+			continue;
 		}
 
 		//
@@ -67,12 +58,14 @@ async function organizeWidgets() {
 
 		await accounts.updateById(accountData._id, { widgets: updatedWidgets });
 
-		Logs.terminate(`Updated widgets for Account ${accountData._id} in ${timer.get()}`);
+		Logs.success(`Updated widgets for Account ${accountData._id} in ${timer.get()}.`);
+
+		processedAccountsCounter++;
 
 		//
 	}
 
-	Logs.terminate(`Organization completed in ${globalTimer.get()}`);
+	Logs.terminate(`Organized ${processedAccountsCounter} out of ${totalAccountsCounter} accounts in ${globalTimer.get()}.`);
 
 	//
 }
