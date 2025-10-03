@@ -164,16 +164,16 @@ export class AccountsController {
 		//
 		// Strip out non-updatable fields from the request body.
 
-		delete request.body._id;
-		delete request.body._version;
-		delete request.body.created_at;
-		delete request.body.updated_at;
-		delete request.body.role;
+		// delete request.body._id;
+		// delete request.body._version;
+		// delete request.body.created_at;
+		// delete request.body.updated_at;
+		// delete request.body.role;
 
 		//
 		// Update the account widgets (smart notification geofences, etc.)
 
-		request.body.widgets = await getUpdatedWidgets(request.body.widgets);
+		// request.body.widgets = await getUpdatedWidgets(request.body.widgets);
 
 		//
 		// Update the account in the database.
