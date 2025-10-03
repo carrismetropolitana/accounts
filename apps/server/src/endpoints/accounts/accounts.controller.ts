@@ -130,8 +130,14 @@ export class AccountsController {
 
 		//
 		// Update the account widgets (smart notification geofences, etc.)
+		// if any have changed (compare by ID).
 
-		validatedAccountUpdateData.widgets = await getUpdatedWidgets(validatedAccountUpdateData.widgets);
+		const prevWidgetIds = foundAccount.widgets.map(w => w._id).sort();
+		const newWidgetIds = validatedAccountUpdateData.widgets.map(w => w._id).sort();
+
+		if (JSON.stringify(prevWidgetIds) !== JSON.stringify(newWidgetIds)) {
+			validatedAccountUpdateData.widgets = await getUpdatedWidgets(validatedAccountUpdateData.widgets);
+		}
 
 		//
 		// Update the account in the database
