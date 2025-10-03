@@ -120,6 +120,38 @@ export class AccountsController {
 		}
 
 		//
+		// Ensure there is only one Expo notification token per account in the database.
+		// Keep only the device with the most recent updated_at timestamp.
+
+		for (const deviceData of foundAccount.devices) {
+			// Skip if there is no push token
+			if (!deviceData.push_token) continue;
+			// Find other accounts with the same push token
+			const otherAccountsWithTheSamePushToken = await accounts.findMany({ 'devices.push_token': deviceData.push_token });
+			// If more than one account has the same push token,
+			// delete the device object from that account as it is a duplicate.
+			// Keep only the one with the most recent updated_at timestamp.
+			for (const otherAccount of otherAccountsWithTheSamePushToken) {
+				// Skip if it's the same account
+				if (otherAccount._id === foundAccount._id) continue;
+				// If another account has the same push token,
+				// remove the device object from the account.
+				otherAccount.devices = otherAccount.devices
+					.map(item => item.push_token === deviceData.push_token ? null : item)
+					.filter(item => !!item);
+				// If the account has no devices left, delete it.
+				if (otherAccount.devices.length === 0) {
+					await accounts.deleteById(otherAccount._id);
+					Logs.info(`[${request.id}] [AccountsController] [update] Deleted account ${otherAccount._id} as it had no devices left after removing duplicate push token.`);
+					continue;
+				}
+				// Update the account in the database.
+				await accounts.updateById(otherAccount._id, otherAccount);
+				Logs.info(`[${request.id}] [AccountsController] [update] Removed duplicate push token from account ${otherAccount._id}.`);
+			}
+		}
+
+		//
 		// Validate the request body against the Account schema. If invalid, throw 400.
 
 		const { error, success } = AccountSchema.safeParse(request.body);
