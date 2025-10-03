@@ -122,33 +122,22 @@ export class AccountsController {
 		// Validate the request body against the Account schema.
 		// If invalid, throw 400.
 
-		const { data, error, success } = AccountUpdateDtoSchema.strip().safeParse(request.body);
+		const { data: validatedAccountUpdateData, error, success } = AccountUpdateDtoSchema.strip().safeParse(request.body);
 
 		if (!success) {
 			const issues = error.issues.map(i => `${i.path.join('.')} - ${i.message}`).join('; ');
 			throw new HttpException(HttpStatus.BAD_REQUEST, `Invalid Body: ${issues}`);
 		}
 
-		console.log('data', data);
-
-		//
-		// Strip out non-updatable fields from the request body
-
-		// delete request.body._id;
-		// delete request.body._version;
-		// delete request.body.created_at;
-		// delete request.body.updated_at;
-		// delete request.body.role;
-
 		//
 		// Update the account widgets (smart notification geofences, etc.)
 
-		request.body.widgets = await getUpdatedWidgets(request.body.widgets);
+		validatedAccountUpdateData.widgets = await getUpdatedWidgets(validatedAccountUpdateData.widgets);
 
 		//
 		// Update the account in the database
 
-		const updateResult = await accounts.updateById(foundAccount._id, request.body);
+		const updateResult = await accounts.updateById(foundAccount._id, validatedAccountUpdateData);
 
 		//
 		// Return the updated account
