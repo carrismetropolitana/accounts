@@ -1,6 +1,6 @@
 /* * */
 
-import { type Account, AccountCreateDto, AccountSchema, type AccountUpdateDto, UpdateAccountSchema } from '@carrismetropolitana/accounts-pckg-types';
+import { type Account, AccountCreateDto, AccountSchema, type AccountUpdateDto, CreateAccountSchema, UpdateAccountSchema } from '@carrismetropolitana/accounts-pckg-types';
 import { type IndexDescription, MongoCollectionClass } from '@tmlmobilidade/interfaces';
 import { AsyncSingletonProxy } from '@tmlmobilidade/utils';
 

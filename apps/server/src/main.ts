@@ -8,15 +8,9 @@ const MAX_BODY_SIZE = 1024 * 1024 * 10; // 10MB
 
 const options: FastifyServiceOptions = {
 	bodyLimit: MAX_BODY_SIZE,
-	// logger: {
-	// 	level: 'debug',
-	// 	transport: {
-	// 		options: {
-	// 			colorize: true,
-	// 		},
-	// 		target: 'pino-pretty',
-	// 	},
-	// },
+	logger: {
+		level: 'debug',
+	},
 	port: 5050,
 	routerOptions: {
 		ignoreTrailingSlash: true,

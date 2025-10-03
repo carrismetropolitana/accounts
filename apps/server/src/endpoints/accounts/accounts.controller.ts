@@ -3,7 +3,7 @@
 import { migrateAccountToLatestVersion } from '@/services/migration.js';
 import { getRandomPersonaImageId } from '@/services/personas.js';
 import { accounts } from '@carrismetropolitana/accounts-pckg-interfaces';
-import { type Account, AccountSchema, UpdateAccountSchema } from '@carrismetropolitana/accounts-pckg-types';
+import { type Account, CreateAccountSchema, UpdateAccountSchema } from '@carrismetropolitana/accounts-pckg-types';
 import { getUpdatedWidgets } from '@carrismetropolitana/accounts-pckg-utils';
 import TIMETRACKER from '@helperkits/timer';
 import { type FastifyReply, type FastifyRequest } from '@tmlmobilidade/connectors';
@@ -32,18 +32,16 @@ export class AccountsController {
 			randomDeviceId = generateRandomToken();
 		}
 		// Create a new account object with default values and the generated Device ID
-		const newAccount = AccountSchema
-			.parse({
-				created_at: Dates.now('Europe/Lisbon').unix_timestamp,
-				devices: [{ device_id: randomDeviceId }],
-				persona: { image_id: getRandomPersonaImageId() },
-				updated_at: Dates.now('Europe/Lisbon').unix_timestamp,
-			});
+		const newAccount = CreateAccountSchema.parse({
+			created_at: Dates.now('Europe/Lisbon').unix_timestamp,
+			devices: [{ device_id: randomDeviceId }],
+			persona: { image_id: getRandomPersonaImageId() },
+			updated_at: Dates.now('Europe/Lisbon').unix_timestamp,
+		});
 		// Save the new account to the database
-		const accountsCollection = await accounts.getCollection();
-		await accountsCollection.insertOne(newAccount);
+		const insertResult = await accounts.insertOne(newAccount, { unsafe: true });
 		// And return the generated Device ID
-		Logs.success(`[${request.id}] [AccountsController] [create] Account ID with random Device ID ${randomDeviceId} created successfully in ${timer.get()}.`, 1);
+		Logs.success(`[${request.id}] [AccountsController] [create] Account ID ${insertResult._id} with random Device ID ${randomDeviceId} created successfully in ${timer.get()}.`, 1);
 		return reply.send({ data: { device_id: randomDeviceId }, error: null, statusCode: HttpStatus.CREATED });
 	}
 
