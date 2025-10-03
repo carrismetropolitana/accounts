@@ -66,6 +66,8 @@ export class AccountsController {
 		// Setup logging
 		const timer = new TIMETRACKER();
 		Logs.info(`[${request.id}] [AccountsController] [get] Retrieving account...`);
+		// Skip if device ID is invalid (temporary check)
+		if (request.device_id === 'newDeviceId') throw new HttpException(HttpStatus.BAD_REQUEST, 'INVALID_DEVICE_ID');
 		// Find the account by Device ID. If not found, throw 404.
 		let foundAccount = await accounts.findByDeviceId(request.device_id);
 		if (!foundAccount) throw new HttpException(HttpStatus.NOT_FOUND, 'ACCOUNT_NOT_FOUND');
