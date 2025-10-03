@@ -76,7 +76,7 @@ export class AccountsController {
 			foundAccount = migrateAccountToLatestVersion(foundAccount, request.device_id);
 			// Update the migrated document in the database.
 			await accounts.deleteById(foundAccount._id);
-			await accounts.updateById(foundAccount._id, foundAccount, { upsert: true });
+			await accounts.insertOne(foundAccount);
 		}
 		Logs.success(`[${request.id}] [AccountsController] [get] Account ${foundAccount._id} retrieved successfully in ${timer.get()}.`, 1);
 		return reply.send({ data: foundAccount, error: null, statusCode: HttpStatus.OK });
@@ -115,7 +115,7 @@ export class AccountsController {
 			foundAccount = migrateAccountToLatestVersion(foundAccount, request.device_id);
 			// Update the migrated document in the database.
 			await accounts.deleteById(foundAccount._id);
-			await accounts.updateById(foundAccount._id, foundAccount, { upsert: true });
+			await accounts.insertOne(foundAccount);
 		}
 
 		//
