@@ -86,6 +86,8 @@ async function organizeAccounts() {
 				await accounts.updateById(otherAccount._id, otherAccount);
 				Logs.info(`Removed duplicate push token from account ${otherAccount._id}.`);
 			}
+
+			//
 		}
 
 		//
