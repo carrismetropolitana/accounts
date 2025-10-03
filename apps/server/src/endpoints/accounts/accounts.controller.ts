@@ -3,7 +3,7 @@
 import { migrateAccountToLatestVersion } from '@/services/migration.js';
 import { getRandomPersonaImageId } from '@/services/personas.js';
 import { accounts } from '@carrismetropolitana/accounts-pckg-interfaces';
-import { type Account, AccountCreateDtoSchema, AccountUpdateDtoSchema } from '@carrismetropolitana/accounts-pckg-types';
+import { type Account, AccountSchema, UpdateAccountSchema } from '@carrismetropolitana/accounts-pckg-types';
 import { getUpdatedWidgets } from '@carrismetropolitana/accounts-pckg-utils';
 import TIMETRACKER from '@helperkits/timer';
 import { type FastifyReply, type FastifyRequest } from '@tmlmobilidade/connectors';
@@ -32,15 +32,13 @@ export class AccountsController {
 			randomDeviceId = generateRandomToken();
 		}
 		// Create a new account object with default values and the generated Device ID
-		const newAccount = AccountCreateDtoSchema
+		const newAccount = AccountSchema
 			.parse({
 				created_at: Dates.now('Europe/Lisbon').unix_timestamp,
 				devices: [{ device_id: randomDeviceId }],
 				persona: { image_id: getRandomPersonaImageId() },
 				updated_at: Dates.now('Europe/Lisbon').unix_timestamp,
 			});
-
-		console.log('newAccount', newAccount);
 		// Save the new account to the database
 		const insertResult = await accounts.insertOne(newAccount);
 		// And return the generated Device ID
@@ -124,7 +122,7 @@ export class AccountsController {
 		// Validate the request body against the Account schema.
 		// If invalid, throw 400.
 
-		const { data: validatedAccountUpdateData, error, success } = AccountUpdateDtoSchema.strip().safeParse(request.body);
+		const { data: validatedAccountUpdateData, error, success } = UpdateAccountSchema.strip().safeParse(request.body);
 
 		if (!success) {
 			const issues = error.issues.map(i => `${i.path.join('.')} - ${i.message}`).join('; ');
