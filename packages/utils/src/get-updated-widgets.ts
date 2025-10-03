@@ -47,8 +47,6 @@ export async function getUpdatedWidgets(widgetsData: Widget[]): Promise<Widget[]
 	//
 	// Process smart notifications
 
-	Logs.info(`[getUpdatedWidgets] Processing ${smartNotificationWidgets.length} smart_notification widgets...`);
-
 	for (const smartNotification of smartNotificationWidgets) {
 		//
 
@@ -56,6 +54,8 @@ export async function getUpdatedWidgets(widgetsData: Widget[]): Promise<Widget[]
 
 		//
 		// Get entities needed to calculate geofence
+
+		Logs.info(`[getUpdatedWidgets] Processing Smart Notification widget | stop_id: ${smartNotification.properties.stop_id} | pattern_id: ${smartNotification.properties.pattern_id} | distance: ${smartNotification.properties.distance}`);
 
 		const stopData = await apiStops.getStop(smartNotification.properties.stop_id);
 		const patternData = await apiPatterns.getPattern(smartNotification.properties.pattern_id);
