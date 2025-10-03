@@ -119,21 +119,17 @@ export class AccountsController {
 		}
 
 		//
-		// Ensure there is only one Expo notification token per account in the database.
-		// Keep only the device with the most recent updated_at timestamp.
-
-		// CALL HERE THE UTILS FUNCTION TO CLEAN THE TOKENS
-
-		//
 		// Validate the request body against the Account schema.
 		// If invalid, throw 400.
 
-		const { error, success } = AccountUpdateDtoSchema.strip().safeParse(request.body);
+		const { data, error, success } = AccountUpdateDtoSchema.strip().safeParse(request.body);
 
 		if (!success) {
 			const issues = error.issues.map(i => `${i.path.join('.')} - ${i.message}`).join('; ');
 			throw new HttpException(HttpStatus.BAD_REQUEST, `Invalid Body: ${issues}`);
 		}
+
+		console.log('data', data);
 
 		//
 		// Strip out non-updatable fields from the request body
