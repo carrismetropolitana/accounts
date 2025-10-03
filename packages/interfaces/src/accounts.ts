@@ -1,18 +1,18 @@
 /* * */
 
-import { type Account, AccountSchema } from '@carrismetropolitana/accounts-pckg-types';
+import { type Account, AccountCreateDto, AccountCreateDtoSchema, type AccountUpdateDto, AccountUpdateDtoSchema } from '@carrismetropolitana/accounts-pckg-types';
 import { type IndexDescription, MongoCollectionClass } from '@tmlmobilidade/interfaces';
 import { AsyncSingletonProxy } from '@tmlmobilidade/utils';
 
 /* * */
 
-class AccountsClass extends MongoCollectionClass<Account, Account, Account> {
+class AccountsClass extends MongoCollectionClass<Account, AccountCreateDto, AccountUpdateDto> {
 	//
 
 	private static _instance: AccountsClass;
 
-	protected override createSchema = AccountSchema;
-	protected override updateSchema = AccountSchema;
+	protected override createSchema = AccountCreateDtoSchema;
+	protected override updateSchema = AccountUpdateDtoSchema;
 
 	private constructor() {
 		super();

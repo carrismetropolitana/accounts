@@ -32,6 +32,15 @@ export const AccountSchema = DocumentSchema.extend({
 	widgets: z.array(WidgetSchema).default([]),
 });
 
-export const AccountUpdateDtoSchema = AccountSchema.omit({ _id: true, _version: true, created_at: true, updated_at: true });
+export const AccountCreateDtoSchema = AccountSchema.omit({ _id: true });
+
+export const AccountUpdateDtoSchema = AccountSchema.omit({
+	_id: true,
+	_version: true,
+	created_at: true,
+	updated_at: true,
+}).strip();
 
 export type Account = z.infer<typeof AccountSchema>;
+export type AccountCreateDto = z.infer<typeof AccountCreateDtoSchema>;
+export type AccountUpdateDto = z.infer<typeof AccountUpdateDtoSchema>;

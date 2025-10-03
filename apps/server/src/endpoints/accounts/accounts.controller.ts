@@ -3,7 +3,7 @@
 import { migrateAccountToLatestVersion } from '@/services/migration.js';
 import { getRandomPersonaImageId } from '@/services/personas.js';
 import { accounts } from '@carrismetropolitana/accounts-pckg-interfaces';
-import { type Account, AccountSchema } from '@carrismetropolitana/accounts-pckg-types';
+import { type Account, AccountCreateDtoSchema, AccountUpdateDtoSchema } from '@carrismetropolitana/accounts-pckg-types';
 import { getUpdatedWidgets } from '@carrismetropolitana/accounts-pckg-utils';
 import TIMETRACKER from '@helperkits/timer';
 import { type FastifyReply, type FastifyRequest } from '@tmlmobilidade/connectors';
@@ -32,8 +32,7 @@ export class AccountsController {
 			randomDeviceId = generateRandomToken();
 		}
 		// Create a new account object with default values and the generated Device ID
-		const newAccount = AccountSchema
-			.omit({ _id: true })
+		const newAccount = AccountCreateDtoSchema
 			.parse({
 				created_at: Dates.now('Europe/Lisbon').unix_timestamp,
 				devices: [{ device_id: randomDeviceId }],
@@ -123,38 +122,13 @@ export class AccountsController {
 		// Ensure there is only one Expo notification token per account in the database.
 		// Keep only the device with the most recent updated_at timestamp.
 
-		for (const deviceData of foundAccount.devices) {
-			// Skip if there is no push token
-			if (!deviceData.push_token) continue;
-			// Find other accounts with the same push token
-			const otherAccountsWithTheSamePushToken = await accounts.findMany({ 'devices.push_token': deviceData.push_token });
-			// If more than one account has the same push token,
-			// delete the device object from that account as it is a duplicate.
-			// Keep only the one with the most recent updated_at timestamp.
-			for (const otherAccount of otherAccountsWithTheSamePushToken) {
-				// Skip if it's the same account
-				if (otherAccount._id === foundAccount._id) continue;
-				// If another account has the same push token,
-				// remove the device object from the account.
-				otherAccount.devices = otherAccount.devices
-					.map(item => item.push_token === deviceData.push_token ? null : item)
-					.filter(item => !!item);
-				// If the account has no devices left, delete it.
-				if (otherAccount.devices.length === 0) {
-					await accounts.deleteById(otherAccount._id);
-					Logs.info(`[${request.id}] [AccountsController] [update] Deleted account ${otherAccount._id} as it had no devices left after removing duplicate push token.`);
-					continue;
-				}
-				// Update the account in the database.
-				await accounts.updateById(otherAccount._id, otherAccount);
-				Logs.info(`[${request.id}] [AccountsController] [update] Removed duplicate push token from account ${otherAccount._id}.`);
-			}
-		}
+		// CALL HERE THE UTILS FUNCTION TO CLEAN THE TOKENS
 
 		//
-		// Validate the request body against the Account schema. If invalid, throw 400.
+		// Validate the request body against the Account schema.
+		// If invalid, throw 400.
 
-		const { error, success } = AccountSchema.safeParse(request.body);
+		const { error, success } = AccountUpdateDtoSchema.strip().safeParse(request.body);
 
 		if (!success) {
 			const issues = error.issues.map(i => `${i.path.join('.')} - ${i.message}`).join('; ');
@@ -162,7 +136,7 @@ export class AccountsController {
 		}
 
 		//
-		// Strip out non-updatable fields from the request body.
+		// Strip out non-updatable fields from the request body
 
 		// delete request.body._id;
 		// delete request.body._version;
@@ -173,15 +147,15 @@ export class AccountsController {
 		//
 		// Update the account widgets (smart notification geofences, etc.)
 
-		// request.body.widgets = await getUpdatedWidgets(request.body.widgets);
+		request.body.widgets = await getUpdatedWidgets(request.body.widgets);
 
 		//
-		// Update the account in the database.
+		// Update the account in the database
 
 		const updateResult = await accounts.updateById(foundAccount._id, request.body);
 
 		//
-		// Return the updated account.
+		// Return the updated account
 
 		Logs.success(`[${request.id}] [AccountsController] [update] Account ${foundAccount._id} updated successfully in ${timer.get()}.`, 1);
 
