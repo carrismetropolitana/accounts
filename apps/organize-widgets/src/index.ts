@@ -61,7 +61,7 @@ async function organizeWidgets() {
 
 		await accounts.updateById(accountData._id, { widgets: updatedWidgets });
 
-		Logs.success(`Updated widgets for Account ${accountData._id} in ${timer.get()}.`, 1);
+		Logs.success(`Updated widgets for Account ${accountData._id} in ${timer.get()}.`);
 
 		processedAccountsCounter++;
 
