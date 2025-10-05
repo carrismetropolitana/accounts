@@ -36,8 +36,55 @@ services:
   # # # # # # # # # # # # # # # # # # # # #
   # # # # # # # # # # # # # # # # # # # # #
 
+  accounts-db:
+    image: mongo:latest
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+      resources:
+        limits:
+          memory: 8gb
+    ports:
+      - 27017:27017
+    volumes:
+      - ./accounts-entrypoint.sh:/docker-entrypoint-initdb.d/init.sh:ro
+      - ./accounts-keyfile.key:/data/replica.key
+      - ./accounts-db-data:/data/db
+    env_file:
+      - ./secrets/.env
+    entrypoint:
+      - bash
+      - -c
+      - |
+          chmod 400 /data/replica.key
+          chown 999:999 /data/replica.key
+          exec docker-entrypoint.sh $$@
+    command: mongod --bind_ip_all --auth --replSet rs0 --keyFile /data/replica.key --port 27017
+
+  # # # # # # # # # # # # # # # # # # # # #
+  # # # # # # # # # # # # # # # # # # # # #
+
+  backupd:
+    image: ghcr.io/tmlmobilidade/backupd:production
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+      resources:
+        limits:
+          memory: 2gb
+    volumes:
+      - ./backupd-data:/data/backups
+      - ./secrets/backupd.yaml:/config.yaml
+    environment:
+      - CONFIG_PATH=/config.yaml
+
+  # # # # # # # # # # # # # # # # # # # # #
+  # # # # # # # # # # # # # # # # # # # # #
+
   nginx:
-    image: ghcr.io/carrismetropolitana/accounts-nginx:production
+    image: ghcr.io/carrismetropolitana/accounts-nginx:staging
     deploy:
       restart_policy:
         condition: on-failure
@@ -63,7 +110,13 @@ services:
   certbot:
     image: certbot/certbot
     restart: unless-stopped
-    mem_limit: 2g
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+      resources:
+        limits:
+          memory: 100mb
     volumes:
       - ./letsencrypt:/etc/letsencrypt
       - certbotdata:/var/www/certbot
@@ -72,7 +125,7 @@ services:
   # # # # # # # # # # # # # # # # # # # # #
   # # # # # # # # # # # # # # # # # # # # #
 
-  server:
+  serverv0:
     image: ghcr.io/carrismetropolitana/accounts-server:production
     deploy:
       restart_policy:
@@ -94,68 +147,74 @@ services:
   # # # # # # # # # # # # # # # # # # # # #
   # # # # # # # # # # # # # # # # # # # # #
 
-  accounts-db:
-    image: mongo:latest
-    restart: always
-    ports:
-      - 27017:27017
-    volumes:
-      - ./accounts-entrypoint.sh:/docker-entrypoint-initdb.d/init.sh:ro
-      - ./accounts-keyfile.key:/data/replica.key
-      - ./accounts-db-data:/data/db
-    env_file:
-      - ./secrets/.env
-    entrypoint:
-      - bash
-      - -c
-      - |
-          chmod 400 /data/replica.key
-          chown 999:999 /data/replica.key
-          exec docker-entrypoint.sh $$@
-    command: mongod --bind_ip_all --auth --replSet rs0 --keyFile /data/replica.key --port 27017
-
-  # # # # # # # # # # # # # # # # # # # # #
-  # # # # # # # # # # # # # # # # # # # # #
-
-  backupd:
-    image: ghcr.io/tmlmobilidade/backupd:production
-    volumes:
-      - ./backupd-data:/data/backups
-      - ./secrets/backupd.yaml:/config.yaml
-    environment:
-      - CONFIG_PATH=/config.yaml
-    depends_on:
-      - accounts-db
-
-  # # # # # # # # # # # # # # # # # # # # #
-  # # # # # # # # # # # # # # # # # # # # #
-
-  redis:
-    image: redis:latest
+  serverv1:
+    image: ghcr.io/carrismetropolitana/accounts-server:staging
     deploy:
       restart_policy:
         condition: on-failure
         delay: 30s
-    ports:
-      - 6379:6379
-    volumes:
-      - ./redis-data:/data
-    command: redis-server --appendonly yes
+      resources:
+        limits:
+          memory: 2gb
+    logging:
+      options:
+        max-size: '1m'
+        max-file: '1'
+    env_file:
+      - ./secrets/.env
 
   # # # # # # # # # # # # # # # # # # # # #
   # # # # # # # # # # # # # # # # # # # # #
 
   notifications-service:
-    image: ghcr.io/carrismetropolitana/accounts-notifications-service:production
+    image: ghcr.io/carrismetropolitana/accounts-notifications-service:staging
     deploy:
       restart_policy:
         condition: on-failure
         delay: 30s
+      resources:
+        limits:
+          memory: 2gb
     env_file:
       - ./secrets/.env
     volumes:
       - ./secrets/firebase.json:/app/firebase.json
       - ./notifications-service-data:/data
-    depends_on:
-      - redis
-      - filter-service
+
+  # # # # # # # # # # # # # # # # # # # # #
+  # # # # # # # # # # # # # # # # # # # # #
+
+  organize-widgets:
+    image: ghcr.io/carrismetropolitana/accounts-organize-widgets:staging
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+      resources:
+        limits:
+          memory: 2gb
+    logging:
+      options:
+        max-size: '1m'
+        max-file: '1'
+    env_file:
+      - ./secrets/.env
+
+  # # # # # # # # # # # # # # # # # # # # #
+  # # # # # # # # # # # # # # # # # # # # #
+
+  organize-accounts:
+    image: ghcr.io/carrismetropolitana/accounts-organize-accounts:staging
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+      resources:
+        limits:
+          memory: 2gb
+    logging:
+      options:
+        max-size: '1m'
+        max-file: '1'
+    env_file:
+      - ./secrets/.env
