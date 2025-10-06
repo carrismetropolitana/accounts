@@ -50,8 +50,24 @@ export class AccountsController {
 	 * @param request Fastify request
 	 * @param reply Fastify reply
 	 */
-	static async delete(request: FastifyRequest, reply: FastifyReply<void>) {
-		await accounts.deleteById(request.device_id);
+	static async delete(request: FastifyRequest<{ Params: { device_id?: string, email?: string, phone?: string } }>, reply: FastifyReply<void>) {
+		// Find the account by Device ID. If not found, throw 404.
+		let foundAccount: Account;
+		if (request.params.device_id) {
+			foundAccount = await accounts.findByDeviceId(request.device_id);
+		}
+		else if (request.params.email) {
+			// foundAccount = await accounts.findOne({ email: request.params.email });
+		}
+		else if (request.params.phone) {
+			// foundAccount = await accounts.findOne({ phone: request.params.phone });
+		}
+		else {
+			throw new HttpException(HttpStatus.BAD_REQUEST, 'MISSING_IDENTIFIER');
+		}
+		if (!foundAccount) throw new HttpException(HttpStatus.NOT_FOUND, 'ACCOUNT_NOT_FOUND');
+		// Delete the account from the database.
+		await accounts.deleteById(foundAccount._id);
 		return reply.send({ data: null, error: null, statusCode: HttpStatus.OK });
 	}
 

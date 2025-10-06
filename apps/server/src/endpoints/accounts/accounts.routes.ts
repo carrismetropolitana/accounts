@@ -25,7 +25,7 @@ server.register(
 		instance.put('/', { preHandler: authorizationMiddleware }, AccountsController.update);
 
 		// DELETE /accounts
-		instance.delete('/', { preHandler: authorizationMiddleware }, AccountsController.delete);
+		instance.delete('/', AccountsController.delete);
 
 		next();
 	},
