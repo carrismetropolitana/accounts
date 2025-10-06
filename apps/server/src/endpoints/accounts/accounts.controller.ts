@@ -132,10 +132,10 @@ export class AccountsController {
 		// Update the account widgets (smart notification geofences, etc.)
 		// if any have changed (compare by ID).
 
-		const prevWidgetIds = foundAccount.widgets.map(w => w._id).sort();
-		const newWidgetIds = validatedAccountUpdateData.widgets.map(w => w._id).sort();
+		const prevWidgetProperties = foundAccount.widgets.map(w => ({ id: w._id, properties: w.properties })).sort((a, b) => a.id.localeCompare(b.id));
+		const newWidgetProperties = validatedAccountUpdateData.widgets.map(w => ({ id: w._id, properties: w.properties })).sort((a, b) => a.id.localeCompare(b.id));
 
-		if (JSON.stringify(prevWidgetIds) !== JSON.stringify(newWidgetIds)) {
+		if (JSON.stringify(prevWidgetProperties) !== JSON.stringify(newWidgetProperties)) {
 			validatedAccountUpdateData.widgets = await getUpdatedWidgets(validatedAccountUpdateData.widgets);
 		}
 
