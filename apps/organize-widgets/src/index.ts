@@ -40,7 +40,7 @@ async function organizeWidgets() {
 		const accountData: Account = accountItem;
 
 		Logs.divider();
-		Logs.info(`[$${totalAccountsCounter}] Processing Account ${accountData._id}...`);
+		Logs.info(`[${totalAccountsCounter}] Processing Account ${accountData._id}...`);
 
 		//
 		// Check that this account has any smart_notification widget
@@ -65,7 +65,7 @@ async function organizeWidgets() {
 			Logs.success(`Updated widgets for Account ${accountData._id} in ${timer.get()}.`);
 		}
 		catch (error) {
-			Logs.error(`[$${totalAccountsCounter}] Failed to update widgets for Account ${accountData._id}: ${error.message}`);
+			Logs.error(`[${totalAccountsCounter}] Failed to update widgets for Account ${accountData._id}: ${error.message}`);
 		}
 
 		processedAccountsCounter++;
