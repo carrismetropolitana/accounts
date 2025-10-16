@@ -1,6 +1,7 @@
 /* * */
 
 import { type Shape } from '@carrismetropolitana/api-types/network';
+import { Logs } from '@tmlmobilidade/utils';
 
 /* * */
 
@@ -41,13 +42,14 @@ class ApiShapesClass {
 			if (this.serviceData.has(id)) return;
 			// Fetch data from service
 			const response = await fetch(`${this.serviceUrl}/${id}`);
-			if (!response.ok) throw new Error(response.statusText);
+			if (!response.ok) return Logs.error(response.statusText);
 			// Save response data
 			const data = await response.json() as Shape;
 			this.serviceData.set(id, data);
 		}
 		catch (error) {
-			throw new Error(`Error updating shapes data: ${error.message}`);
+			Logs.error(`Error updating shapes data: ${error.message}`);
+			return;
 		}
 	}
 

@@ -1,6 +1,7 @@
 /* * */
 
 import { type Stop } from '@carrismetropolitana/api-types/network';
+import { Logs } from '@tmlmobilidade/utils';
 
 /* * */
 
@@ -52,12 +53,13 @@ class ApiStopsClass {
 			if (this.serviceData?.length) return;
 			// Fetch data from service
 			const response = await fetch(this.serviceUrl);
-			if (!response.ok) throw new Error(response.statusText);
+			if (!response.ok) return Logs.error(response.statusText);
 			// Save response data
 			this.serviceData = await response.json() as Stop[];
 		}
 		catch (error) {
-			throw new Error(`Error updating stops data: ${error.message}`);
+			Logs.error(`Error updating stops data: ${error.message}`);
+			return;
 		}
 	}
 
