@@ -26,7 +26,10 @@ async function organizeAccounts() {
 	// Stream all Account documents
 
 	const accountsCollection = await accounts.getCollection();
-	const accountsStream = accountsCollection.find({ _version: '1.0' }).stream();
+	const accountsStream = accountsCollection
+		.find({ _version: '1.0' })
+		.sort({ updated_at: -1 })
+		.stream();
 
 	//
 	// Loop through all Account documents
