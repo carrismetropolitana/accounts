@@ -27,7 +27,7 @@ import (
 		log.Println(err)
 	}
 	
-	fmt.Printf("Found %d Notification Widgets \n", len(notifications))
+	fmt.Printf("(FIRST TIME) Found %d Notification Widgets \n", len(notifications))
 	*myNotifications = notifications
 
 
@@ -45,6 +45,8 @@ import (
 
 func getActiveNotifications() ([]types.NotificationWidget, error) {
 	mongoService := NewMongoService(GetEnv("DATABASE_URI"), GetEnv("production"))
+
+	fmt.Printf("DATABASE_URI: %s, production: %s\n", GetEnv("DATABASE_URI"), GetEnv("production"))
 
 	
 	// Build pipeline
@@ -106,6 +108,8 @@ func getActiveNotifications() ([]types.NotificationWidget, error) {
 	if err := cursor.All(context.Background(), &notifications); err != nil {
 		return nil, err
 	}
+
+	fmt.Printf("Found %d Notification Widgets \n", len(notifications))
 
 	return notifications, nil
 }
