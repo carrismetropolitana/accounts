@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"notifications-service/lib"
@@ -87,6 +88,14 @@ func getActiveNotifications() ([]types.NotificationWidget, error) {
 			}},
 		}}},
 	}
+
+	// Print Pipeline ready to copy and paste into MongoDB Compass
+	fmt.Println("pipeline: \n", pipeline)
+	pipelineJSON, err := json.Marshal(pipeline)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println("pipelineJSON: ", string(pipelineJSON))
 
 	cursor, err := mongoService.Aggregate("accounts", pipeline)
 	if err != nil {
