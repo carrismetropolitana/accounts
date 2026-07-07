@@ -20,7 +20,10 @@ async function organizeWidgets() {
 	// Stream all Account documents
 
 	const accountsCollection = await accounts.getCollection();
-	const accountsStream = accountsCollection.find({ _version: '1.0', widgets: { $not: { $size: 0 } } }).stream();
+	const accountsStream = accountsCollection.find({
+		'_version': '1.0',
+		'widgets.type': 'smart_notification',
+	}).stream();
 
 	//
 	// Loop through all Account documents
