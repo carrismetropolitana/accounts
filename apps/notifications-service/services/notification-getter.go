@@ -44,11 +44,21 @@ import (
 }
 
 func getActiveNotifications() ([]types.NotificationWidget, error) {
-	mongoService := NewMongoService(GetEnv("DATABASE_URI"), GetEnv("production"))
+	dbName := GetDatabaseName()
+	mongoService := GetMongoService()
+	if mongoService == nil {
+		return nil, fmt.Errorf("failed to connect to MongoDB database %q", dbName)
+	}
 
-	fmt.Printf("DATABASE_URI: %s, production: %s\n", GetEnv("DATABASE_URI"), GetEnv("production"))
+	currentWeekday := lib.GetCurrentWeekDay()
+	currentSecond := lib.GetCurrentSecondInDay()
+	fmt.Printf(
+		"Querying database %q with weekday=%s second=%d\n",
+		dbName,
+		currentWeekday,
+		currentSecond,
+	)
 
-	
 	// Build pipeline
 	pipeline := mongo.Pipeline{
 		// Unwind widgets
@@ -56,9 +66,9 @@ func getActiveNotifications() ([]types.NotificationWidget, error) {
 		// Match widgets with conditions
 		bson.D{{Key: "$match", Value: bson.D{
 			{Key: "widgets.type", Value: "smart_notification"},
-			{Key: "widgets.properties.weekdays", Value: lib.GetCurrentWeekDay()},
-			{Key: "widgets.properties.start_time", Value: bson.D{{Key: "$lte", Value: lib.GetCurrentSecondInDay()}}},
-			{Key: "widgets.properties.end_time", Value: bson.D{{Key: "$gte", Value: lib.GetCurrentSecondInDay()}}},
+			{Key: "widgets.properties.weekdays", Value: currentWeekday},
+			{Key: "widgets.properties.start_time", Value: bson.D{{Key: "$lte", Value: currentSecond}}},
+			{Key: "widgets.properties.end_time", Value: bson.D{{Key: "$gte", Value: currentSecond}}},
 			{Key: "widgets.status.code", Value: "complete"},
 		}}},
 		// Project widget fields + account id + push tokens
@@ -104,12 +114,58 @@ func getActiveNotifications() ([]types.NotificationWidget, error) {
 		return nil, err
 	}
 
-	notifications := []types.NotificationWidget{}
-	if err := cursor.All(context.Background(), &notifications); err != nil {
+	rawResults := []bson.M{}
+	if err := cursor.All(context.Background(), &rawResults); err != nil {
 		return nil, err
+	}
+
+	fmt.Printf("MongoDB returned %d raw documents\n", len(rawResults))
+
+	notifications := make([]types.NotificationWidget, 0, len(rawResults))
+	for i, raw := range rawResults {
+		notification, err := decodeNotificationWidget(raw)
+		if err != nil {
+			log.Printf("Failed to decode notification widget %d: %v (raw: %+v)", i, err, raw)
+			continue
+		}
+		notifications = append(notifications, notification)
 	}
 
 	fmt.Printf("Found %d Notification Widgets \n", len(notifications))
 
 	return notifications, nil
+}
+
+func decodeNotificationWidget(raw bson.M) (types.NotificationWidget, error) {
+	var notification types.NotificationWidget
+
+	data, err := bson.Marshal(raw)
+	if err != nil {
+		return notification, err
+	}
+
+	if err := bson.Unmarshal(data, &notification); err != nil {
+		return notification, err
+	}
+
+	if accountID, ok := raw["account_id"]; ok {
+		notification.AccountId = bsonValueToString(accountID)
+	}
+
+	if id, ok := raw["_id"]; ok {
+		notification.Id = bsonValueToString(id)
+	}
+
+	return notification, nil
+}
+
+func bsonValueToString(value interface{}) string {
+	switch v := value.(type) {
+	case string:
+		return v
+	case bson.ObjectID:
+		return v.Hex()
+	default:
+		return fmt.Sprint(v)
+	}
 }

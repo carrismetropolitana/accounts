@@ -28,5 +28,21 @@ func GetEnv(key string) string {
 		}
 	}
 
-	return requiredEnvVars[key]
+	if value, ok := requiredEnvVars[key]; ok {
+		return value
+	}
+
+	return os.Getenv(key)
+}
+
+func GetDatabaseName() string {
+	if dbName := os.Getenv("MONGODB_DATABASE"); dbName != "" {
+		return dbName
+	}
+
+	if dbName := os.Getenv("production"); dbName != "" {
+		return dbName
+	}
+
+	return "production"
 }
