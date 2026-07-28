@@ -14,7 +14,8 @@
 	"scripts": {
 		"build": "rimraf ./dist && tsc && resolve-tspaths",
 		"lint": "eslint && tsc --noEmit",
-		"lint:fix": "eslint --fix"
+		"lint:fix": "eslint --fix",
+		"test": "tsx --test tests/cicm-favorites.test.ts"
 	},
 	"dependencies": {
 		"@tmlmobilidade/types": "20251029.1408.3",

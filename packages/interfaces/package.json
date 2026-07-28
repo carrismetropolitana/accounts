@@ -14,10 +14,12 @@
 	"scripts": {
 		"build": "rimraf ./dist && tsc && resolve-tspaths",
 		"lint": "eslint && tsc --noEmit",
-		"lint:fix": "eslint --fix"
+		"lint:fix": "eslint --fix",
+		"test": "tsx --test tests/cicm-favorites.test.ts"
 	},
 	"dependencies": {
 		"@tmlmobilidade/interfaces": "20251029.1408.3",
+		"@tmlmobilidade/lib": "20251029.1408.3",
 		"@tmlmobilidade/utils": "20251029.1408.3"
 	},
 	"devDependencies": {

@@ -3,17 +3,30 @@
 import { migrateAccountToLatestVersion } from '@/services/migration.js';
 import { getRandomPersonaImageId } from '@/services/personas.js';
 import { accounts } from '@carrismetropolitana/accounts-pckg-interfaces';
-import { type Account, CreateAccountSchema, UpdateAccountSchema } from '@carrismetropolitana/accounts-pckg-types';
+import {
+	type Account,
+	type CicmFavorite,
+	CicmFavoriteSchema,
+	CicmFavoritesSchema,
+	CreateAccountSchema,
+	UpdateAccountSchema,
+} from '@carrismetropolitana/accounts-pckg-types';
 import { getUpdatedWidgets } from '@carrismetropolitana/accounts-pckg-utils';
 import TIMETRACKER from '@helperkits/timer';
 import { type FastifyReply, type FastifyRequest } from '@tmlmobilidade/connectors';
 import { HttpException, HttpStatus } from '@tmlmobilidade/lib';
 import { Dates, generateRandomToken, Logs } from '@tmlmobilidade/utils';
+import { z } from 'zod';
 
 /* * */
 
 export class AccountsController {
 	//
+	static async addCicmFavorite(request: FastifyRequest<{ Params: CicmFavoriteParams }>, reply: FastifyReply<{ favorites: CicmFavorite[] }>) {
+		const favorite = parseCicmFavorite(request.params);
+		const favorites = await accounts.addCicmFavorite(parseCicmDeviceId(request.device_id), favorite);
+		return reply.send({ data: { favorites }, error: null, statusCode: HttpStatus.OK });
+	}
 
 	/**
 	 * Create a new empty account with a random Account ID.
@@ -97,6 +110,24 @@ export class AccountsController {
 		return reply.send({ data: foundAccount, error: null, statusCode: HttpStatus.OK });
 	}
 
+	static async getCicmFavorites(request: FastifyRequest, reply: FastifyReply<{ favorites: CicmFavorite[] }>) {
+		const favorites = await accounts.getCicmFavorites(parseCicmDeviceId(request.device_id));
+		return reply.send({ data: { favorites }, error: null, statusCode: HttpStatus.OK });
+	}
+
+	static async importCicmFavorites(request: FastifyRequest<{ Body: unknown }>, reply: FastifyReply<{ favorites: CicmFavorite[] }>) {
+		const parsedBody = CicmFavoritesImportSchema.safeParse(request.body);
+		if (!parsedBody.success) throw new HttpException(HttpStatus.BAD_REQUEST, formatValidationIssues(parsedBody.error.issues));
+		const favorites = await accounts.importCicmFavorites(parseCicmDeviceId(request.device_id), parsedBody.data.favorites);
+		return reply.send({ data: { favorites }, error: null, statusCode: HttpStatus.OK });
+	}
+
+	static async removeCicmFavorite(request: FastifyRequest<{ Params: CicmFavoriteParams }>, reply: FastifyReply<{ favorites: CicmFavorite[] }>) {
+		const favorite = parseCicmFavorite(request.params);
+		const favorites = await accounts.removeCicmFavorite(parseCicmDeviceId(request.device_id), favorite);
+		return reply.send({ data: { favorites }, error: null, statusCode: HttpStatus.OK });
+	}
+
 	/**
 	 * Updates an account by Device ID.
 	 * @param request Fastify request
@@ -158,7 +189,7 @@ export class AccountsController {
 		//
 		// Update the account in the database
 
-		const updateResult = await accounts.updateById(foundAccount._id, validatedAccountUpdateData);
+		const updateResult = await accounts.updateAccountPreservingCicmFavorites(foundAccount._id, validatedAccountUpdateData);
 
 		//
 		// Return the updated account
@@ -169,4 +200,28 @@ export class AccountsController {
 	}
 
 	//
+}
+
+interface CicmFavoriteParams {
+	contentId: string
+	contentType: string
+}
+
+const CicmFavoritesImportSchema = z.object({ favorites: CicmFavoritesSchema }).strict();
+const CicmDeviceIdSchema = z.string().uuid();
+
+function parseCicmDeviceId(deviceId: string): string {
+	const parsedDeviceId = CicmDeviceIdSchema.safeParse(deviceId);
+	if (!parsedDeviceId.success) throw new HttpException(HttpStatus.UNAUTHORIZED, 'Invalid device authorization token');
+	return parsedDeviceId.data;
+}
+
+function parseCicmFavorite(params: CicmFavoriteParams): CicmFavorite {
+	const parsedFavorite = CicmFavoriteSchema.safeParse({ id: params.contentId, type: params.contentType });
+	if (!parsedFavorite.success) throw new HttpException(HttpStatus.BAD_REQUEST, formatValidationIssues(parsedFavorite.error.issues));
+	return parsedFavorite.data;
+}
+
+function formatValidationIssues(issues: { message: string, path: (number | string)[] }[]): string {
+	return `Invalid Body: ${issues.map(issue => `${issue.path.join('.')} - ${issue.message}`).join('; ')}`;
 }
