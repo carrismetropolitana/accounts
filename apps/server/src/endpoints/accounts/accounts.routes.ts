@@ -21,6 +21,18 @@ server.register(
 		// GET /accounts/new
 		instance.get('/new', AccountsController.create);
 
+		// GET /accounts/favorites/cicm
+		instance.get('/favorites/cicm', { preHandler: authorizationMiddleware }, AccountsController.getCicmFavorites);
+
+		// PUT /accounts/favorites/cicm/import
+		instance.put('/favorites/cicm/import', { preHandler: authorizationMiddleware }, AccountsController.importCicmFavorites);
+
+		// PUT /accounts/favorites/cicm/:contentType/:contentId
+		instance.put('/favorites/cicm/:contentType/:contentId', { preHandler: authorizationMiddleware }, AccountsController.addCicmFavorite);
+
+		// DELETE /accounts/favorites/cicm/:contentType/:contentId
+		instance.delete('/favorites/cicm/:contentType/:contentId', { preHandler: authorizationMiddleware }, AccountsController.removeCicmFavorite);
+
 		// PUT /accounts
 		instance.put('/', { preHandler: authorizationMiddleware }, AccountsController.update);
 
